@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Club {
+  id         String   @id @default(uuid())
+  name       String
+  section    String
+  address    String
+  phone      String
+  email      String
+  logoUrl    String?  @map("logo_url")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  players    Player[]
+  users      User[]
+  templates  Template[]
+  categories CategoryConfig[]
+
+  @@map("clubs")
+}
+
+model CategoryConfig {
+  id           String @id @default(uuid())
+  clubId       String @map("club_id")
+  name         String
+  minAge       Int    @map("min_age")
+  maxAge       Int?   @map("max_age")
+  displayOrder Int    @default(0) @map("display_order")
+
+  club Club @relation(fields: [clubId], references: [id])
+
+  @@map("category_configs")
+}
+
+model Player {
+  id        String   @id @default(uuid())
+  clubId    String   @map("club_id")
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  birthDate DateTime @map("birth_date") @db.Date
+  gender    Gender
+  address   String
+  phone     String?
+  email     String?
+  photoUrl  String?  @map("photo_url")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  club     Club      @relation(fields: [clubId], references: [id])
+  licenses License[]
+
+  @@map("players")
+}
+
+model License {
+  id        String        @id @default(uuid())
+  playerId  String        @map("player_id")
+  seasonId  String        @map("season_id")
+  number    String        @unique
+  status    LicenseStatus @default(active)
+  category  String
+  startDate DateTime      @map("start_date") @db.Date
+  endDate   DateTime      @map("end_date") @db.Date
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  player Player @relation(fields: [playerId], references: [id])
+  season Season @relation(fields: [seasonId], references: [id])
+
+  @@map("licenses")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  clubId       String?  @map("club_id")
+  name         String
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role
+  lastLogin    DateTime? @map("last_login")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  club Club? @relation(fields: [clubId], references: [id])
+
+  @@map("users")
+}
+
+model Season {
+  id        String   @id @default(uuid())
+  label     String   @unique
+  startDate DateTime @map("start_date") @db.Date
+  endDate   DateTime @map("end_date") @db.Date
+  active    Boolean  @default(false)
+
+  licenses License[]
+
+  @@map("seasons")
+}
+
+enum Gender {
+  G
+  F
+  H
+  D
+}
+
+enum LicenseStatus {
+  active
+  expired
+}
+
+enum Role {
+  adminClub
+}
+
+model Template {
+  id           String         @id @default(uuid())
+  clubId       String         @map("club_id")
+  name         String
+  description  String?
+  format       TemplateFormat
+  fileData     Bytes          @map("file_data")
+  placeholders String[]
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  club Club @relation(fields: [clubId], references: [id])
+
+  @@map("templates")
+}
+
+enum TemplateFormat {
+  xlsx
+  docx
+}

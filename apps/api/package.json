@@ -1,0 +1,42 @@
+{
+  "name": "@hoop/api",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "lint": "eslint src/",
+    "test": "vitest run",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:seed": "tsx prisma/seed.ts",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.0.1",
+    "@fastify/jwt": "^9.1.0",
+    "@fastify/multipart": "^9.4.0",
+    "@hoop/shared": "workspace:*",
+    "@prisma/client": "^6.6.0",
+    "bcrypt": "^6.0.0",
+    "docx-templates": "^4.15.0",
+    "exceljs": "^4.4.0",
+    "fastify": "^5.3.3",
+    "fastify-plugin": "^5.1.0",
+    "zod": "^3.24.2"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/node": "^22.15.3",
+    "prisma": "^6.6.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.7.3",
+    "vitest": "^3.1.1"
+  }
+}

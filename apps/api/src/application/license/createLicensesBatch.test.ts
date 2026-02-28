@@ -17,20 +17,20 @@ const mockSeason = { id: 'season-1', label: '2025' };
 function createDeps(overrides: { missingPlayerId?: string } = {}) {
   return {
     licenseRepository: {
-      create: vi
-        .fn()
-        .mockImplementation((input) =>
-          Promise.resolve({
-            id: `lic-${input.number}`,
-            ...input,
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          }),
-        ),
+      create: vi.fn().mockImplementation((input) =>
+        Promise.resolve({
+          id: `lic-${input.number}`,
+          ...input,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        }),
+      ),
       findById: vi.fn(),
       findMany: vi.fn(),
       findManyWithRelations: vi.fn(),
-      count: vi.fn(),
+      findActiveByPlayerId: vi.fn(),
+      countBySeason: vi.fn(),
+      getNextSequenceNumber: vi.fn(),
     },
     playerRepository: {
       findById: vi
@@ -42,7 +42,7 @@ function createDeps(overrides: { missingPlayerId?: string } = {}) {
       findMany: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
-      count: vi.fn(),
+      countByClub: vi.fn(),
     },
     seasonRepository: {
       findById: vi.fn().mockResolvedValue(mockSeason),

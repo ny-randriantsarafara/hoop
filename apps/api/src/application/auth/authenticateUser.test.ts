@@ -21,6 +21,7 @@ function createDeps(
 ): AuthenticateUserDeps {
   return {
     userRepository: {
+      findById: vi.fn().mockResolvedValue(null),
       findByEmail: vi.fn().mockResolvedValue(mockUser),
       updateLastLogin: vi.fn().mockResolvedValue(undefined),
       ...overrides,

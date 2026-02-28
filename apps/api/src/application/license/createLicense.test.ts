@@ -30,7 +30,9 @@ function createDeps(overrides: { playerExists?: boolean; seasonExists?: boolean 
       findById: vi.fn(),
       findMany: vi.fn(),
       findManyWithRelations: vi.fn(),
-      count: vi.fn(),
+      findActiveByPlayerId: vi.fn(),
+      countBySeason: vi.fn(),
+      getNextSequenceNumber: vi.fn(),
     },
     playerRepository: {
       findById: vi.fn().mockResolvedValue(playerExists ? mockPlayer : null),
@@ -38,7 +40,7 @@ function createDeps(overrides: { playerExists?: boolean; seasonExists?: boolean 
       findMany: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
-      count: vi.fn(),
+      countByClub: vi.fn(),
     },
     seasonRepository: {
       findById: vi.fn().mockResolvedValue(seasonExists ? mockSeason : null),

@@ -10,8 +10,9 @@ describe('cn', () => {
     expect(cn('px-2', 'px-4')).toBe('px-4');
   });
 
-  it('handles conditional classes', () => {
-    expect(cn('base', false && 'hidden', 'visible')).toBe('base visible');
+  it('handles falsy classes', () => {
+    const isHidden = false;
+    expect(cn('base', isHidden && 'hidden', 'visible')).toBe('base visible');
   });
 
   it('returns empty string for no input', () => {

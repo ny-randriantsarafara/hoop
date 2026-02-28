@@ -30,7 +30,7 @@ describe('createPlayer', () => {
         findMany: vi.fn(),
         update: vi.fn(),
         delete: vi.fn(),
-        count: vi.fn(),
+        countByClub: vi.fn(),
       },
     };
 

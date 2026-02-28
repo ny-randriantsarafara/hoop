@@ -1,4 +1,4 @@
-import type { PlayerEntity } from './playerEntity.js';
+import type { PlayerEntity } from './playerEntity';
 import type { CreatePlayerInput, UpdatePlayerInput, Gender } from '@hoop/shared';
 
 export interface PlayerFilters {
@@ -7,6 +7,7 @@ export interface PlayerFilters {
   readonly gender?: Gender;
   readonly birthDateFrom?: Date;
   readonly birthDateTo?: Date;
+  readonly seasonId?: string;
 }
 
 export interface PlayerRepository {

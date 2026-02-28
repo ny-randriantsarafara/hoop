@@ -1,22 +1,20 @@
 import { apiClient } from '@/shared/lib/apiClient';
 import type { CreateLicenseInput, License, LicenseWithRelations } from '@hoop/shared';
 
-interface LicenseFilters {
-  readonly status?: string;
-  readonly category?: string;
-}
-
 export function fetchPlayerLicenses(token: string, playerId: string): Promise<License[]> {
   return apiClient<License[]>(`/players/${playerId}/licenses`, { token });
 }
 
 export function fetchLicenses(
   token: string,
-  filters?: LicenseFilters,
+  filters?: Record<string, string | undefined>,
 ): Promise<LicenseWithRelations[]> {
   const params = new URLSearchParams();
-  if (filters?.status) params.set('status', filters.status);
-  if (filters?.category) params.set('category', filters.category);
+  if (filters) {
+    for (const [key, value] of Object.entries(filters)) {
+      if (value) params.set(key, value);
+    }
+  }
   const query = params.toString();
   return apiClient<LicenseWithRelations[]>(`/licenses${query ? `?${query}` : ''}`, { token });
 }

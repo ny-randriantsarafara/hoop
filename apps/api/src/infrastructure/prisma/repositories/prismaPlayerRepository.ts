@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
-import type { PlayerEntity } from '../../../domain/player/playerEntity.js';
-import type { PlayerRepository, PlayerFilters } from '../../../domain/player/playerRepository.js';
+import type { PlayerEntity } from '../../../domain/player/playerEntity';
+import type { PlayerRepository, PlayerFilters } from '../../../domain/player/playerRepository';
 import type { CreatePlayerInput, UpdatePlayerInput } from '@hoop/shared';
 
 export function createPrismaPlayerRepository(prisma: PrismaClient): PlayerRepository {

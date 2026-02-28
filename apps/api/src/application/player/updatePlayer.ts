@@ -1,5 +1,5 @@
-import type { PlayerRepository } from '../../domain/player/playerRepository.js';
-import type { PlayerEntity } from '../../domain/player/playerEntity.js';
+import type { PlayerRepository } from '../../domain/player/playerRepository';
+import type { PlayerEntity } from '../../domain/player/playerEntity';
 import type { UpdatePlayerInput } from '@hoop/shared';
 
 export interface UpdatePlayerDeps {

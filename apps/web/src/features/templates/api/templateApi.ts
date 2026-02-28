@@ -42,11 +42,7 @@ export function generateTemplate(
   });
 }
 
-export async function downloadTemplate(
-  token: string,
-  id: string,
-  filename: string,
-): Promise<void> {
+export async function downloadTemplate(token: string, id: string, filename: string): Promise<void> {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
   const response = await fetch(`${apiUrl}/templates/${id}/download`, {
     headers: { Authorization: `Bearer ${token}` },

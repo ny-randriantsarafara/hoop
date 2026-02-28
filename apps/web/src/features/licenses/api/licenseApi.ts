@@ -6,10 +6,7 @@ interface LicenseFilters {
   readonly category?: string;
 }
 
-export function fetchPlayerLicenses(
-  token: string,
-  playerId: string,
-): Promise<License[]> {
+export function fetchPlayerLicenses(token: string, playerId: string): Promise<License[]> {
   return apiClient<License[]>(`/players/${playerId}/licenses`, { token });
 }
 
@@ -24,10 +21,7 @@ export function fetchLicenses(
   return apiClient<LicenseWithRelations[]>(`/licenses${query ? `?${query}` : ''}`, { token });
 }
 
-export function createLicense(
-  token: string,
-  data: CreateLicenseInput,
-): Promise<License> {
+export function createLicense(token: string, data: CreateLicenseInput): Promise<License> {
   return apiClient<License>('/licenses', {
     token,
     method: 'POST',

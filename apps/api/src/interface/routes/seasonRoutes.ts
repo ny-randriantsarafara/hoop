@@ -7,7 +7,10 @@ interface SeasonRoutesDeps {
   readonly seasonRepository: SeasonRepository;
 }
 
-export async function seasonRoutes(fastify: FastifyInstance, deps: SeasonRoutesDeps): Promise<void> {
+export async function seasonRoutes(
+  fastify: FastifyInstance,
+  deps: SeasonRoutesDeps,
+): Promise<void> {
   fastify.get('/seasons', async () => {
     return deps.seasonRepository.findAll();
   });

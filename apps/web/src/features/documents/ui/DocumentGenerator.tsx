@@ -9,14 +9,7 @@ import { Button } from '@/shared/ui/button';
 import { Label } from '@/shared/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Badge } from '@/shared/ui/badge';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/shared/ui/table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
 import { SearchableSelect } from '@/shared/ui/searchable-select';
 import { TableSkeleton } from '@/shared/ui/skeleton';
 import { PlayerFilterBar } from '@/shared/ui/player-filter-bar';
@@ -226,7 +219,10 @@ export function DocumentGenerator() {
             {templates.length === 0 ? (
               <p className="text-muted-foreground">
                 No templates yet.{' '}
-                <Link href="/templates/builder" className="text-primary underline hover:no-underline">
+                <Link
+                  href="/templates/builder"
+                  className="text-primary underline hover:no-underline"
+                >
                   Create a template
                 </Link>{' '}
                 to get started.
@@ -355,16 +351,10 @@ export function DocumentGenerator() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="secondary">
-                              {computeCategory(
-                                new Date(player.birthDate),
-                                seasonYear,
-                                categories,
-                              )}
+                              {computeCategory(new Date(player.birthDate), seasonYear, categories)}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            {genderLabels[player.gender] ?? player.gender}
-                          </TableCell>
+                          <TableCell>{genderLabels[player.gender] ?? player.gender}</TableCell>
                         </TableRow>
                       ))
                     )}
@@ -388,7 +378,9 @@ export function DocumentGenerator() {
                         className="mt-1 h-4 w-4 rounded border-input"
                       />
                       <div className="flex-1 min-w-0">
-                        <span className="font-medium">{player.lastName} {player.firstName}</span>
+                        <span className="font-medium">
+                          {player.lastName} {player.firstName}
+                        </span>
                         <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">
                           <span>{new Date(player.birthDate).toLocaleDateString('fr-FR')}</span>
                           <span>{genderLabels[player.gender] ?? player.gender}</span>
@@ -426,9 +418,7 @@ export function DocumentGenerator() {
               <p className="text-sm text-muted-foreground">
                 Season: {selectedSeason?.label ?? '—'}
               </p>
-              <p className="text-sm text-muted-foreground">
-                Players: {selectedPlayerIds.size}
-              </p>
+              <p className="text-sm text-muted-foreground">Players: {selectedPlayerIds.size}</p>
             </div>
             <div className="space-y-2">
               <Label>Preview</Label>
@@ -456,11 +446,7 @@ export function DocumentGenerator() {
                         <TableCell>{genderLabels[player.gender] ?? player.gender}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">
-                            {computeCategory(
-                              new Date(player.birthDate),
-                              seasonYear,
-                              categories,
-                            )}
+                            {computeCategory(new Date(player.birthDate), seasonYear, categories)}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -474,18 +460,13 @@ export function DocumentGenerator() {
                   <p className="py-8 text-center text-muted-foreground">No players selected</p>
                 ) : (
                   selectedPlayers.map((player, index) => (
-                    <div
-                      key={player.id}
-                      className="rounded-lg border p-3 space-y-1"
-                    >
+                    <div key={player.id} className="rounded-lg border p-3 space-y-1">
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">{index + 1}. {player.lastName} {player.firstName}</span>
+                        <span className="font-medium">
+                          {index + 1}. {player.lastName} {player.firstName}
+                        </span>
                         <Badge variant="secondary">
-                          {computeCategory(
-                            new Date(player.birthDate),
-                            seasonYear,
-                            categories,
-                          )}
+                          {computeCategory(new Date(player.birthDate), seasonYear, categories)}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">

@@ -46,8 +46,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       <nav className="flex-1 space-y-1 px-3 py-4">
         {siteConfig.navItems.map((item) => {
           const Icon = iconMap[item.icon as keyof typeof iconMap];
-          const isActive =
-            item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+          const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
 
           return (
             <Link

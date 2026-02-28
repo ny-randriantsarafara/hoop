@@ -106,9 +106,7 @@ export function LicenseForm({ defaultPlayerId }: LicenseFormProps) {
     <Card className="max-w-2xl">
       <CardHeader>
         <CardTitle>Single Entry</CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Enter license details for one player
-        </p>
+        <p className="text-sm text-muted-foreground">Enter license details for one player</p>
       </CardHeader>
       <CardContent>
         {error && (
@@ -120,12 +118,7 @@ export function LicenseForm({ defaultPlayerId }: LicenseFormProps) {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="playerId">Player</Label>
-            <Select
-              id="playerId"
-              name="playerId"
-              required
-              defaultValue={defaultPlayerId}
-            >
+            <Select id="playerId" name="playerId" required defaultValue={defaultPlayerId}>
               <option value="">Select player...</option>
               {players.map((player) => (
                 <option key={player.id} value={player.id}>

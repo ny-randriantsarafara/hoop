@@ -1,13 +1,6 @@
 'use client';
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/shared/lib/utils';
 
@@ -74,15 +67,16 @@ export function ToastProvider({ children }: { readonly children: React.ReactNode
     [dismiss],
   );
 
-  useEffect(() => () => {
-    timeoutsRef.current.forEach((t) => clearTimeout(t));
-    timeoutsRef.current.clear();
-  }, []);
+  useEffect(
+    () => () => {
+      timeoutsRef.current.forEach((t) => clearTimeout(t));
+      timeoutsRef.current.clear();
+    },
+    [],
+  );
 
   const value: ToastContextValue = { toasts, toast, dismiss };
-  return (
-    <ToastContext.Provider value={value}>{children}</ToastContext.Provider>
-  );
+  return <ToastContext.Provider value={value}>{children}</ToastContext.Provider>;
 }
 
 export function useToast(): { readonly toast: ToastContextValue['toast'] } {
@@ -96,15 +90,10 @@ export function useToast(): { readonly toast: ToastContextValue['toast'] } {
 const variantStyles = {
   default: 'border bg-background text-foreground',
   success: 'border border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400',
-  destructive:
-    'border border-destructive/30 bg-destructive/10 text-destructive',
+  destructive: 'border border-destructive/30 bg-destructive/10 text-destructive',
 };
 
-function ToastItem({
-  data,
-}: {
-  readonly data: ToastData;
-}) {
+function ToastItem({ data }: { readonly data: ToastData }) {
   return (
     <div
       role="alert"
@@ -115,9 +104,7 @@ function ToastItem({
       aria-live="polite"
     >
       <p className="font-semibold">{data.title}</p>
-      {data.description && (
-        <p className="mt-1 text-sm opacity-90">{data.description}</p>
-      )}
+      {data.description && <p className="mt-1 text-sm opacity-90">{data.description}</p>}
     </div>
   );
 }
@@ -131,10 +118,7 @@ export function Toaster() {
   if (toasts.length === 0) return null;
 
   return createPortal(
-    <div
-      className="fixed bottom-4 right-4 z-50 flex flex-col gap-2"
-      aria-label="Notifications"
-    >
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2" aria-label="Notifications">
       {toasts.map((data) => (
         <ToastItem key={data.id} data={data} />
       ))}

@@ -41,11 +41,7 @@ export function SearchableSelect({
 
   const handleClickOutside = useCallback((e: MouseEvent) => {
     const target = e.target;
-    if (
-      containerRef.current &&
-      target instanceof Node &&
-      !containerRef.current.contains(target)
-    ) {
+    if (containerRef.current && target instanceof Node && !containerRef.current.contains(target)) {
       setOpen(false);
     }
   }, []);
@@ -108,12 +104,7 @@ export function SearchableSelect({
           viewBox="0 0 24 24"
           aria-hidden
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M19 9l-7 7-7-7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
 
@@ -135,9 +126,7 @@ export function SearchableSelect({
           </div>
           <div className="max-h-60 overflow-y-auto">
             {filteredOptions.length === 0 ? (
-              <div className="py-6 text-center text-sm text-muted-foreground">
-                No results found
-              </div>
+              <div className="py-6 text-center text-sm text-muted-foreground">No results found</div>
             ) : (
               filteredOptions.map((option) => (
                 <button

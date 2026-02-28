@@ -29,9 +29,7 @@ export function StatsCards() {
   }, [session?.accessToken]);
 
   if (error) {
-    return (
-      <div className="rounded-md bg-destructive/10 p-4 text-destructive text-sm">{error}</div>
-    );
+    return <div className="rounded-md bg-destructive/10 p-4 text-destructive text-sm">{error}</div>;
   }
 
   if (loading) {

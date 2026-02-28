@@ -9,14 +9,7 @@ import { Badge } from '@/shared/ui/badge';
 import { TableSkeleton } from '@/shared/ui/skeleton';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { useToast } from '@/shared/ui/toast';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/shared/ui/table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
 import { fetchTemplates, deleteTemplate, downloadTemplate } from '../api/templateApi';
 
 export function TemplateList() {
@@ -167,11 +160,7 @@ export function TemplateList() {
                   >
                     <Download className="h-4 w-4" />
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setDeleteId(template.id)}
-                  >
+                  <Button variant="ghost" size="icon" onClick={() => setDeleteId(template.id)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>

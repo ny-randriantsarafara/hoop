@@ -12,20 +12,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { useToast } from '@/shared/ui/toast';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/shared/ui/table';
-import {
-  fetchSeasons,
-  createSeason,
-  updateSeason,
-  deleteSeason,
-} from '../api/seasonApi';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
+import { fetchSeasons, createSeason, updateSeason, deleteSeason } from '../api/seasonApi';
 
 function formatDate(date: Date | string): string {
   return new Date(date).toLocaleDateString(undefined, {
@@ -382,10 +370,7 @@ export function SeasonManager() {
         {/* Mobile cards */}
         <div className="space-y-3 md:hidden">
           {seasons.map((season) => (
-            <div
-              key={season.id}
-              className="rounded-lg border p-4 space-y-2"
-            >
+            <div key={season.id} className="rounded-lg border p-4 space-y-2">
               {editId === season.id ? (
                 <div className="space-y-3">
                   <div className="space-y-2">
@@ -417,11 +402,7 @@ export function SeasonManager() {
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={handleEdit}
-                      disabled={saving || !editLabel.trim()}
-                    >
+                    <Button size="sm" onClick={handleEdit} disabled={saving || !editLabel.trim()}>
                       <Check className="mr-2 h-4 w-4" />
                       Save
                     </Button>

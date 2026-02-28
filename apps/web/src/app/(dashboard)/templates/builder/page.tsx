@@ -5,10 +5,7 @@ export default function TemplateBuilderPage() {
   return (
     <div className="space-y-6">
       <Breadcrumbs
-        items={[
-          { label: 'Templates', href: '/templates' },
-          { label: 'Create Template' },
-        ]}
+        items={[{ label: 'Templates', href: '/templates' }, { label: 'Create Template' }]}
       />
       <TemplateBuilder />
     </div>

@@ -27,7 +27,10 @@ interface PlayerRoutesDeps {
   readonly prisma: PrismaClient;
 }
 
-export async function playerRoutes(fastify: FastifyInstance, deps: PlayerRoutesDeps): Promise<void> {
+export async function playerRoutes(
+  fastify: FastifyInstance,
+  deps: PlayerRoutesDeps,
+): Promise<void> {
   fastify.get('/players', async (request) => {
     if (!request.jwtPayload) {
       throw new Error('Unauthorized');

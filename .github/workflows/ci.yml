@@ -28,7 +28,7 @@ jobs:
           POSTGRES_DB: hoopadmin_test
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
-        ports: ["5432:5432"]
+        ports: ['5432:5432']
         options: >-
           --health-cmd pg_isready
           --health-interval 10s

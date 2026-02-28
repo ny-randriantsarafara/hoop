@@ -16,7 +16,9 @@ const mockUser = {
   lastLogin: null,
 };
 
-function createDeps(overrides: Partial<AuthenticateUserDeps['userRepository']> = {}): AuthenticateUserDeps {
+function createDeps(
+  overrides: Partial<AuthenticateUserDeps['userRepository']> = {},
+): AuthenticateUserDeps {
   return {
     userRepository: {
       findByEmail: vi.fn().mockResolvedValue(mockUser),
@@ -31,7 +33,10 @@ describe('authenticateUser', () => {
     vi.mocked(bcrypt.compare).mockResolvedValue(true as never);
     const deps = createDeps();
 
-    const result = await authenticateUser(deps, { email: 'admin@test.mg', password: 'password123' });
+    const result = await authenticateUser(deps, {
+      email: 'admin@test.mg',
+      password: 'password123',
+    });
 
     expect(result).toEqual({
       userId: 'user-1',

@@ -41,17 +41,17 @@ cp .env.example apps/web/.env.local
 # Edit NEXT_PUBLIC_API_URL, API_URL, NEXTAUTH_SECRET, NEXTAUTH_URL
 ```
 
-| Variable | File | Description |
-|----------|------|-------------|
-| DATABASE_URL | apps/api/.env | PostgreSQL connection string |
-| JWT_SECRET | apps/api/.env | Secret for signing JWT tokens |
-| PORT | apps/api/.env | API server port (default: 3001) |
-| HOST | apps/api/.env | API server host (default: 0.0.0.0) |
-| CORS_ORIGIN | apps/api/.env | Allowed CORS origin |
+| Variable            | File                | Description                         |
+| ------------------- | ------------------- | ----------------------------------- |
+| DATABASE_URL        | apps/api/.env       | PostgreSQL connection string        |
+| JWT_SECRET          | apps/api/.env       | Secret for signing JWT tokens       |
+| PORT                | apps/api/.env       | API server port (default: 3001)     |
+| HOST                | apps/api/.env       | API server host (default: 0.0.0.0)  |
+| CORS_ORIGIN         | apps/api/.env       | Allowed CORS origin                 |
 | NEXT_PUBLIC_API_URL | apps/web/.env.local | Public API URL for browser requests |
-| API_URL | apps/web/.env.local | Server-side API URL |
-| NEXTAUTH_SECRET | apps/web/.env.local | NextAuth session encryption secret |
-| NEXTAUTH_URL | apps/web/.env.local | NextAuth callback URL |
+| API_URL             | apps/web/.env.local | Server-side API URL                 |
+| NEXTAUTH_SECRET     | apps/web/.env.local | NextAuth session encryption secret  |
+| NEXTAUTH_URL        | apps/web/.env.local | NextAuth callback URL               |
 
 ### 3. Database Setup
 
@@ -85,20 +85,20 @@ pnpm dev:web    # Web only (port 3000)
 
 ## Available Scripts
 
-| Script | Description |
-|--------|-------------|
-| `pnpm dev` | Start both API and web in development mode |
-| `pnpm dev:api` | Start API server only |
-| `pnpm dev:web` | Start web frontend only |
-| `pnpm build` | Build all packages |
-| `pnpm build:api` | Build API (TypeScript compilation) |
-| `pnpm build:web` | Build web (Next.js production build) |
-| `pnpm lint` | Run ESLint across all packages |
-| `pnpm test` | Run all tests |
-| `pnpm db:dev` | Start PostgreSQL via Docker for development |
-| `pnpm db:stop` | Stop development database containers |
-| `pnpm db:migrate` | Run Prisma migrations (development) |
-| `pnpm db:seed` | Seed database with default data |
+| Script            | Description                                 |
+| ----------------- | ------------------------------------------- |
+| `pnpm dev`        | Start both API and web in development mode  |
+| `pnpm dev:api`    | Start API server only                       |
+| `pnpm dev:web`    | Start web frontend only                     |
+| `pnpm build`      | Build all packages                          |
+| `pnpm build:api`  | Build API (TypeScript compilation)          |
+| `pnpm build:web`  | Build web (Next.js production build)        |
+| `pnpm lint`       | Run ESLint across all packages              |
+| `pnpm test`       | Run all tests                               |
+| `pnpm db:dev`     | Start PostgreSQL via Docker for development |
+| `pnpm db:stop`    | Stop development database containers        |
+| `pnpm db:migrate` | Run Prisma migrations (development)         |
+| `pnpm db:seed`    | Seed database with default data             |
 
 ## Project Structure
 
@@ -141,6 +141,7 @@ apps/web/src/
 ```
 
 Each feature follows the pattern:
+
 - `api/` — API client functions
 - `ui/` — React components
 

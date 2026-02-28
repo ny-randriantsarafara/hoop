@@ -1,9 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import {
-  createLicenseSchema,
-  createLicensesBatchSchema,
-} from '@hoop/shared';
+import { createLicenseSchema, createLicensesBatchSchema } from '@hoop/shared';
 import { listLicenses } from '../../application/license/listLicenses.js';
 import { createLicense } from '../../application/license/createLicense.js';
 import { createLicensesBatch } from '../../application/license/createLicensesBatch.js';
@@ -25,7 +22,10 @@ interface LicenseRoutesDeps {
   readonly playerRepository: PlayerRepository;
 }
 
-export async function licenseRoutes(fastify: FastifyInstance, deps: LicenseRoutesDeps): Promise<void> {
+export async function licenseRoutes(
+  fastify: FastifyInstance,
+  deps: LicenseRoutesDeps,
+): Promise<void> {
   fastify.get('/licenses', async (request) => {
     const query = querySchema.parse(request.query ?? {});
     return listLicenses({ licenseRepository: deps.licenseRepository }, query);

@@ -1,6 +1,9 @@
 import type { PrismaClient } from '@prisma/client';
 import type { LicenseEntity } from '../../../domain/license/licenseEntity.js';
-import type { LicenseRepository, LicenseFilters } from '../../../domain/license/licenseRepository.js';
+import type {
+  LicenseRepository,
+  LicenseFilters,
+} from '../../../domain/license/licenseRepository.js';
 import type { CreateLicenseInput, LicenseWithRelations } from '@hoop/shared';
 
 export function createPrismaLicenseRepository(prisma: PrismaClient): LicenseRepository {

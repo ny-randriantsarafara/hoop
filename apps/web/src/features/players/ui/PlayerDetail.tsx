@@ -14,14 +14,7 @@ import { Breadcrumbs } from '@/shared/ui/breadcrumbs';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { useToast } from '@/shared/ui/toast';
 import { Skeleton } from '@/shared/ui/skeleton';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/shared/ui/table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
 import { fetchPlayer, deletePlayer } from '../api/playerApi';
 import { fetchPlayerLicenses } from '@/features/licenses/api/licenseApi';
 import { fetchCategories } from '@/features/settings/api/categoryApi';
@@ -120,9 +113,7 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
   }
 
   if (error) {
-    return (
-      <div className="rounded-md bg-destructive/10 p-4 text-destructive text-sm">{error}</div>
-    );
+    return <div className="rounded-md bg-destructive/10 p-4 text-destructive text-sm">{error}</div>;
   }
 
   if (!player) {
@@ -130,11 +121,7 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
   }
 
   const currentYear = new Date().getFullYear();
-  const category = computeCategory(
-    new Date(player.birthDate),
-    currentYear,
-    categories,
-  );
+  const category = computeCategory(new Date(player.birthDate), currentYear, categories);
 
   return (
     <div className="space-y-6">
@@ -176,7 +163,9 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
             </div>
             <div>
               <dt className="text-muted-foreground">Category</dt>
-              <dd><Badge variant="secondary">{category}</Badge></dd>
+              <dd>
+                <Badge variant="secondary">{category}</Badge>
+              </dd>
             </div>
             <div>
               <dt className="text-muted-foreground">Gender</dt>
@@ -233,12 +222,8 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
                         {license.status}
                       </Badge>
                     </TableCell>
-                    <TableCell>
-                      {new Date(license.startDate).toLocaleDateString('fr-FR')}
-                    </TableCell>
-                    <TableCell>
-                      {new Date(license.endDate).toLocaleDateString('fr-FR')}
-                    </TableCell>
+                    <TableCell>{new Date(license.startDate).toLocaleDateString('fr-FR')}</TableCell>
+                    <TableCell>{new Date(license.endDate).toLocaleDateString('fr-FR')}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

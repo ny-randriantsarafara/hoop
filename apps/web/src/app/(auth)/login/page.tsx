@@ -9,9 +9,7 @@ export default function LoginPage() {
             H
           </div>
           <h1 className="mt-4 text-2xl font-bold">HoopAdmin</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Sign in to manage licenses
-          </p>
+          <p className="mt-1 text-sm text-muted-foreground">Sign in to manage licenses</p>
         </div>
         <LoginForm />
       </div>

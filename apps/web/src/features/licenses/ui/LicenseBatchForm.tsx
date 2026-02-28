@@ -11,14 +11,7 @@ import { Label } from '@/shared/ui/label';
 import { Select } from '@/shared/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { useToast } from '@/shared/ui/toast';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/shared/ui/table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
 import { fetchPlayers } from '@/features/players/api/playerApi';
 import { createLicensesBatch } from '../api/licenseApi';
 import { fetchSeasons } from '@/features/settings/api/seasonApi';
@@ -71,10 +64,7 @@ export function LicenseBatchForm() {
   }, [session?.accessToken, toast]);
 
   function addRow() {
-    setRows((prev) => [
-      ...prev,
-      { id: generateId(), playerId: '', number: '', category: '' },
-    ]);
+    setRows((prev) => [...prev, { id: generateId(), playerId: '', number: '', category: '' }]);
   }
 
   function removeRow(id: string) {
@@ -82,18 +72,14 @@ export function LicenseBatchForm() {
   }
 
   function updateRow(id: string, updates: Partial<BatchRow>) {
-    setRows((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, ...updates } : r)),
-    );
+    setRows((prev) => prev.map((r) => (r.id === id ? { ...r, ...updates } : r)));
   }
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!session?.accessToken) return;
 
-    const validRows = rows.filter(
-      (r) => r.playerId && r.number.trim() && r.category,
-    );
+    const validRows = rows.filter((r) => r.playerId && r.number.trim() && r.category);
     if (validRows.length === 0) {
       setError('Add at least one row with player, license number, and category');
       return;
@@ -101,10 +87,7 @@ export function LicenseBatchForm() {
 
     const rowsWithCategory = validRows
       .map((r) => ({ row: r, category: categories.find((c) => c.name === r.category)?.name }))
-      .filter(
-        (item): item is { row: BatchRow; category: string } =>
-          item.category !== undefined,
-      );
+      .filter((item): item is { row: BatchRow; category: string } => item.category !== undefined);
     if (rowsWithCategory.length !== validRows.length) {
       setError('All rows must have a valid category');
       return;
@@ -230,9 +213,7 @@ export function LicenseBatchForm() {
                       <TableCell>
                         <Select
                           value={row.playerId}
-                          onChange={(e) =>
-                            updateRow(row.id, { playerId: e.target.value })
-                          }
+                          onChange={(e) => updateRow(row.id, { playerId: e.target.value })}
                         >
                           <option value="">Select...</option>
                           {players.map((player) => (
@@ -246,17 +227,13 @@ export function LicenseBatchForm() {
                         <Input
                           placeholder="e.g. 2025-001234"
                           value={row.number}
-                          onChange={(e) =>
-                            updateRow(row.id, { number: e.target.value })
-                          }
+                          onChange={(e) => updateRow(row.id, { number: e.target.value })}
                         />
                       </TableCell>
                       <TableCell>
                         <Select
                           value={row.category}
-                          onChange={(e) =>
-                            updateRow(row.id, { category: e.target.value })
-                          }
+                          onChange={(e) => updateRow(row.id, { category: e.target.value })}
                         >
                           <option value="">Select...</option>
                           {categories.map((cat) => (

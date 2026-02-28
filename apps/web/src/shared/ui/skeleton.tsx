@@ -1,25 +1,11 @@
 import { forwardRef } from 'react';
 import { cn } from '@/shared/lib/utils';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/shared/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/shared/ui/table';
 
-export const Skeleton = forwardRef<
-  HTMLDivElement,
-  React.HTMLAttributes<HTMLDivElement>
->(
+export const Skeleton = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => {
     return (
-      <div
-        ref={ref}
-        className={cn('animate-pulse rounded-md bg-muted', className)}
-        {...props}
-      />
+      <div ref={ref} className={cn('animate-pulse rounded-md bg-muted', className)} {...props} />
     );
   },
 );

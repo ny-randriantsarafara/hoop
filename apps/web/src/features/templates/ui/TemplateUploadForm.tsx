@@ -112,7 +112,9 @@ export function TemplateUploadForm() {
               onDrop={handleDrop}
               className={cn(
                 'flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 cursor-pointer transition-colors',
-                dragOver ? 'border-primary bg-primary/5' : 'border-muted-foreground/25 hover:border-muted-foreground/50',
+                dragOver
+                  ? 'border-primary bg-primary/5'
+                  : 'border-muted-foreground/25 hover:border-muted-foreground/50',
               )}
             >
               <Upload className="h-10 w-10 text-muted-foreground mb-2" />

@@ -68,7 +68,10 @@ export async function templateRoutes(
         : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
     reply.header('Content-Type', contentType);
-    reply.header('Content-Disposition', `attachment; filename="${template.name}.${template.format}"`);
+    reply.header(
+      'Content-Disposition',
+      `attachment; filename="${template.name}.${template.format}"`,
+    );
     return reply.send(Buffer.from(template.fileData));
   });
 

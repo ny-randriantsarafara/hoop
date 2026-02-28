@@ -131,9 +131,7 @@ export function PlayerEditForm({ playerId }: PlayerEditFormProps) {
   }
 
   if (error) {
-    return (
-      <div className="rounded-md bg-destructive/10 p-4 text-destructive text-sm">{error}</div>
-    );
+    return <div className="rounded-md bg-destructive/10 p-4 text-destructive text-sm">{error}</div>;
   }
 
   if (!player) {
@@ -153,69 +151,73 @@ export function PlayerEditForm({ playerId }: PlayerEditFormProps) {
         <CardHeader>
           <CardTitle>Edit Player</CardTitle>
         </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
-              <Input id="lastName" name="lastName" defaultValue={player.lastName} required />
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input id="lastName" name="lastName" defaultValue={player.lastName} required />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input id="firstName" name="firstName" defaultValue={player.firstName} required />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
-              <Input id="firstName" name="firstName" defaultValue={player.firstName} required />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="birthDate">Birth Date</Label>
-              <Input
-                id="birthDate"
-                name="birthDate"
-                type="date"
-                defaultValue={player.birthDate}
-                required
-              />
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="birthDate">Birth Date</Label>
+                <Input
+                  id="birthDate"
+                  name="birthDate"
+                  type="date"
+                  defaultValue={player.birthDate}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gender">Gender</Label>
+                <Select id="gender" name="gender" required defaultValue={player.gender}>
+                  <option value="">Select...</option>
+                  <option value="G">Boy (G)</option>
+                  <option value="F">Girl (F)</option>
+                  <option value="H">Man (H)</option>
+                  <option value="D">Woman (D)</option>
+                </Select>
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Select id="gender" name="gender" required defaultValue={player.gender}>
-                <option value="">Select...</option>
-                <option value="G">Boy (G)</option>
-                <option value="F">Girl (F)</option>
-                <option value="H">Man (H)</option>
-                <option value="D">Woman (D)</option>
-              </Select>
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="address">Address</Label>
-            <Input id="address" name="address" defaultValue={player.address} required />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" name="phone" defaultValue={player.phone ?? ''} />
+              <Label htmlFor="address">Address</Label>
+              <Input id="address" name="address" defaultValue={player.address} required />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" defaultValue={player.email ?? ''} />
-            </div>
-          </div>
 
-          <div className="flex gap-2 pt-4">
-            <Button type="submit" disabled={submitting}>
-              {submitting ? 'Saving...' : 'Save Changes'}
-            </Button>
-            <Button type="button" variant="outline" onClick={() => router.push(`/players/${playerId}`)}>
-              Cancel
-            </Button>
-          </div>
-        </form>
-      </CardContent>
-    </Card>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input id="phone" name="phone" defaultValue={player.phone ?? ''} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" name="email" type="email" defaultValue={player.email ?? ''} />
+              </div>
+            </div>
+
+            <div className="flex gap-2 pt-4">
+              <Button type="submit" disabled={submitting}>
+                {submitting ? 'Saving...' : 'Save Changes'}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => router.push(`/players/${playerId}`)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }

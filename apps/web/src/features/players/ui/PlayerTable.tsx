@@ -12,14 +12,7 @@ import { TableSkeleton } from '@/shared/ui/skeleton';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { useToast } from '@/shared/ui/toast';
 import { PlayerFilterBar } from '@/shared/ui/player-filter-bar';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/shared/ui/table';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
 import { fetchPlayers, deletePlayer } from '../api/playerApi';
 import { fetchCategories } from '@/features/settings/api/categoryApi';
 import Link from 'next/link';
@@ -140,67 +133,59 @@ export function PlayerTable() {
         {loading ? (
           <TableSkeleton columns={6} />
         ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Birth Date</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead className="w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {players.length === 0 ? (
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  No players found
-                </TableCell>
+                <TableHead>Name</TableHead>
+                <TableHead>Birth Date</TableHead>
+                <TableHead>Gender</TableHead>
+                <TableHead>Category</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead className="w-[100px]">Actions</TableHead>
               </TableRow>
-            ) : (
-              players.map((player) => (
-                <TableRow
-                  key={player.id}
-                  className="cursor-pointer"
-                  onClick={() => router.push(`/players/${player.id}`)}
-                >
-                  <TableCell className="font-medium">
-                    {player.lastName} {player.firstName}
-                  </TableCell>
-                  <TableCell>
-                    {new Date(player.birthDate).toLocaleDateString('fr-FR')}
-                  </TableCell>
-                  <TableCell>{genderLabels[player.gender] ?? player.gender}</TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">
-                      {computeCategory(
-                        new Date(player.birthDate),
-                        currentYear,
-                        categories,
-                      )}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="max-w-[200px] truncate">
-                    {player.address}
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setDeleteId(player.id);
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+            </TableHeader>
+            <TableBody>
+              {players.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    No players found
                   </TableCell>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+              ) : (
+                players.map((player) => (
+                  <TableRow
+                    key={player.id}
+                    className="cursor-pointer"
+                    onClick={() => router.push(`/players/${player.id}`)}
+                  >
+                    <TableCell className="font-medium">
+                      {player.lastName} {player.firstName}
+                    </TableCell>
+                    <TableCell>{new Date(player.birthDate).toLocaleDateString('fr-FR')}</TableCell>
+                    <TableCell>{genderLabels[player.gender] ?? player.gender}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary">
+                        {computeCategory(new Date(player.birthDate), currentYear, categories)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="max-w-[200px] truncate">{player.address}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteId(player.id);
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         )}
       </div>
 
@@ -216,7 +201,9 @@ export function PlayerTable() {
                 onClick={() => router.push(`/players/${player.id}`)}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium">{player.lastName} {player.firstName}</span>
+                  <span className="font-medium">
+                    {player.lastName} {player.firstName}
+                  </span>
                   <Badge variant="secondary">
                     {computeCategory(new Date(player.birthDate), currentYear, categories)}
                   </Badge>

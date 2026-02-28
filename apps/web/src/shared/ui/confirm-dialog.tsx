@@ -3,13 +3,7 @@
 import { forwardRef, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/shared/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/shared/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/shared/ui/card';
 
 interface ConfirmDialogProps {
   readonly open: boolean;
@@ -96,16 +90,10 @@ export const ConfirmDialog = forwardRef<HTMLDivElement, ConfirmDialogProps>(
           <Card>
             <CardHeader>
               <CardTitle id="confirm-dialog-title">{title}</CardTitle>
-              <CardDescription id="confirm-dialog-description">
-                {description}
-              </CardDescription>
+              <CardDescription id="confirm-dialog-description">{description}</CardDescription>
             </CardHeader>
             <CardContent className="flex justify-end gap-2">
-              <Button
-                variant="outline"
-                onClick={handleCancel}
-                disabled={loading}
-              >
+              <Button variant="outline" onClick={handleCancel} disabled={loading}>
                 {cancelLabel}
               </Button>
               <Button

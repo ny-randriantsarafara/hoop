@@ -65,11 +65,36 @@ async function main() {
   });
 
   const players = [
-    { firstName: 'Hery', lastName: 'Rakoto', birthDate: new Date('2008-03-15'), gender: 'G' as const },
-    { firstName: 'Naina', lastName: 'Andria', birthDate: new Date('2006-07-22'), gender: 'F' as const },
-    { firstName: 'Tiana', lastName: 'Rabe', birthDate: new Date('1995-11-01'), gender: 'H' as const },
-    { firstName: 'Soa', lastName: 'Razafy', birthDate: new Date('2010-05-10'), gender: 'F' as const },
-    { firstName: 'Mamy', lastName: 'Randria', birthDate: new Date('2003-09-30'), gender: 'G' as const },
+    {
+      firstName: 'Hery',
+      lastName: 'Rakoto',
+      birthDate: new Date('2008-03-15'),
+      gender: 'G' as const,
+    },
+    {
+      firstName: 'Naina',
+      lastName: 'Andria',
+      birthDate: new Date('2006-07-22'),
+      gender: 'F' as const,
+    },
+    {
+      firstName: 'Tiana',
+      lastName: 'Rabe',
+      birthDate: new Date('1995-11-01'),
+      gender: 'H' as const,
+    },
+    {
+      firstName: 'Soa',
+      lastName: 'Razafy',
+      birthDate: new Date('2010-05-10'),
+      gender: 'F' as const,
+    },
+    {
+      firstName: 'Mamy',
+      lastName: 'Randria',
+      birthDate: new Date('2003-09-30'),
+      gender: 'G' as const,
+    },
   ];
 
   for (const player of players) {

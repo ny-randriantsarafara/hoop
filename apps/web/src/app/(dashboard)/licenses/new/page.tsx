@@ -14,17 +14,10 @@ export default function NewLicensePage() {
 
   return (
     <div className="space-y-6">
-      <Breadcrumbs
-        items={[
-          { label: 'Licenses', href: '/licenses' },
-          { label: 'New License' },
-        ]}
-      />
+      <Breadcrumbs items={[{ label: 'Licenses', href: '/licenses' }, { label: 'New License' }]} />
       <div>
         <h1 className="text-2xl font-bold">New License</h1>
-        <p className="text-muted-foreground">
-          Enter license details received from the federation
-        </p>
+        <p className="text-muted-foreground">Enter license details received from the federation</p>
       </div>
 
       <div className="flex gap-2">
@@ -44,11 +37,7 @@ export default function NewLicensePage() {
         </Button>
       </div>
 
-      {mode === 'single' ? (
-        <LicenseForm defaultPlayerId={playerId} />
-      ) : (
-        <LicenseBatchForm />
-      )}
+      {mode === 'single' ? <LicenseForm defaultPlayerId={playerId} /> : <LicenseBatchForm />}
     </div>
   );
 }

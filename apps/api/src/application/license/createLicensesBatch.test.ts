@@ -17,18 +17,27 @@ const mockSeason = { id: 'season-1', label: '2025' };
 function createDeps(overrides: { missingPlayerId?: string } = {}) {
   return {
     licenseRepository: {
-      create: vi.fn().mockImplementation((input) =>
-        Promise.resolve({ id: `lic-${input.number}`, ...input, createdAt: new Date(), updatedAt: new Date() }),
-      ),
+      create: vi
+        .fn()
+        .mockImplementation((input) =>
+          Promise.resolve({
+            id: `lic-${input.number}`,
+            ...input,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          }),
+        ),
       findById: vi.fn(),
       findMany: vi.fn(),
       findManyWithRelations: vi.fn(),
       count: vi.fn(),
     },
     playerRepository: {
-      findById: vi.fn().mockImplementation((id) =>
-        Promise.resolve(id === overrides.missingPlayerId ? null : mockPlayer),
-      ),
+      findById: vi
+        .fn()
+        .mockImplementation((id) =>
+          Promise.resolve(id === overrides.missingPlayerId ? null : mockPlayer),
+        ),
       create: vi.fn(),
       findMany: vi.fn(),
       update: vi.fn(),
@@ -68,7 +77,9 @@ describe('createLicensesBatch', () => {
       { ...baseInput, number: 'LIC-002' },
     ];
 
-    await expect(createLicensesBatch(deps, inputs)).rejects.toThrow('Player missing-player not found');
+    await expect(createLicensesBatch(deps, inputs)).rejects.toThrow(
+      'Player missing-player not found',
+    );
     expect(deps.licenseRepository.create).not.toHaveBeenCalled();
   });
 });

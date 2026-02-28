@@ -8,5 +8,6 @@ dist/
 .DS_Store
 coverage/
 .turbo/
+*.tsbuildinfo
 prisma/*.db
 uploads/

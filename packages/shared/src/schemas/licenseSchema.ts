@@ -7,7 +7,7 @@ export const createLicenseSchema = z.object({
   seasonId: z.string().uuid(),
   number: z.string().min(1).max(50),
   status: z.enum(licenseStatusValues),
-  category: z.string().min(1).max(50),
+  categoryId: z.string().uuid(),
   startDate: z.coerce.date(),
   endDate: z.coerce.date(),
 });

@@ -14,7 +14,7 @@ import { fetchPlayers } from '@/features/players/api/playerApi';
 import { getFormString } from '@/shared/lib/formUtils';
 import { createLicense } from '../api/licenseApi';
 import { fetchSeasons } from '@/features/settings/api/seasonApi';
-import { fetchCategories } from '@/features/settings/api/categoryApi';
+import { fetchCategories, type CategoryConfig } from '@/features/settings/api/categoryApi';
 
 interface LicenseFormProps {
   readonly defaultPlayerId?: string;
@@ -26,7 +26,7 @@ export function LicenseForm({ defaultPlayerId }: LicenseFormProps) {
   const { toast } = useToast();
   const [players, setPlayers] = useState<Player[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
-  const [categories, setCategories] = useState<ReadonlyArray<{ name: string }>>([]);
+  const [categories, setCategories] = useState<ReadonlyArray<CategoryConfig>>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [dataLoading, setDataLoading] = useState(true);
@@ -60,8 +60,8 @@ export function LicenseForm({ defaultPlayerId }: LicenseFormProps) {
     const playerId = getFormString(formData, 'playerId');
     const seasonId = getFormString(formData, 'seasonId');
     const number = getFormString(formData, 'number');
-    const categoryValue = getFormString(formData, 'category');
-    const category = categories.find((c) => c.name === categoryValue)?.name;
+    const categoryId = getFormString(formData, 'categoryId');
+    const category = categories.find((c) => c.id === categoryId);
     const startDate = getFormString(formData, 'startDate');
     const endDate = getFormString(formData, 'endDate');
 
@@ -75,9 +75,9 @@ export function LicenseForm({ defaultPlayerId }: LicenseFormProps) {
       await createLicense(session.accessToken, {
         playerId,
         seasonId,
+        categoryId: category.id,
         number,
         status: 'active',
-        category,
         startDate: new Date(startDate),
         endDate: new Date(endDate),
       });
@@ -146,11 +146,11 @@ export function LicenseForm({ defaultPlayerId }: LicenseFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="category">Category</Label>
-            <Select id="category" name="category" required>
+            <Label htmlFor="categoryId">Category</Label>
+            <Select id="categoryId" name="categoryId" required>
               <option value="">Select category...</option>
               {categories.map((cat) => (
-                <option key={cat.name} value={cat.name}>
+                <option key={cat.id} value={cat.id}>
                   {cat.name}
                 </option>
               ))}

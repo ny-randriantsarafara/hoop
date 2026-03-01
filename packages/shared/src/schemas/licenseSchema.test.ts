@@ -4,9 +4,9 @@ import { createLicenseSchema, createLicensesBatchSchema } from './licenseSchema'
 const validLicense = {
   playerId: '550e8400-e29b-41d4-a716-446655440000',
   seasonId: '660e8400-e29b-41d4-a716-446655440000',
+  categoryId: '770e8400-e29b-41d4-a716-446655440000',
   number: 'LIC-2025-001',
   status: 'active' as const,
-  category: 'U14',
   startDate: '2025-01-01',
   endDate: '2025-12-31',
 };

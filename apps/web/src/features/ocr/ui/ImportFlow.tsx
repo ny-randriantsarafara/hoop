@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Loader2, RotateCcw, CheckCircle } from 'lucide-react';
@@ -10,8 +10,13 @@ import { useToast } from '@/shared/ui/toast';
 import type { OcrExtractionResponse, OcrPlayerData, OcrLicenseData } from '@hoop/shared';
 import { extractDocument, saveValidatedData } from '../api/ocrApi';
 import { createPlayer } from '@/features/players/api/playerApi';
+import { createLicense } from '@/features/licenses/api/licenseApi';
+import { fetchSeasons } from '@/features/settings/api/seasonApi';
+import { fetchCategories, type CategoryConfig } from '@/features/settings/api/categoryApi';
 import { DocumentDropzone } from './DocumentDropzone';
 import { ExtractionReview } from './ExtractionReview';
+import { prepareLicenseInput } from '../lib/licenseDraft';
+import { preparePlayerInput } from '../lib/playerDraft';
 
 type FlowState =
   | { step: 'idle' }
@@ -20,12 +25,68 @@ type FlowState =
   | { step: 'saved'; playerName: string }
   | { step: 'error'; message: string };
 
+const playerFieldLabels: Readonly<Record<string, string>> = {
+  firstName: 'first name',
+  lastName: 'last name',
+  birthDate: 'birth date',
+  gender: 'gender',
+  address: 'address',
+  phone: 'phone',
+  email: 'email',
+};
+
 export function ImportFlow() {
   const { data: session } = useSession();
   const router = useRouter();
   const { toast } = useToast();
   const [state, setState] = useState<FlowState>({ step: 'idle' });
   const [saving, setSaving] = useState(false);
+  const [categories, setCategories] = useState<ReadonlyArray<CategoryConfig>>([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+
+  useEffect(() => {
+    if (!session?.accessToken) return;
+
+    setCategoriesLoading(true);
+    fetchCategories(session.accessToken)
+      .then((items) => {
+        const byNormalizedId = new Map<string, CategoryConfig>();
+        for (const item of items) {
+          if (!item.name.trim()) continue;
+          if (!byNormalizedId.has(item.id)) {
+            byNormalizedId.set(item.id, item);
+          }
+        }
+        setCategories(Array.from(byNormalizedId.values()));
+      })
+      .catch((error) => {
+        setCategories([]);
+        toast({
+          title: 'Failed to load categories',
+          description: getErrorMessage(error, 'License category must be selected from settings.'),
+          variant: 'destructive',
+        });
+      })
+      .finally(() => {
+        setCategoriesLoading(false);
+      });
+  }, [session?.accessToken, toast]);
+
+  function getErrorMessage(error: unknown, fallback: string): string {
+    return error instanceof Error && error.message ? error.message : fallback;
+  }
+
+  function getPlayerName(player: OcrPlayerData): string {
+    const name = [player.firstName?.trim(), player.lastName?.trim()].filter(Boolean).join(' ');
+    return name || 'Player';
+  }
+
+  function formatFieldList(
+    fields: ReadonlyArray<string>,
+    labels: Readonly<Record<string, string>>,
+  ): string {
+    return fields.map((field) => labels[field] ?? field).join(', ');
+  }
 
   async function handleFileSelected(file: File) {
     if (!session?.accessToken) return;
@@ -46,29 +107,41 @@ export function ImportFlow() {
 
     setSaving(true);
     try {
-      await createPlayer(session.accessToken, {
-        clubId: session.user.clubId,
-        firstName: player.firstName ?? '',
-        lastName: player.lastName ?? '',
-        birthDate: player.birthDate ?? '',
-        gender: player.gender ?? '',
-        address: player.address ?? '',
-        phone: player.phone ?? undefined,
-        email: player.email ?? undefined,
-      });
+      const preparedPlayer = preparePlayerInput(player, session.user.clubId);
+      if (preparedPlayer.kind === 'invalid') {
+        toast({
+          title: 'Player data is invalid',
+          description: `Please review: ${formatFieldList(preparedPlayer.fields, playerFieldLabels)}.`,
+          variant: 'destructive',
+        });
+        return;
+      }
 
-      await saveValidatedData(session.accessToken, extractionId, {
-        validatedData: {
-          player,
-          license: { number: null, category: null, startDate: null, endDate: null },
-        },
-      });
+      await createPlayer(session.accessToken, preparedPlayer.data);
 
-      const name = [player.firstName, player.lastName].filter(Boolean).join(' ');
+      try {
+        await saveValidatedData(session.accessToken, extractionId, {
+          validatedData: {
+            player,
+            license: { number: null, category: null, startDate: null, endDate: null },
+          },
+        });
+      } catch (error) {
+        toast({
+          title: 'Player saved, but import validation was not saved',
+          description: getErrorMessage(error, 'You can continue using the player normally.'),
+        });
+      }
+
+      const name = getPlayerName(player);
       setState({ step: 'saved', playerName: name });
       toast({ title: `Player ${name} created`, variant: 'success' });
-    } catch {
-      toast({ title: 'Failed to save player', variant: 'destructive' });
+    } catch (error) {
+      toast({
+        title: 'Failed to save player',
+        description: getErrorMessage(error, 'Please review the fields and try again.'),
+        variant: 'destructive',
+      });
     } finally {
       setSaving(false);
     }
@@ -78,31 +151,119 @@ export function ImportFlow() {
     player: OcrPlayerData,
     license: OcrLicenseData,
     extractionId: string,
+    categoryId: string | null,
   ) {
     if (!session?.accessToken || !session.user?.clubId) return;
 
     setSaving(true);
+    const playerName = getPlayerName(player);
+    let playerCreated = false;
     try {
-      await createPlayer(session.accessToken, {
-        clubId: session.user.clubId,
-        firstName: player.firstName ?? '',
-        lastName: player.lastName ?? '',
-        birthDate: player.birthDate ?? '',
-        gender: player.gender ?? '',
-        address: player.address ?? '',
-        phone: player.phone ?? undefined,
-        email: player.email ?? undefined,
+      const preparedPlayer = preparePlayerInput(player, session.user.clubId);
+      if (preparedPlayer.kind === 'invalid') {
+        toast({
+          title: 'Player data is invalid',
+          description: `Please review: ${formatFieldList(preparedPlayer.fields, playerFieldLabels)}.`,
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const seasons = await fetchSeasons(session.accessToken);
+      const activeSeason = seasons.find((season) => season.active);
+
+      let licenseData: ReturnType<typeof prepareLicenseInput> | null = null;
+      if (activeSeason) {
+        if (categories.length === 0) {
+          toast({
+            title: 'No categories configured',
+            description: 'Add categories in settings before creating licenses from imports.',
+            variant: 'destructive',
+          });
+          return;
+        }
+
+        licenseData = prepareLicenseInput(license, categoryId);
+        if (licenseData.kind === 'invalid') {
+          const fieldLabels: Record<string, string> = {
+            number: 'license number',
+            category: 'category',
+            startDate: 'start date',
+            endDate: 'end date',
+          };
+          const missingFields = licenseData.missing
+            .map((field) => fieldLabels[field] ?? field)
+            .join(', ');
+          toast({
+            title: 'License data is incomplete',
+            description: `Please fill: ${missingFields}.`,
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
+      const createdPlayer = await createPlayer(session.accessToken, preparedPlayer.data);
+      playerCreated = true;
+
+      try {
+        await saveValidatedData(session.accessToken, extractionId, {
+          validatedData: { player, license },
+        });
+      } catch (error) {
+        toast({
+          title: 'Player saved, but import validation was not saved',
+          description: getErrorMessage(error, 'You can continue using the player normally.'),
+        });
+      }
+
+      if (!activeSeason) {
+        setState({ step: 'saved', playerName });
+        toast({
+          title: `Player ${playerName} created`,
+          description: 'License was skipped because no active season is configured.',
+        });
+        return;
+      }
+
+      if (!licenseData || licenseData.kind !== 'ready') {
+        toast({
+          title: 'License data is incomplete',
+          description: 'Please complete the license fields before saving.',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      await createLicense(session.accessToken, {
+        playerId: createdPlayer.id,
+        seasonId: activeSeason.id,
+        categoryId: licenseData.data.categoryId,
+        number: licenseData.data.number,
+        status: 'active',
+        startDate: licenseData.data.startDate,
+        endDate: licenseData.data.endDate,
       });
 
-      await saveValidatedData(session.accessToken, extractionId, {
-        validatedData: { player, license },
-      });
+      setState({ step: 'saved', playerName });
+      toast({ title: `Player ${playerName} and license created`, variant: 'success' });
+    } catch (error) {
+      const message = getErrorMessage(error, 'Please review the fields and try again.');
+      if (playerCreated) {
+        setState({ step: 'saved', playerName });
+        toast({
+          title: `Player ${playerName} created, but license was not`,
+          description: message,
+          variant: 'destructive',
+        });
+        return;
+      }
 
-      const name = [player.firstName, player.lastName].filter(Boolean).join(' ');
-      setState({ step: 'saved', playerName: name });
-      toast({ title: `Player ${name} and license created`, variant: 'success' });
-    } catch {
-      toast({ title: 'Failed to save', variant: 'destructive' });
+      toast({
+        title: 'Failed to save player and license',
+        description: message,
+        variant: 'destructive',
+      });
     } finally {
       setSaving(false);
     }
@@ -140,6 +301,8 @@ export function ImportFlow() {
           extraction={state.extraction}
           onSavePlayer={handleSavePlayer}
           onSavePlayerAndLicense={handleSavePlayerAndLicense}
+          categories={categories}
+          categoriesLoading={categoriesLoading}
           saving={saving}
         />
       </div>

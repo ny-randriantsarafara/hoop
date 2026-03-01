@@ -61,7 +61,7 @@ describe('licenseFilterFields', () => {
     const keys = licenseFilterFields.map((f) => f.key);
     expect(keys).toContain('seasonId');
     expect(keys).toContain('status');
-    expect(keys).toContain('category');
+    expect(keys).toContain('categoryId');
     expect(keys).toContain('number');
     expect(keys).toContain('endDateFrom');
     expect(keys).toContain('endDateTo');

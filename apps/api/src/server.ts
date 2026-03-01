@@ -3,24 +3,25 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import multipart from '@fastify/multipart';
 import { loadConfig } from './config';
-import { prisma } from './infrastructure/prisma/prismaClient';
-import { authPlugin } from './interface/plugins/authPlugin';
-import { errorPlugin } from './interface/plugins/errorPlugin';
-import { createPrismaPlayerRepository } from './infrastructure/prisma/repositories/prismaPlayerRepository';
-import { createPrismaLicenseRepository } from './infrastructure/prisma/repositories/prismaLicenseRepository';
-import { createPrismaSeasonRepository } from './infrastructure/prisma/repositories/prismaSeasonRepository';
-import { createPrismaUserRepository } from './infrastructure/prisma/repositories/prismaUserRepository';
-import { authRoutes } from './interface/routes/authRoutes';
-import { clubRoutes } from './interface/routes/clubRoutes';
-import { playerRoutes } from './interface/routes/playerRoutes';
-import { licenseRoutes } from './interface/routes/licenseRoutes';
-import { seasonRoutes } from './interface/routes/seasonRoutes';
-import { dashboardRoutes } from './interface/routes/dashboardRoutes';
-import { templateRoutes } from './interface/routes/templateRoutes';
-import { documentRoutes } from './interface/routes/documentRoutes';
-import { categoryRoutes } from './interface/routes/categoryRoutes';
-import { ocrRoutes } from './interface/routes/ocrRoutes';
-import { createOllamaOcrService } from './infrastructure/ocr/ollamaOcrService';
+import { prisma } from './infrastructure/prisma/prisma-client';
+import { authPlugin } from './interface/plugins/auth-plugin';
+import { errorPlugin } from './interface/plugins/error-plugin';
+import { createPrismaPlayerRepository } from './infrastructure/prisma/repositories/player.repository';
+import { createPrismaLicenseRepository } from './infrastructure/prisma/repositories/license.repository';
+import { createPrismaSeasonRepository } from './infrastructure/prisma/repositories/season.repository';
+import { createPrismaUserRepository } from './infrastructure/prisma/repositories/user.repository';
+import { createPrismaCategoryRepository } from './infrastructure/prisma/repositories/category.repository';
+import { authRoutes } from './interface/routes/auth-routes';
+import { clubRoutes } from './interface/routes/club-routes';
+import { playerRoutes } from './interface/routes/player-routes';
+import { licenseRoutes } from './interface/routes/license-routes';
+import { seasonRoutes } from './interface/routes/season-routes';
+import { dashboardRoutes } from './interface/routes/dashboard-routes';
+import { templateRoutes } from './interface/routes/template-routes';
+import { documentRoutes } from './interface/routes/document-routes';
+import { categoryRoutes } from './interface/routes/category-routes';
+import { ocrRoutes } from './interface/routes/ocr-routes';
+import { createOllamaOcrService } from './infrastructure/ocr/ollama-ocr-service';
 
 const config = loadConfig();
 
@@ -30,6 +31,7 @@ const playerRepository = createPrismaPlayerRepository(prisma);
 const licenseRepository = createPrismaLicenseRepository(prisma);
 const seasonRepository = createPrismaSeasonRepository(prisma);
 const userRepository = createPrismaUserRepository(prisma);
+const categoryRepository = createPrismaCategoryRepository(prisma);
 const ocrService = createOllamaOcrService(config.ollamaBaseUrl, config.ollamaModel);
 
 async function start(): Promise<void> {
@@ -58,7 +60,12 @@ async function start(): Promise<void> {
       await clubRoutes(app, { prisma });
       await categoryRoutes(app, { prisma });
       await playerRoutes(app, { playerRepository, licenseRepository, prisma });
-      await licenseRoutes(app, { licenseRepository, seasonRepository, playerRepository });
+      await licenseRoutes(app, {
+        licenseRepository,
+        seasonRepository,
+        playerRepository,
+        categoryRepository,
+      });
       await seasonRoutes(app, { seasonRepository });
       await dashboardRoutes(app, {
         playerRepository,

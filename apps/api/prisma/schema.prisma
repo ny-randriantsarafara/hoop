@@ -35,7 +35,8 @@ model CategoryConfig {
   maxAge       Int?   @map("max_age")
   displayOrder Int    @default(0) @map("display_order")
 
-  club Club @relation(fields: [clubId], references: [id])
+  club     Club      @relation(fields: [clubId], references: [id])
+  licenses License[]
 
   @@map("category_configs")
 }
@@ -64,16 +65,17 @@ model License {
   id        String        @id @default(uuid())
   playerId  String        @map("player_id")
   seasonId  String        @map("season_id")
+  categoryId String       @map("category_id")
   number    String        @unique
   status    LicenseStatus @default(active)
-  category  String
   startDate DateTime      @map("start_date") @db.Date
   endDate   DateTime      @map("end_date") @db.Date
   createdAt DateTime      @default(now()) @map("created_at")
   updatedAt DateTime      @updatedAt @map("updated_at")
 
-  player Player @relation(fields: [playerId], references: [id])
-  season Season @relation(fields: [seasonId], references: [id])
+  player   Player         @relation(fields: [playerId], references: [id])
+  season   Season         @relation(fields: [seasonId], references: [id])
+  category CategoryConfig @relation(fields: [categoryId], references: [id])
 
   @@map("licenses")
 }

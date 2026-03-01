@@ -1,0 +1,105 @@
+import { describe, it, expect, vi } from 'vitest';
+import { createLicense } from './create-license';
+import type { LicenseEntity } from '../../domain/license/license.entity';
+
+const mockInput = {
+  playerId: 'player-1',
+  seasonId: 'season-1',
+  categoryId: 'category-1',
+  number: 'LIC-001',
+  status: 'active' as const,
+  startDate: new Date('2025-01-01'),
+  endDate: new Date('2025-12-31'),
+};
+
+const mockLicense: LicenseEntity = {
+  id: 'license-1',
+  ...mockInput,
+  createdAt: new Date(),
+  updatedAt: new Date(),
+};
+
+const mockPlayer = { id: 'player-1', clubId: 'club-1' };
+const mockSeason = { id: 'season-1', label: '2025' };
+const mockCategory = { id: 'category-1', clubId: 'club-1', name: 'U14' };
+
+function createDeps(
+  overrides: { playerExists?: boolean; seasonExists?: boolean; category?: typeof mockCategory | null } = {},
+) {
+  const { playerExists = true, seasonExists = true, category = mockCategory } = overrides;
+  return {
+    licenseRepository: {
+      create: vi.fn().mockResolvedValue(mockLicense),
+      findById: vi.fn(),
+      findMany: vi.fn(),
+      findManyWithRelations: vi.fn(),
+      findActiveByPlayerId: vi.fn(),
+      countBySeason: vi.fn(),
+      getNextSequenceNumber: vi.fn(),
+    },
+    playerRepository: {
+      findById: vi.fn().mockResolvedValue(playerExists ? mockPlayer : null),
+      create: vi.fn(),
+      findMany: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      countByClub: vi.fn(),
+    },
+    seasonRepository: {
+      findById: vi.fn().mockResolvedValue(seasonExists ? mockSeason : null),
+      findAll: vi.fn(),
+      findActive: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deactivateAll: vi.fn(),
+    },
+    categoryRepository: {
+      findById: vi.fn().mockResolvedValue(category),
+    },
+  };
+}
+
+describe('createLicense', () => {
+  it('creates a license when player and season exist', async () => {
+    const deps = createDeps();
+
+    const result = await createLicense(deps, mockInput);
+
+    expect(deps.playerRepository.findById).toHaveBeenCalledWith('player-1');
+    expect(deps.seasonRepository.findById).toHaveBeenCalledWith('season-1');
+    expect(deps.categoryRepository.findById).toHaveBeenCalledWith('category-1');
+    expect(deps.licenseRepository.create).toHaveBeenCalledWith(mockInput);
+    expect(result).toEqual(mockLicense);
+  });
+
+  it('throws when player does not exist', async () => {
+    const deps = createDeps({ playerExists: false });
+
+    await expect(createLicense(deps, mockInput)).rejects.toThrow('Player not found');
+    expect(deps.licenseRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('throws when season does not exist', async () => {
+    const deps = createDeps({ seasonExists: false });
+
+    await expect(createLicense(deps, mockInput)).rejects.toThrow('Season not found');
+    expect(deps.licenseRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('throws when category does not exist', async () => {
+    const deps = createDeps({ category: null });
+
+    await expect(createLicense(deps, mockInput)).rejects.toThrow('Category not found');
+    expect(deps.licenseRepository.create).not.toHaveBeenCalled();
+  });
+
+  it('throws when category belongs to another club', async () => {
+    const deps = createDeps({
+      category: { id: 'category-2', clubId: 'club-2', name: 'U14' },
+    });
+
+    await expect(createLicense(deps, mockInput)).rejects.toThrow('Category not allowed for club');
+    expect(deps.licenseRepository.create).not.toHaveBeenCalled();
+  });
+});

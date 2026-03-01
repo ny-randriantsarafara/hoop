@@ -37,7 +37,7 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
   const [player, setPlayer] = useState<Player | null>(null);
   const [licenses, setLicenses] = useState<License[]>([]);
   const [categories, setCategories] = useState<
-    ReadonlyArray<{ name: string; minAge: number; maxAge: number | null }>
+    ReadonlyArray<{ id: string; name: string; minAge: number; maxAge: number | null }>
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -56,7 +56,12 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
       setPlayer(playerData);
       setLicenses(licensesData);
       setCategories(
-        categoryList.map((c) => ({ name: c.name, minAge: c.minAge, maxAge: c.maxAge })),
+        categoryList.map((c) => ({
+          id: c.id,
+          name: c.name,
+          minAge: c.minAge,
+          maxAge: c.maxAge,
+        })),
       );
     } catch {
       setError('Failed to load player');
@@ -122,6 +127,7 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
 
   const currentYear = new Date().getFullYear();
   const category = computeCategory(new Date(player.birthDate), currentYear, categories);
+  const categoryNameById = new Map(categories.map((entry) => [entry.id, entry.name]));
 
   return (
     <div className="space-y-6">
@@ -214,10 +220,10 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
               </TableHeader>
               <TableBody>
                 {licenses.map((license) => (
-                  <TableRow key={license.id}>
-                    <TableCell className="font-mono">{license.number}</TableCell>
-                    <TableCell>{license.category}</TableCell>
-                    <TableCell>
+                    <TableRow key={license.id}>
+                      <TableCell className="font-mono">{license.number}</TableCell>
+                      <TableCell>{categoryNameById.get(license.categoryId) ?? 'Unknown category'}</TableCell>
+                      <TableCell>
                       <Badge variant={licenseStatusVariant[license.status] ?? 'secondary'}>
                         {license.status}
                       </Badge>

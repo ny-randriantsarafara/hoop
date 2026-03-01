@@ -11,7 +11,7 @@ export const licenseFilterFields: ReadonlyArray<FilterFieldDefinition> = [
       { value: 'expired', label: 'Expired' },
     ],
   },
-  { key: 'category', label: 'Category', type: 'select' },
+  { key: 'categoryId', label: 'Category', type: 'select' },
   { key: 'number', label: 'License Number', type: 'text', placeholder: 'Number...' },
   { key: 'endDateFrom', label: 'Expires after', type: 'date' },
   { key: 'endDateTo', label: 'Expires before', type: 'date' },

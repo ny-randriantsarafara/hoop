@@ -9,8 +9,9 @@ HoopAdmin is a basketball club license management system built for local clubs. 
 - **Database**: PostgreSQL 16
 - **Package Manager**: pnpm (monorepo with workspaces)
 - **Authentication**: NextAuth (Auth.js) + JWT
+- **OCR**: Ollama (self-hosted vision model for document data extraction)
 - **CI/CD**: GitHub Actions
-- **Deployment**: Docker Compose (API + DB), VPS deploy via SSH (API container + static frontend)
+- **Deployment**: Docker Compose (API + DB + Ollama), VPS deploy via SSH (API container + static frontend)
 
 ## Prerequisites
 
@@ -52,6 +53,8 @@ cp .env.example apps/web/.env.local
 | API_URL             | apps/web/.env.local | Server-side API URL                 |
 | NEXTAUTH_SECRET     | apps/web/.env.local | NextAuth session encryption secret  |
 | NEXTAUTH_URL        | apps/web/.env.local | NextAuth callback URL               |
+| OLLAMA_BASE_URL     | apps/api/.env       | Ollama URL (default: localhost:11434)|
+| OLLAMA_MODEL        | apps/api/.env       | Vision model name (default: gemma3) |
 
 ### 3. Database Setup
 
@@ -159,8 +162,10 @@ apps/api/src/
 ├── application/      # Use cases (orchestrate domain logic)
 │   ├── auth/         # authenticateUser
 │   ├── license/      # createLicense, listLicenses, etc.
+│   ├── ocr/          # extractDocumentData, validateExtraction
 │   └── player/       # createPlayer, listPlayers, etc.
 ├── infrastructure/   # External implementations
+│   ├── ocr/          # Ollama OCR service (document extraction)
 │   ├── prisma/       # Prisma repositories (DB queries)
 │   └── template/     # Template processor (XLSX/DOCX)
 └── interface/        # HTTP layer
@@ -183,6 +188,10 @@ packages/shared/src/
 ```
 
 The shared package is imported as `@hoop/shared` by both `apps/api` and `apps/web`.
+
+## OCR Setup (Ollama)
+
+The import feature uses Ollama to extract player and license data from photos of official documents. See [docs/ollama-setup.md](docs/ollama-setup.md) for installation, model selection, and production deployment instructions.
 
 ## Docker Deployment
 

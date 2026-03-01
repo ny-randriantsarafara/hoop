@@ -2,6 +2,6 @@ export type {
   FilterFieldDefinition,
   FilterFieldOption,
   FilterFieldType,
-} from './filterFieldDefinition';
-export { playerFilterFields } from './playerFilterFields';
-export { licenseFilterFields } from './licenseFilterFields';
+} from './filter-field-definition';
+export { playerFilterFields } from './player-filter-fields';
+export { licenseFilterFields } from './license-filter-fields';

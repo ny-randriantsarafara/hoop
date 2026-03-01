@@ -99,16 +99,16 @@ Auth routes (`/api/auth/*`) are registered without the `authenticate` pre-handle
 
 Environment variables are validated at startup using a Zod schema. If any required variable is missing, the server fails fast with a clear error.
 
-| Config key | Env variable | Default | Description |
-|---|---|---|---|
-| `port` | `PORT` | `3001` | Server port |
-| `host` | `HOST` | `0.0.0.0` | Server host |
-| `databaseUrl` | `DATABASE_URL` | — (required) | PostgreSQL connection string |
-| `jwtSecret` | `JWT_SECRET` | — (required) | JWT signing secret |
-| `nodeEnv` | `NODE_ENV` | `development` | Environment |
-| `corsOrigin` | `CORS_ORIGIN` | `http://localhost:3000` | Allowed CORS origin |
-| `ollamaBaseUrl` | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `ollamaModel` | `OLLAMA_MODEL` | `gemma3` | Vision model name |
+| Config key      | Env variable      | Default                  | Description                  |
+| --------------- | ----------------- | ------------------------ | ---------------------------- |
+| `port`          | `PORT`            | `3001`                   | Server port                  |
+| `host`          | `HOST`            | `0.0.0.0`                | Server host                  |
+| `databaseUrl`   | `DATABASE_URL`    | — (required)             | PostgreSQL connection string |
+| `jwtSecret`     | `JWT_SECRET`      | — (required)             | JWT signing secret           |
+| `nodeEnv`       | `NODE_ENV`        | `development`            | Environment                  |
+| `corsOrigin`    | `CORS_ORIGIN`     | `http://localhost:3000`  | Allowed CORS origin          |
+| `ollamaBaseUrl` | `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL            |
+| `ollamaModel`   | `OLLAMA_MODEL`    | `gemma3`                 | Vision model name            |
 
 ---
 
@@ -124,20 +124,20 @@ Each entity is a readonly TypeScript interface that mirrors the database model s
 
 Defined in `domain/player/playerEntity.ts`.
 
-| Field | Type | Description |
-|---|---|---|
-| `id` | string | UUID |
-| `clubId` | string | Owning club |
-| `firstName` | string | First name |
-| `lastName` | string | Last name |
-| `birthDate` | Date | Date of birth |
-| `gender` | Gender | G, F, H, or D |
-| `address` | string | Home address |
-| `phone` | string \| null | Phone number |
-| `email` | string \| null | Email address |
-| `photoUrl` | string \| null | Photo URL |
-| `createdAt` | Date | Creation timestamp |
-| `updatedAt` | Date | Last update timestamp |
+| Field       | Type           | Description           |
+| ----------- | -------------- | --------------------- |
+| `id`        | string         | UUID                  |
+| `clubId`    | string         | Owning club           |
+| `firstName` | string         | First name            |
+| `lastName`  | string         | Last name             |
+| `birthDate` | Date           | Date of birth         |
+| `gender`    | Gender         | G, F, H, or D         |
+| `address`   | string         | Home address          |
+| `phone`     | string \| null | Phone number          |
+| `email`     | string \| null | Email address         |
+| `photoUrl`  | string \| null | Photo URL             |
+| `createdAt` | Date           | Creation timestamp    |
+| `updatedAt` | Date           | Last update timestamp |
 
 Helper function: `getPlayerFullName(player)` returns `"lastName firstName"`.
 
@@ -145,18 +145,18 @@ Helper function: `getPlayerFullName(player)` returns `"lastName firstName"`.
 
 Defined in `domain/license/licenseEntity.ts`.
 
-| Field | Type | Description |
-|---|---|---|
-| `id` | string | UUID |
-| `playerId` | string | Licensed player |
-| `seasonId` | string | Season |
-| `number` | string | Unique license number |
-| `status` | LicenseStatus | active or expired |
-| `category` | string | Category at creation time |
-| `startDate` | Date | Validity start |
-| `endDate` | Date | Validity end |
-| `createdAt` | Date | Creation timestamp |
-| `updatedAt` | Date | Last update timestamp |
+| Field       | Type          | Description               |
+| ----------- | ------------- | ------------------------- |
+| `id`        | string        | UUID                      |
+| `playerId`  | string        | Licensed player           |
+| `seasonId`  | string        | Season                    |
+| `number`    | string        | Unique license number     |
+| `status`    | LicenseStatus | active or expired         |
+| `category`  | string        | Category at creation time |
+| `startDate` | Date          | Validity start            |
+| `endDate`   | Date          | Validity end              |
+| `createdAt` | Date          | Creation timestamp        |
+| `updatedAt` | Date          | Last update timestamp     |
 
 Helper functions: `isLicenseActive(license)`, `isLicenseExpired(license)`.
 
@@ -164,28 +164,28 @@ Helper functions: `isLicenseActive(license)`, `isLicenseExpired(license)`.
 
 Defined in `domain/season/seasonEntity.ts`.
 
-| Field | Type | Description |
-|---|---|---|
-| `id` | string | UUID |
-| `label` | string | Display label (e.g., "2025-2026") |
-| `startDate` | Date | Season start |
-| `endDate` | Date | Season end |
-| `active` | boolean | Whether this season is the current active one |
+| Field       | Type    | Description                                   |
+| ----------- | ------- | --------------------------------------------- |
+| `id`        | string  | UUID                                          |
+| `label`     | string  | Display label (e.g., "2025-2026")             |
+| `startDate` | Date    | Season start                                  |
+| `endDate`   | Date    | Season end                                    |
+| `active`    | boolean | Whether this season is the current active one |
 
 #### UserEntity
 
 Defined in `domain/user/userEntity.ts`.
 
-| Field | Type | Description |
-|---|---|---|
-| `id` | string | UUID |
-| `clubId` | string \| null | Associated club |
-| `name` | string | Display name |
-| `email` | string | Login email |
-| `passwordHash` | string | bcrypt hash |
-| `role` | Role | User role (adminClub) |
-| `lastLogin` | Date \| null | Last login timestamp |
-| `createdAt` | Date | Creation timestamp |
+| Field          | Type           | Description           |
+| -------------- | -------------- | --------------------- |
+| `id`           | string         | UUID                  |
+| `clubId`       | string \| null | Associated club       |
+| `name`         | string         | Display name          |
+| `email`        | string         | Login email           |
+| `passwordHash` | string         | bcrypt hash           |
+| `role`         | Role           | User role (adminClub) |
+| `lastLogin`    | Date \| null   | Last login timestamp  |
+| `createdAt`    | Date           | Creation timestamp    |
 
 ### Repository interfaces
 
@@ -314,6 +314,7 @@ All four repositories follow the same pattern: a factory function (`createPrisma
 #### `prismaPlayerRepository`
 
 Implements `PlayerRepository`. Notable behavior:
+
 - **Search**: splits the search string into words, each word must match either `firstName` or `lastName` (case-insensitive).
 - **Date filtering**: supports `birthDateFrom`/`birthDateTo` range queries.
 - **Ordering**: players are returned sorted by `lastName` ascending.
@@ -321,6 +322,7 @@ Implements `PlayerRepository`. Notable behavior:
 #### `prismaLicenseRepository`
 
 Implements `LicenseRepository`. Notable behavior:
+
 - **Filter builder**: `buildLicenseWhere()` constructs Prisma `where` clauses from filter parameters.
 - **Relations**: `findManyWithRelations()` includes player name and season label.
 - **Number search**: case-insensitive `contains` on the license number.
@@ -329,6 +331,7 @@ Implements `LicenseRepository`. Notable behavior:
 #### `prismaSeasonRepository`
 
 Implements `SeasonRepository`. Notable behavior:
+
 - **Active season**: only one season can be active. `create()` and `update()` automatically deactivate all other seasons when `active: true`.
 - **Ordering**: seasons are sorted by `label` descending.
 
@@ -361,12 +364,14 @@ sequenceDiagram
 ```
 
 **Key details**:
+
 - Supports JPEG, PNG, WebP, and PDF (PDF is converted to an image first using `pdf-to-img`).
 - Sends a structured prompt instructing the model to extract player and license data.
 - Uses Ollama's `format` parameter with a JSON schema to enforce structured output.
 - The response is validated against `ocrExtractionResultSchema` from `@hoop/shared`.
 
 **Error types**:
+
 - `OcrConnectionError` — Ollama is unreachable (fetch throws). Returns HTTP 503.
 - `OcrExtractionError` — Ollama returned an error or unexpected format. Returns HTTP 422.
 
@@ -394,6 +399,7 @@ Defined in `infrastructure/template/xlsxPlaceholderWriter.ts`. Takes a buffer an
 ### XLSX preview parser
 
 Defined in `infrastructure/template/xlsxPreviewParser.ts`. Parses an XLSX file and returns a `SpreadsheetPreview` containing:
+
 - All cells with their values, styles (bold, italic, font size, colors, borders, alignment), and detected placeholders.
 - Merged cell regions.
 - Column widths (converted from Excel units to pixels).
@@ -408,6 +414,7 @@ Defined in `infrastructure/template/xlsxPreviewParser.ts`. Parses an XLSX file a
 #### Auth plugin (`authPlugin.ts`)
 
 Registers two things on the Fastify instance:
+
 - A `jwtPayload` request decorator — holds the decoded JWT payload (`userId`, `role`, `clubId`).
 - An `authenticate` function — verifies the JWT and populates `request.jwtPayload`. Throws `"Unauthorized"` on invalid tokens.
 
@@ -415,17 +422,17 @@ Registers two things on the Fastify instance:
 
 A global error handler that translates errors into appropriate HTTP status codes:
 
-| Error condition | HTTP status | Response body |
-|---|---|---|
-| `ZodError` | 400 | `{ error: "Validation Error", details: [...] }` |
-| `"Invalid credentials"` | 401 | `{ error: "Invalid credentials" }` |
-| `"Unauthorized"` | 401 | `{ error: "Unauthorized" }` |
-| `"Forbidden"` | 403 | `{ error: "Forbidden" }` |
-| Contains `"No club"` | 403 | `{ error: <message> }` |
-| Contains `"not found"` | 404 | `{ error: <message> }` |
-| Contains `"Unsupported file type"` | 400 | `{ error: <message> }` |
-| Contains `"Cannot"` or `"can only"` | 400 | `{ error: <message> }` |
-| Any other error | 500 | `{ error: "Internal Server Error" }` |
+| Error condition                     | HTTP status | Response body                                   |
+| ----------------------------------- | ----------- | ----------------------------------------------- |
+| `ZodError`                          | 400         | `{ error: "Validation Error", details: [...] }` |
+| `"Invalid credentials"`             | 401         | `{ error: "Invalid credentials" }`              |
+| `"Unauthorized"`                    | 401         | `{ error: "Unauthorized" }`                     |
+| `"Forbidden"`                       | 403         | `{ error: "Forbidden" }`                        |
+| Contains `"No club"`                | 403         | `{ error: <message> }`                          |
+| Contains `"not found"`              | 404         | `{ error: <message> }`                          |
+| Contains `"Unsupported file type"`  | 400         | `{ error: <message> }`                          |
+| Contains `"Cannot"` or `"can only"` | 400         | `{ error: <message> }`                          |
+| Any other error                     | 500         | `{ error: "Internal Server Error" }`            |
 
 ### Routes
 
@@ -433,86 +440,86 @@ All routes are registered under the `/api` prefix.
 
 #### Auth routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/api/auth/login` | No | Authenticate with email/password. Returns JWT token and user info. |
-| GET | `/api/auth/me` | Yes | Returns the current user's JWT payload (userId, role, clubId). |
+| Method | Path              | Auth | Description                                                        |
+| ------ | ----------------- | ---- | ------------------------------------------------------------------ |
+| POST   | `/api/auth/login` | No   | Authenticate with email/password. Returns JWT token and user info. |
+| GET    | `/api/auth/me`    | Yes  | Returns the current user's JWT payload (userId, role, clubId).     |
 
 #### Club routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/api/clubs/me` | Yes | Returns the current user's club. |
+| Method | Path            | Auth | Description                      |
+| ------ | --------------- | ---- | -------------------------------- |
+| GET    | `/api/clubs/me` | Yes  | Returns the current user's club. |
 
 #### Category routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/api/categories` | Yes | Lists all category configs for the user's club, ordered by `displayOrder`. |
-| POST | `/api/categories` | Yes | Creates a new category config. Body: `{ name, minAge, maxAge, displayOrder }`. |
-| PUT | `/api/categories/:id` | Yes | Updates a category config. Body: partial `{ name, minAge, maxAge, displayOrder }`. |
-| DELETE | `/api/categories/:id` | Yes | Deletes a category config. Returns 204. |
+| Method | Path                  | Auth | Description                                                                        |
+| ------ | --------------------- | ---- | ---------------------------------------------------------------------------------- |
+| GET    | `/api/categories`     | Yes  | Lists all category configs for the user's club, ordered by `displayOrder`.         |
+| POST   | `/api/categories`     | Yes  | Creates a new category config. Body: `{ name, minAge, maxAge, displayOrder }`.     |
+| PUT    | `/api/categories/:id` | Yes  | Updates a category config. Body: partial `{ name, minAge, maxAge, displayOrder }`. |
+| DELETE | `/api/categories/:id` | Yes  | Deletes a category config. Returns 204.                                            |
 
 #### Player routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/api/players` | Yes | Lists players with filters: `search`, `gender`, `clubId`, `birthDateFrom`, `birthDateTo`, `category`, `seasonId`. When `category` is provided, players are filtered by computed category. |
-| GET | `/api/players/:id` | Yes | Returns a single player by ID. |
-| POST | `/api/players` | Yes | Creates a new player. Body validated with `createPlayerSchema`. |
-| PUT | `/api/players/:id` | Yes | Updates a player. Body validated with `updatePlayerSchema`. |
-| DELETE | `/api/players/:id` | Yes | Deletes a player. Returns 204. |
-| GET | `/api/players/:id/licenses` | Yes | Lists all licenses for a player. |
+| Method | Path                        | Auth | Description                                                                                                                                                                               |
+| ------ | --------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/players`              | Yes  | Lists players with filters: `search`, `gender`, `clubId`, `birthDateFrom`, `birthDateTo`, `category`, `seasonId`. When `category` is provided, players are filtered by computed category. |
+| GET    | `/api/players/:id`          | Yes  | Returns a single player by ID.                                                                                                                                                            |
+| POST   | `/api/players`              | Yes  | Creates a new player. Body validated with `createPlayerSchema`.                                                                                                                           |
+| PUT    | `/api/players/:id`          | Yes  | Updates a player. Body validated with `updatePlayerSchema`.                                                                                                                               |
+| DELETE | `/api/players/:id`          | Yes  | Deletes a player. Returns 204.                                                                                                                                                            |
+| GET    | `/api/players/:id/licenses` | Yes  | Lists all licenses for a player.                                                                                                                                                          |
 
 **Category filtering**: when a `category` query parameter is provided, the route fetches all players, loads category configs for the club, resolves the season year (from `seasonId` or current year), and filters players by their computed category using `computeCategory()`.
 
 #### License routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/api/licenses` | Yes | Lists licenses with filters: `seasonId`, `status`, `category`, `number`, `startDateFrom`, `startDateTo`, `endDateFrom`, `endDateTo`. Returns licenses with player name and season label. |
-| POST | `/api/licenses` | Yes | Creates a single license. Body validated with `createLicenseSchema`. |
-| POST | `/api/licenses/batch` | Yes | Creates multiple licenses at once. Body validated with `createLicensesBatchSchema`. |
+| Method | Path                  | Auth | Description                                                                                                                                                                              |
+| ------ | --------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/licenses`       | Yes  | Lists licenses with filters: `seasonId`, `status`, `category`, `number`, `startDateFrom`, `startDateTo`, `endDateFrom`, `endDateTo`. Returns licenses with player name and season label. |
+| POST   | `/api/licenses`       | Yes  | Creates a single license. Body validated with `createLicenseSchema`.                                                                                                                     |
+| POST   | `/api/licenses/batch` | Yes  | Creates multiple licenses at once. Body validated with `createLicensesBatchSchema`.                                                                                                      |
 
 #### Season routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/api/seasons` | Yes | Lists all seasons, ordered by label descending. |
-| POST | `/api/seasons` | Yes | Creates a new season. Body validated with `createSeasonSchema`. If `active: true`, deactivates all other seasons first. |
-| PUT | `/api/seasons/:id` | Yes | Updates a season. Body validated with `updateSeasonSchema`. If `active: true`, deactivates all others. |
-| DELETE | `/api/seasons/:id` | Yes | Deletes a season. Returns 204. |
+| Method | Path               | Auth | Description                                                                                                             |
+| ------ | ------------------ | ---- | ----------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/seasons`     | Yes  | Lists all seasons, ordered by label descending.                                                                         |
+| POST   | `/api/seasons`     | Yes  | Creates a new season. Body validated with `createSeasonSchema`. If `active: true`, deactivates all other seasons first. |
+| PUT    | `/api/seasons/:id` | Yes  | Updates a season. Body validated with `updateSeasonSchema`. If `active: true`, deactivates all others.                  |
+| DELETE | `/api/seasons/:id` | Yes  | Deletes a season. Returns 204.                                                                                          |
 
 #### Dashboard routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/api/dashboard/stats` | Yes | Returns dashboard statistics: `totalPlayers`, `activeLicenses`, `expiringLicenses`, `playersByCategory`. Uses the active season and category configs to compute player distribution. |
+| Method | Path                   | Auth | Description                                                                                                                                                                          |
+| ------ | ---------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/dashboard/stats` | Yes  | Returns dashboard statistics: `totalPlayers`, `activeLicenses`, `expiringLicenses`, `playersByCategory`. Uses the active season and category configs to compute player distribution. |
 
 #### Template routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| GET | `/api/templates` | Yes | Lists all templates for the user's club (metadata only, no file data). |
-| GET | `/api/templates/:id` | Yes | Returns template metadata by ID. |
-| GET | `/api/templates/:id/download` | Yes | Downloads the template file with appropriate Content-Type and Content-Disposition headers. |
-| POST | `/api/templates` | Yes | Uploads a new template. Multipart form with `file`, `name`, `description`, `cellMappings`. For XLSX with `cellMappings`, writes placeholders into cells before saving. For DOCX, scans for `{{...}}` placeholders in the text. |
-| DELETE | `/api/templates/:id` | Yes | Deletes a template. Returns 204. |
-| POST | `/api/templates/preview` | Yes | Uploads an XLSX file and returns a `SpreadsheetPreview` for the visual editor. |
-| POST | `/api/templates/generate` | Yes | Generates a new XLSX template from a list of placeholder column names. Body: `{ name, description?, columns }`. |
+| Method | Path                          | Auth | Description                                                                                                                                                                                                                    |
+| ------ | ----------------------------- | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/templates`              | Yes  | Lists all templates for the user's club (metadata only, no file data).                                                                                                                                                         |
+| GET    | `/api/templates/:id`          | Yes  | Returns template metadata by ID.                                                                                                                                                                                               |
+| GET    | `/api/templates/:id/download` | Yes  | Downloads the template file with appropriate Content-Type and Content-Disposition headers.                                                                                                                                     |
+| POST   | `/api/templates`              | Yes  | Uploads a new template. Multipart form with `file`, `name`, `description`, `cellMappings`. For XLSX with `cellMappings`, writes placeholders into cells before saving. For DOCX, scans for `{{...}}` placeholders in the text. |
+| DELETE | `/api/templates/:id`          | Yes  | Deletes a template. Returns 204.                                                                                                                                                                                               |
+| POST   | `/api/templates/preview`      | Yes  | Uploads an XLSX file and returns a `SpreadsheetPreview` for the visual editor.                                                                                                                                                 |
+| POST   | `/api/templates/generate`     | Yes  | Generates a new XLSX template from a list of placeholder column names. Body: `{ name, description?, columns }`.                                                                                                                |
 
 #### Document routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/api/documents/generate` | Yes | Generates a filled document from a template and player data. Body: `{ templateId, playerIds, seasonId }`. Returns the file as a download (XLSX or DOCX). Replaces all placeholders with actual player, club, and season data. |
+| Method | Path                      | Auth | Description                                                                                                                                                                                                                   |
+| ------ | ------------------------- | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/documents/generate` | Yes  | Generates a filled document from a template and player data. Body: `{ templateId, playerIds, seasonId }`. Returns the file as a download (XLSX or DOCX). Replaces all placeholders with actual player, club, and season data. |
 
 #### OCR routes
 
-| Method | Path | Auth | Description |
-|---|---|---|---|
-| POST | `/api/ocr/extract` | Yes | Uploads a document image (JPEG, PNG, WebP, PDF). Calls Ollama to extract player and license data. Returns structured extraction result with an `extractionId`. |
-| PATCH | `/api/ocr/extractions/:id` | Yes | Validates an extraction by saving human-corrected data. Body validated with `validateExtractionSchema`. |
+| Method | Path                       | Auth | Description                                                                                                                                                    |
+| ------ | -------------------------- | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/ocr/extract`         | Yes  | Uploads a document image (JPEG, PNG, WebP, PDF). Calls Ollama to extract player and license data. Returns structured extraction result with an `extractionId`. |
+| PATCH  | `/api/ocr/extractions/:id` | Yes  | Validates an extraction by saving human-corrected data. Body validated with `validateExtractionSchema`.                                                        |
 
 ---
 
@@ -548,19 +555,19 @@ This approach makes it easy to swap implementations (e.g., for testing) without 
 
 Tests use **Vitest** and follow the pattern: mock the dependencies, test the use case in isolation.
 
-| Test file | What it tests |
-|---|---|
-| `application/auth/authenticateUser.test.ts` | Login success, user not found, wrong password |
-| `application/player/createPlayer.test.ts` | Player creation via repository |
-| `application/player/updatePlayer.test.ts` | Player update, player not found |
-| `application/player/deletePlayer.test.ts` | Player deletion, player not found |
-| `application/license/createLicense.test.ts` | License creation, missing player/season |
-| `application/license/createLicensesBatch.test.ts` | Batch creation, failure on missing player |
-| `application/ocr/extractDocumentData.test.ts` | Extraction success, unsupported file type, PDF/PNG support |
-| `application/ocr/validateExtraction.test.ts` | Validation update, not found, wrong club |
-| `infrastructure/ocr/ollamaOcrService.test.ts` | OCR service: request format, connection error, extraction error, MIME type validation |
-| `infrastructure/template/xlsxPlaceholderWriter.test.ts` | Placeholder writing, preservation, empty mappings, no worksheets |
-| `infrastructure/template/xlsxPreviewParser.test.ts` | Cell parsing, placeholder detection, styles, column widths, merged cells, empty workbook |
+| Test file                                               | What it tests                                                                            |
+| ------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `application/auth/authenticateUser.test.ts`             | Login success, user not found, wrong password                                            |
+| `application/player/createPlayer.test.ts`               | Player creation via repository                                                           |
+| `application/player/updatePlayer.test.ts`               | Player update, player not found                                                          |
+| `application/player/deletePlayer.test.ts`               | Player deletion, player not found                                                        |
+| `application/license/createLicense.test.ts`             | License creation, missing player/season                                                  |
+| `application/license/createLicensesBatch.test.ts`       | Batch creation, failure on missing player                                                |
+| `application/ocr/extractDocumentData.test.ts`           | Extraction success, unsupported file type, PDF/PNG support                               |
+| `application/ocr/validateExtraction.test.ts`            | Validation update, not found, wrong club                                                 |
+| `infrastructure/ocr/ollamaOcrService.test.ts`           | OCR service: request format, connection error, extraction error, MIME type validation    |
+| `infrastructure/template/xlsxPlaceholderWriter.test.ts` | Placeholder writing, preservation, empty mappings, no worksheets                         |
+| `infrastructure/template/xlsxPreviewParser.test.ts`     | Cell parsing, placeholder detection, styles, column widths, merged cells, empty workbook |
 
 ---
 

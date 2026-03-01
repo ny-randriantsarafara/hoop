@@ -34,52 +34,52 @@ The three packages reference each other via pnpm workspace protocol. Both `@hoop
 
 ### Backend (`@hoop/api`)
 
-| Technology | Version | Role |
-|---|---|---|
-| Node.js | 20 | Runtime |
-| Fastify | 5.3 | HTTP framework |
-| Prisma | 6.6 | ORM and database migrations |
-| PostgreSQL | 16 | Database |
-| Zod | 3.24 | Request/response validation |
-| bcrypt | 6.0 | Password hashing |
-| ExcelJS | 4.4 | XLSX reading, writing, template processing |
-| docx-templates | 4.15 | DOCX template processing |
-| pdf-to-img | 5.0 | PDF-to-image conversion for OCR |
-| @fastify/jwt | 9.1 | JWT authentication |
-| @fastify/multipart | 9.4 | File upload handling |
-| @fastify/cors | 11.0 | Cross-origin resource sharing |
+| Technology         | Version | Role                                       |
+| ------------------ | ------- | ------------------------------------------ |
+| Node.js            | 20      | Runtime                                    |
+| Fastify            | 5.3     | HTTP framework                             |
+| Prisma             | 6.6     | ORM and database migrations                |
+| PostgreSQL         | 16      | Database                                   |
+| Zod                | 3.24    | Request/response validation                |
+| bcrypt             | 6.0     | Password hashing                           |
+| ExcelJS            | 4.4     | XLSX reading, writing, template processing |
+| docx-templates     | 4.15    | DOCX template processing                   |
+| pdf-to-img         | 5.0     | PDF-to-image conversion for OCR            |
+| @fastify/jwt       | 9.1     | JWT authentication                         |
+| @fastify/multipart | 9.4     | File upload handling                       |
+| @fastify/cors      | 11.0    | Cross-origin resource sharing              |
 
 ### Frontend (`@hoop/web`)
 
-| Technology | Version | Role |
-|---|---|---|
-| Next.js | 15.3 | React framework (App Router) |
-| React | 19.1 | UI library |
-| NextAuth (Auth.js) | 5.0-beta | Authentication (Credentials provider) |
-| Tailwind CSS | 3.4 | Utility-first styling |
-| Lucide React | 0.511 | Icon library |
-| class-variance-authority | 0.7 | Component variant management |
-| clsx + tailwind-merge | — | Conditional class merging |
-| Zod | 3.24 | Client-side validation |
+| Technology               | Version  | Role                                  |
+| ------------------------ | -------- | ------------------------------------- |
+| Next.js                  | 15.3     | React framework (App Router)          |
+| React                    | 19.1     | UI library                            |
+| NextAuth (Auth.js)       | 5.0-beta | Authentication (Credentials provider) |
+| Tailwind CSS             | 3.4      | Utility-first styling                 |
+| Lucide React             | 0.511    | Icon library                          |
+| class-variance-authority | 0.7      | Component variant management          |
+| clsx + tailwind-merge    | —        | Conditional class merging             |
+| Zod                      | 3.24     | Client-side validation                |
 
 ### Shared (`@hoop/shared`)
 
-| Technology | Version | Role |
-|---|---|---|
-| Zod | 3.24 | Validation schemas shared across API and web |
-| TypeScript | 5.7 | Type definitions |
+| Technology | Version | Role                                         |
+| ---------- | ------- | -------------------------------------------- |
+| Zod        | 3.24    | Validation schemas shared across API and web |
+| TypeScript | 5.7     | Type definitions                             |
 
 ### Tooling
 
-| Tool | Purpose |
-|---|---|
-| pnpm 10.29 | Package manager and workspace orchestration |
-| TypeScript 5.7 | Type safety (strict mode, ES2022 target) |
-| ESLint 9 | Linting |
-| Prettier 3.5 | Code formatting |
-| Vitest 3.1 | Unit testing (API, web, shared) |
-| Docker Compose | Local database and production deployment |
-| GitHub Actions | CI/CD pipelines |
+| Tool           | Purpose                                     |
+| -------------- | ------------------------------------------- |
+| pnpm 10.29     | Package manager and workspace orchestration |
+| TypeScript 5.7 | Type safety (strict mode, ES2022 target)    |
+| ESLint 9       | Linting                                     |
+| Prettier 3.5   | Code formatting                             |
+| Vitest 3.1     | Unit testing (API, web, shared)             |
+| Docker Compose | Local database and production deployment    |
+| GitHub Actions | CI/CD pipelines                             |
 
 ## How the pieces connect
 
@@ -121,20 +121,20 @@ The frontend uses NextAuth with a Credentials provider. On login, NextAuth calls
 
 These scripts are run from the project root:
 
-| Script | What it does |
-|---|---|
-| `pnpm dev` | Starts both API (port 3001) and web (port 3000) in development mode |
-| `pnpm dev:api` | Starts only the API server with hot reload (tsx watch) |
-| `pnpm dev:web` | Starts only the Next.js dev server |
-| `pnpm build` | Builds both API (TypeScript compilation) and web (Next.js production build) |
-| `pnpm lint` | Runs ESLint across all packages |
-| `pnpm format` | Formats all `.ts`, `.tsx`, `.json`, `.md` files with Prettier |
-| `pnpm format:check` | Checks formatting without writing |
-| `pnpm test` | Runs all tests across all packages (Vitest) |
-| `pnpm db:dev` | Starts a PostgreSQL container for development |
-| `pnpm db:stop` | Stops the development PostgreSQL container |
-| `pnpm db:migrate` | Runs Prisma migrations in development mode |
-| `pnpm db:seed` | Seeds the database with default data (club, admin user, seasons) |
+| Script              | What it does                                                                |
+| ------------------- | --------------------------------------------------------------------------- |
+| `pnpm dev`          | Starts both API (port 3001) and web (port 3000) in development mode         |
+| `pnpm dev:api`      | Starts only the API server with hot reload (tsx watch)                      |
+| `pnpm dev:web`      | Starts only the Next.js dev server                                          |
+| `pnpm build`        | Builds both API (TypeScript compilation) and web (Next.js production build) |
+| `pnpm lint`         | Runs ESLint across all packages                                             |
+| `pnpm format`       | Formats all `.ts`, `.tsx`, `.json`, `.md` files with Prettier               |
+| `pnpm format:check` | Checks formatting without writing                                           |
+| `pnpm test`         | Runs all tests across all packages (Vitest)                                 |
+| `pnpm db:dev`       | Starts a PostgreSQL container for development                               |
+| `pnpm db:stop`      | Stops the development PostgreSQL container                                  |
+| `pnpm db:migrate`   | Runs Prisma migrations in development mode                                  |
+| `pnpm db:seed`      | Seeds the database with default data (club, admin user, seasons)            |
 
 ## Getting started
 
@@ -166,19 +166,19 @@ Default login credentials: `admin@bcanalamanga.mg` / `password123`
 
 ### Environment variables
 
-| Variable | File | Default | Description |
-|---|---|---|---|
-| `DATABASE_URL` | `apps/api/.env` | — | PostgreSQL connection string |
-| `JWT_SECRET` | `apps/api/.env` | — | Secret for signing JWT tokens |
-| `PORT` | `apps/api/.env` | `3001` | API server port |
-| `HOST` | `apps/api/.env` | `0.0.0.0` | API server host |
-| `CORS_ORIGIN` | `apps/api/.env` | `http://localhost:3000` | Allowed CORS origin |
-| `OLLAMA_BASE_URL` | `apps/api/.env` | `http://localhost:11434` | URL where Ollama is running |
-| `OLLAMA_MODEL` | `apps/api/.env` | `gemma3` | Vision model for OCR extraction |
-| `NEXT_PUBLIC_API_URL` | `apps/web/.env.local` | — | API URL for browser-side requests |
-| `API_URL` | `apps/web/.env.local` | — | API URL for server-side requests |
-| `NEXTAUTH_SECRET` | `apps/web/.env.local` | — | NextAuth session encryption secret |
-| `NEXTAUTH_URL` | `apps/web/.env.local` | — | NextAuth callback URL |
+| Variable              | File                  | Default                  | Description                        |
+| --------------------- | --------------------- | ------------------------ | ---------------------------------- |
+| `DATABASE_URL`        | `apps/api/.env`       | —                        | PostgreSQL connection string       |
+| `JWT_SECRET`          | `apps/api/.env`       | —                        | Secret for signing JWT tokens      |
+| `PORT`                | `apps/api/.env`       | `3001`                   | API server port                    |
+| `HOST`                | `apps/api/.env`       | `0.0.0.0`                | API server host                    |
+| `CORS_ORIGIN`         | `apps/api/.env`       | `http://localhost:3000`  | Allowed CORS origin                |
+| `OLLAMA_BASE_URL`     | `apps/api/.env`       | `http://localhost:11434` | URL where Ollama is running        |
+| `OLLAMA_MODEL`        | `apps/api/.env`       | `gemma3`                 | Vision model for OCR extraction    |
+| `NEXT_PUBLIC_API_URL` | `apps/web/.env.local` | —                        | API URL for browser-side requests  |
+| `API_URL`             | `apps/web/.env.local` | —                        | API URL for server-side requests   |
+| `NEXTAUTH_SECRET`     | `apps/web/.env.local` | —                        | NextAuth session encryption secret |
+| `NEXTAUTH_URL`        | `apps/web/.env.local` | —                        | NextAuth callback URL              |
 
 ## CI/CD
 
@@ -220,10 +220,10 @@ Runs only PostgreSQL on port 5432. The API and web run locally with hot reload.
 
 ## Further reading
 
-| Document | Description |
-|---|---|
-| [api.md](api.md) | API architecture — every layer, every route, every module |
-| [web.md](web.md) | Web architecture — every page, every feature, every component |
-| [shared.md](shared.md) | Shared package — all types, schemas, constants, utilities |
-| [database.md](database.md) | Database schema — full ER diagram, all models, all relations |
-| [../ollama-setup.md](../ollama-setup.md) | Ollama installation and OCR configuration guide |
+| Document                                 | Description                                                   |
+| ---------------------------------------- | ------------------------------------------------------------- |
+| [api.md](api.md)                         | API architecture — every layer, every route, every module     |
+| [web.md](web.md)                         | Web architecture — every page, every feature, every component |
+| [shared.md](shared.md)                   | Shared package — all types, schemas, constants, utilities     |
+| [database.md](database.md)               | Database schema — full ER diagram, all models, all relations  |
+| [../ollama-setup.md](../ollama-setup.md) | Ollama installation and OCR configuration guide               |

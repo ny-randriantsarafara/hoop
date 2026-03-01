@@ -10,4 +10,4 @@ export type {
   MergedRegion,
   CellMapping,
   SpreadsheetPreview,
-} from './spreadsheetPreview';
+} from './spreadsheet-preview';

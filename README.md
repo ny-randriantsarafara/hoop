@@ -42,19 +42,19 @@ cp .env.example apps/web/.env.local
 # Edit NEXT_PUBLIC_API_URL, API_URL, NEXTAUTH_SECRET, NEXTAUTH_URL
 ```
 
-| Variable            | File                | Description                         |
-| ------------------- | ------------------- | ----------------------------------- |
-| DATABASE_URL        | apps/api/.env       | PostgreSQL connection string        |
-| JWT_SECRET          | apps/api/.env       | Secret for signing JWT tokens       |
-| PORT                | apps/api/.env       | API server port (default: 3001)     |
-| HOST                | apps/api/.env       | API server host (default: 0.0.0.0)  |
-| CORS_ORIGIN         | apps/api/.env       | Allowed CORS origin                 |
-| NEXT_PUBLIC_API_URL | apps/web/.env.local | Public API URL for browser requests |
-| API_URL             | apps/web/.env.local | Server-side API URL                 |
-| NEXTAUTH_SECRET     | apps/web/.env.local | NextAuth session encryption secret  |
-| NEXTAUTH_URL        | apps/web/.env.local | NextAuth callback URL               |
-| OLLAMA_BASE_URL     | apps/api/.env       | Ollama URL (default: localhost:11434)|
-| OLLAMA_MODEL        | apps/api/.env       | Vision model name (default: gemma3) |
+| Variable            | File                | Description                           |
+| ------------------- | ------------------- | ------------------------------------- |
+| DATABASE_URL        | apps/api/.env       | PostgreSQL connection string          |
+| JWT_SECRET          | apps/api/.env       | Secret for signing JWT tokens         |
+| PORT                | apps/api/.env       | API server port (default: 3001)       |
+| HOST                | apps/api/.env       | API server host (default: 0.0.0.0)    |
+| CORS_ORIGIN         | apps/api/.env       | Allowed CORS origin                   |
+| NEXT_PUBLIC_API_URL | apps/web/.env.local | Public API URL for browser requests   |
+| API_URL             | apps/web/.env.local | Server-side API URL                   |
+| NEXTAUTH_SECRET     | apps/web/.env.local | NextAuth session encryption secret    |
+| NEXTAUTH_URL        | apps/web/.env.local | NextAuth callback URL                 |
+| OLLAMA_BASE_URL     | apps/api/.env       | Ollama URL (default: localhost:11434) |
+| OLLAMA_MODEL        | apps/api/.env       | Vision model name (default: gemma3)   |
 
 ### 3. Database Setup
 

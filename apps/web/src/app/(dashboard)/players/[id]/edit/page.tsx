@@ -1,4 +1,4 @@
-import { PlayerEditForm } from '@/features/players/ui/PlayerEditForm';
+import { PlayerEditForm } from '@/features/players/ui/player-edit-form';
 
 interface PlayerEditPageProps {
   params: Promise<{ id: string }>;

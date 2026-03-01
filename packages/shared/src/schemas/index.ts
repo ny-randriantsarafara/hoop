@@ -3,23 +3,23 @@ export {
   updatePlayerSchema,
   type CreatePlayerInput,
   type UpdatePlayerInput,
-} from './playerSchema';
+} from './player-schema';
 
 export {
   createLicenseSchema,
   createLicensesBatchSchema,
   type CreateLicenseInput,
   type CreateLicensesBatchInput,
-} from './licenseSchema';
+} from './license-schema';
 
-export { loginSchema, type LoginInput } from './authSchema';
+export { loginSchema, type LoginInput } from './auth-schema';
 
 export {
   createSeasonSchema,
   updateSeasonSchema,
   type CreateSeasonInput,
   type UpdateSeasonInput,
-} from './seasonSchema';
+} from './season-schema';
 
 export {
   ocrExtractionResultSchema,
@@ -33,11 +33,11 @@ export {
   type OcrExtractionResult,
   type OcrExtractionResponse,
   type ValidateExtractionInput,
-} from './ocrSchema';
+} from './ocr-schema';
 
 export {
   spreadsheetPreviewSchema,
   cellMappingSchema,
   type SpreadsheetPreviewInput,
   type CellMappingInput,
-} from './spreadsheetPreviewSchema';
+} from './spreadsheet-preview-schema';

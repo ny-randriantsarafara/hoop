@@ -1,4 +1,4 @@
-import { StatsCards } from '@/features/dashboard/ui/StatsCards';
+import { StatsCards } from '@/features/dashboard/ui/stats-cards';
 import { Button } from '@/shared/ui/button';
 import Link from 'next/link';
 import { Plus } from 'lucide-react';

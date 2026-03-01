@@ -137,7 +137,9 @@ export async function templateRoutes(
           allFoundKeys.push(`{{${match[1]}}}`);
         }
       }
-      const invalidKeys = allFoundKeys.filter((k) => !(allPlaceholders as readonly string[]).includes(k));
+      const invalidKeys = allFoundKeys.filter(
+        (k) => !(allPlaceholders as readonly string[]).includes(k),
+      );
       if (invalidKeys.length > 0) {
         throw new Error(`Invalid placeholder keys: ${[...new Set(invalidKeys)].join(', ')}`);
       }

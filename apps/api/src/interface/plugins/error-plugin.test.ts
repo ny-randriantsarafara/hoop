@@ -12,10 +12,10 @@ describe('errorPlugin', () => {
   it('returns conflict for duplicate license number', async () => {
     await app.register(errorPlugin);
     app.get('/duplicate-license', async () => {
-      throw Object.assign(
-        new Error('Unique constraint failed on the fields: (`number`)'),
-        { code: 'P2002', meta: { target: ['number'] } },
-      );
+      throw Object.assign(new Error('Unique constraint failed on the fields: (`number`)'), {
+        code: 'P2002',
+        meta: { target: ['number'] },
+      });
     });
 
     const response = await app.inject({ method: 'GET', url: '/duplicate-license' });

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { TemplateList } from '@/features/templates/ui/TemplateList';
+import { TemplateList } from '@/features/templates/ui/template-list';
 import { Button } from '@/shared/ui/button';
 
 export default function TemplatesPage() {

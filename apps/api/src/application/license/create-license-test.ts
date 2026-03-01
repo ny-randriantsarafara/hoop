@@ -24,7 +24,11 @@ const mockSeason = { id: 'season-1', label: '2025' };
 const mockCategory = { id: 'category-1', clubId: 'club-1', name: 'U14' };
 
 function createDeps(
-  overrides: { playerExists?: boolean; seasonExists?: boolean; category?: typeof mockCategory | null } = {},
+  overrides: {
+    playerExists?: boolean;
+    seasonExists?: boolean;
+    category?: typeof mockCategory | null;
+  } = {},
 ) {
   const { playerExists = true, seasonExists = true, category = mockCategory } = overrides;
   return {

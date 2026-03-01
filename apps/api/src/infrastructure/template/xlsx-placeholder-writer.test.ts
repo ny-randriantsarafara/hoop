@@ -3,9 +3,7 @@ import ExcelJS from 'exceljs';
 import { writePlaceholdersToXlsx } from './xlsx-placeholder-writer';
 import type { CellMapping } from '@hoop/shared';
 
-async function createTestWorkbook(
-  setup: (sheet: ExcelJS.Worksheet) => void,
-): Promise<Buffer> {
+async function createTestWorkbook(setup: (sheet: ExcelJS.Worksheet) => void): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Sheet1');
   setup(sheet);
@@ -29,8 +27,8 @@ describe('writePlaceholdersToXlsx', () => {
     });
 
     const mappings: CellMapping[] = [
-      { row: 1, col: 0, placeholder: '{{playerFirstName}}' },
-      { row: 1, col: 1, placeholder: '{{playerBirthDate}}' },
+      { row: 1, col: 0, value: '{{playerFirstName}}' },
+      { row: 1, col: 1, value: '{{playerBirthDate}}' },
     ];
 
     const result = await writePlaceholdersToXlsx(buffer, mappings);
@@ -45,9 +43,7 @@ describe('writePlaceholdersToXlsx', () => {
       sheet.addRow(['Header1', 'Header2', 'Header3']);
     });
 
-    const mappings: CellMapping[] = [
-      { row: 0, col: 1, placeholder: '{{clubName}}' },
-    ];
+    const mappings: CellMapping[] = [{ row: 0, col: 1, value: '{{clubName}}' }];
 
     const result = await writePlaceholdersToXlsx(buffer, mappings);
 
@@ -72,7 +68,7 @@ describe('writePlaceholdersToXlsx', () => {
     const buffer = Buffer.from(arrayBuffer);
 
     await expect(
-      writePlaceholdersToXlsx(buffer, [{ row: 0, col: 0, placeholder: '{{test}}' }]),
+      writePlaceholdersToXlsx(buffer, [{ row: 0, col: 0, value: '{{test}}' }]),
     ).rejects.toThrow('Workbook has no worksheets');
   });
 });

@@ -2,9 +2,7 @@ import { describe, it, expect } from 'vitest';
 import ExcelJS from 'exceljs';
 import { parseXlsxForPreview } from './xlsx-preview-parser';
 
-async function createTestWorkbook(
-  setup: (sheet: ExcelJS.Worksheet) => void,
-): Promise<Buffer> {
+async function createTestWorkbook(setup: (sheet: ExcelJS.Worksheet) => void): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const sheet = workbook.addWorksheet('Sheet1');
   setup(sheet);

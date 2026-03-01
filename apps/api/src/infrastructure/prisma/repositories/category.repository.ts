@@ -1,5 +1,8 @@
 import type { PrismaClient } from '@prisma/client';
-import type { CategoryRepository, CategoryRecord } from '../../../domain/category/category-repository';
+import type {
+  CategoryRepository,
+  CategoryRecord,
+} from '../../../domain/category/category-repository';
 
 export function createPrismaCategoryRepository(prisma: PrismaClient): CategoryRepository {
   return {

@@ -1,5 +1,5 @@
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs';
-import { TemplateBuilder } from '@/features/templates/ui/TemplateBuilder';
+import { TemplateBuilder } from '@/features/templates/ui/template-builder';
 
 export default function TemplateBuilderPage() {
   return (

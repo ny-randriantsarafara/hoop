@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { Plus } from 'lucide-react';
-import { LicenseTable } from '@/features/licenses/ui/LicenseTable';
+import { LicenseTable } from '@/features/licenses/ui/license-table';
 import { Button } from '@/shared/ui/button';
 
 export default function LicensesPage() {

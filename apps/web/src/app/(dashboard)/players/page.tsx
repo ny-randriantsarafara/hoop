@@ -1,4 +1,4 @@
-import { PlayerTable } from '@/features/players/ui/PlayerTable';
+import { PlayerTable } from '@/features/players/ui/player-table';
 
 export default function PlayersPage() {
   return (

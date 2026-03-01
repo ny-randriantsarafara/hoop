@@ -2,8 +2,8 @@
 
 import { useState } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { LicenseForm } from '@/features/licenses/ui/LicenseForm';
-import { LicenseBatchForm } from '@/features/licenses/ui/LicenseBatchForm';
+import { LicenseForm } from '@/features/licenses/ui/license-form';
+import { LicenseBatchForm } from '@/features/licenses/ui/license-batch-form';
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs';
 import { Button } from '@/shared/ui/button';
 

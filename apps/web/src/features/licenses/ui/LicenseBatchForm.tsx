@@ -15,13 +15,13 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@
 import { fetchPlayers } from '@/features/players/api/playerApi';
 import { createLicensesBatch } from '../api/licenseApi';
 import { fetchSeasons } from '@/features/settings/api/seasonApi';
-import { fetchCategories } from '@/features/settings/api/categoryApi';
+import { fetchCategories, type CategoryConfig } from '@/features/settings/api/categoryApi';
 
 interface BatchRow {
   readonly id: string;
   playerId: string;
   number: string;
-  category: string;
+  categoryId: string;
 }
 
 function generateId(): string {
@@ -34,12 +34,12 @@ export function LicenseBatchForm() {
   const { toast } = useToast();
   const [players, setPlayers] = useState<Player[]>([]);
   const [seasons, setSeasons] = useState<Season[]>([]);
-  const [categories, setCategories] = useState<ReadonlyArray<{ name: string }>>([]);
+  const [categories, setCategories] = useState<ReadonlyArray<CategoryConfig>>([]);
   const [seasonId, setSeasonId] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [rows, setRows] = useState<BatchRow[]>(() => [
-    { id: generateId(), playerId: '', number: '', category: '' },
+    { id: generateId(), playerId: '', number: '', categoryId: '' },
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -64,7 +64,7 @@ export function LicenseBatchForm() {
   }, [session?.accessToken, toast]);
 
   function addRow() {
-    setRows((prev) => [...prev, { id: generateId(), playerId: '', number: '', category: '' }]);
+    setRows((prev) => [...prev, { id: generateId(), playerId: '', number: '', categoryId: '' }]);
   }
 
   function removeRow(id: string) {
@@ -79,15 +79,15 @@ export function LicenseBatchForm() {
     event.preventDefault();
     if (!session?.accessToken) return;
 
-    const validRows = rows.filter((r) => r.playerId && r.number.trim() && r.category);
+    const validRows = rows.filter((r) => r.playerId && r.number.trim() && r.categoryId);
     if (validRows.length === 0) {
       setError('Add at least one row with player, license number, and category');
       return;
     }
 
     const rowsWithCategory = validRows
-      .map((r) => ({ row: r, category: categories.find((c) => c.name === r.category)?.name }))
-      .filter((item): item is { row: BatchRow; category: string } => item.category !== undefined);
+      .map((r) => ({ row: r, category: categories.find((c) => c.id === r.categoryId) }))
+      .filter((item): item is { row: BatchRow; category: CategoryConfig } => item.category !== undefined);
     if (rowsWithCategory.length !== validRows.length) {
       setError('All rows must have a valid category');
       return;
@@ -105,9 +105,9 @@ export function LicenseBatchForm() {
     const licenses = rowsWithCategory.map(({ row, category }) => ({
       playerId: row.playerId,
       seasonId,
+      categoryId: category.id,
       number: row.number.trim(),
       status: activeStatus,
-      category,
       startDate: new Date(startDate),
       endDate: new Date(endDate),
     }));
@@ -232,12 +232,12 @@ export function LicenseBatchForm() {
                       </TableCell>
                       <TableCell>
                         <Select
-                          value={row.category}
-                          onChange={(e) => updateRow(row.id, { category: e.target.value })}
+                          value={row.categoryId}
+                          onChange={(e) => updateRow(row.id, { categoryId: e.target.value })}
                         >
                           <option value="">Select...</option>
                           {categories.map((cat) => (
-                            <option key={cat.name} value={cat.name}>
+                            <option key={cat.id} value={cat.id}>
                               {cat.name}
                             </option>
                           ))}

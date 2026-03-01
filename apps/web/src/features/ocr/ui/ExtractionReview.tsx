@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
@@ -8,6 +8,12 @@ import { Label } from '@/shared/ui/label';
 import { Select } from '@/shared/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import type { OcrExtractionResponse, OcrPlayerData, OcrLicenseData, OcrConfidence } from '@hoop/shared';
+import { resolveCategoryIdByName } from '../lib/licenseDraft';
+
+interface CategoryOption {
+  readonly id: string;
+  readonly name: string;
+}
 
 const confidenceConfig: Record<OcrConfidence, { label: string; className: string; Icon: typeof CheckCircle }> = {
   high: { label: 'High confidence', className: 'text-green-600', Icon: CheckCircle },
@@ -18,7 +24,14 @@ const confidenceConfig: Record<OcrConfidence, { label: string; className: string
 interface ExtractionReviewProps {
   readonly extraction: OcrExtractionResponse;
   readonly onSavePlayer: (player: OcrPlayerData, extractionId: string) => void;
-  readonly onSavePlayerAndLicense: (player: OcrPlayerData, license: OcrLicenseData, extractionId: string) => void;
+  readonly onSavePlayerAndLicense: (
+    player: OcrPlayerData,
+    license: OcrLicenseData,
+    extractionId: string,
+    categoryId: string | null,
+  ) => void;
+  readonly categories: ReadonlyArray<CategoryOption>;
+  readonly categoriesLoading: boolean;
   readonly saving: boolean;
 }
 
@@ -26,6 +39,8 @@ export function ExtractionReview({
   extraction,
   onSavePlayer,
   onSavePlayerAndLicense,
+  categories,
+  categoriesLoading,
   saving,
 }: ExtractionReviewProps) {
   const emptyPlayer: OcrPlayerData = { firstName: null, lastName: null, birthDate: null, gender: null, address: null, phone: null, email: null };
@@ -33,6 +48,22 @@ export function ExtractionReview({
 
   const [player, setPlayer] = useState<OcrPlayerData>(extraction.player ?? emptyPlayer);
   const [license, setLicense] = useState<OcrLicenseData>(extraction.license ?? emptyLicense);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (categories.length === 0) {
+      setSelectedCategoryId(null);
+      return;
+    }
+
+    setSelectedCategoryId((previous) => {
+      if (previous && categories.some((category) => category.id === previous)) {
+        return previous;
+      }
+
+      return resolveCategoryIdByName(license.category, categories);
+    });
+  }, [categories, license.category]);
 
   const { label, className, Icon } = confidenceConfig[extraction.confidence];
 
@@ -156,11 +187,25 @@ export function ExtractionReview({
               </div>
               <div className="space-y-2">
                 <Label htmlFor="ocr-licenseCategory">Category</Label>
-                <Input
+                <Select
                   id="ocr-licenseCategory"
-                  value={license.category ?? ''}
-                  onChange={(e) => updateLicense('category', e.target.value)}
-                />
+                  value={selectedCategoryId ?? ''}
+                  onChange={(e) => setSelectedCategoryId(e.target.value || null)}
+                  disabled={categoriesLoading || categories.length === 0}
+                >
+                  <option value="">
+                    {categoriesLoading
+                      ? 'Loading categories...'
+                      : categories.length === 0
+                        ? 'No categories configured'
+                        : 'Select category...'}
+                  </option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </Select>
               </div>
             </div>
 
@@ -198,8 +243,10 @@ export function ExtractionReview({
         {hasLicenseData && (
           <Button
             variant="secondary"
-            onClick={() => onSavePlayerAndLicense(player, license, extraction.extractionId)}
-            disabled={saving}
+            onClick={() =>
+              onSavePlayerAndLicense(player, license, extraction.extractionId, selectedCategoryId)
+            }
+            disabled={saving || categoriesLoading || categories.length === 0}
           >
             {saving ? 'Saving...' : 'Save Player + License'}
           </Button>

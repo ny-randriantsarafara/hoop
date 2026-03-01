@@ -37,7 +37,7 @@ export function LicenseTable() {
     Promise.all([fetchCategories(session.accessToken), fetchSeasons(session.accessToken)])
       .then(([cats, seasons]) => {
         setDynamicOptions({
-          category: cats.map((c) => ({ value: c.name, label: c.name })),
+          categoryId: cats.map((c) => ({ value: c.id, label: c.name })),
           seasonId: seasons.map((s) => ({ value: s.id, label: s.label })),
         });
       })
@@ -120,7 +120,7 @@ export function LicenseTable() {
                     </TableCell>
                     <TableCell>{license.season.label}</TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{license.category}</Badge>
+                      <Badge variant="secondary">{license.category.name}</Badge>
                     </TableCell>
                     <TableCell>
                       <Badge variant={statusVariant[license.status] ?? 'secondary'}>
@@ -159,7 +159,7 @@ export function LicenseTable() {
                 <div className="text-sm font-mono text-muted-foreground">{license.number}</div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">
                   <span>Season: {license.season.label}</span>
-                  <Badge variant="secondary">{license.category}</Badge>
+                  <Badge variant="secondary">{license.category.name}</Badge>
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {new Date(license.startDate).toLocaleDateString('fr-FR')} —{' '}

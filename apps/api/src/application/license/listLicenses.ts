@@ -1,4 +1,4 @@
-import type { LicenseRepository, LicenseFilters } from '../../domain/license/licenseRepository.js';
+import type { LicenseRepository, LicenseFilters } from '../../domain/license/licenseRepository';
 import type { LicenseWithRelations } from '@hoop/shared';
 
 export interface ListLicensesDeps {

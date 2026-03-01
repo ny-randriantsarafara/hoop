@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { loginSchema } from '@hoop/shared';
-import { authenticateUser } from '../../application/auth/authenticateUser.js';
-import type { UserRepository } from '../../domain/user/userRepository.js';
+import { authenticateUser } from '../../application/auth/authenticateUser';
+import type { UserRepository } from '../../domain/user/userRepository';
 
 interface AuthRoutesDeps {
   readonly userRepository: UserRepository;

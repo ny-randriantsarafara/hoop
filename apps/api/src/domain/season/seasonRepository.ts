@@ -1,4 +1,4 @@
-import type { SeasonEntity } from './seasonEntity.js';
+import type { SeasonEntity } from './seasonEntity';
 
 export interface SeasonRepository {
   findById(id: string): Promise<SeasonEntity | null>;

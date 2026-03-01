@@ -2,7 +2,9 @@ import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import ExcelJS from 'exceljs';
-import { allPlaceholders } from '@hoop/shared';
+import { allPlaceholders, cellMappingSchema } from '@hoop/shared';
+import { previewTemplate } from '../../application/template/previewTemplate';
+import { writePlaceholdersToXlsx } from '../../infrastructure/template/xlsxPlaceholderWriter';
 
 interface TemplateRoutesDeps {
   readonly prisma: PrismaClient;
@@ -105,14 +107,16 @@ export async function templateRoutes(
     const data = await request.file();
     if (!data) throw new Error('No file uploaded');
 
-    const buffer = await data.toBuffer();
+    let buffer = await data.toBuffer();
     const filename = data.filename;
 
     const nameField = data.fields['name'];
     const descField = data.fields['description'];
+    const cellMappingsField = data.fields['cellMappings'];
 
     const name = getFieldStringValue(nameField) ?? filename;
     const description = getFieldStringValue(descField);
+    const cellMappingsRaw = getFieldStringValue(cellMappingsField);
 
     const ext = filename.split('.').pop()?.toLowerCase();
     if (ext !== 'xlsx' && ext !== 'docx') {
@@ -120,14 +124,38 @@ export async function templateRoutes(
     }
     const format = ext;
 
-    const textContent = buffer.toString('utf-8');
-    const foundPlaceholders = new Set<string>();
-    let match: RegExpExecArray | null;
-    while ((match = placeholderRegex.exec(textContent)) !== null) {
-      const placeholder = `{{${match[1]}}}`;
-      if ((allPlaceholders as readonly string[]).includes(placeholder)) {
-        foundPlaceholders.add(placeholder);
+    let placeholders: string[];
+
+    if (cellMappingsRaw && ext === 'xlsx') {
+      const parsed = JSON.parse(cellMappingsRaw);
+      const mappings = z.array(cellMappingSchema).parse(parsed);
+
+      const tokenRegex = /\{\{(\w+(?:\.\w+)*)\}\}/g;
+      const allFoundKeys: string[] = [];
+      for (const m of mappings) {
+        for (const match of m.value.matchAll(tokenRegex)) {
+          allFoundKeys.push(`{{${match[1]}}}`);
+        }
       }
+      const invalidKeys = allFoundKeys.filter((k) => !(allPlaceholders as readonly string[]).includes(k));
+      if (invalidKeys.length > 0) {
+        throw new Error(`Invalid placeholder keys: ${[...new Set(invalidKeys)].join(', ')}`);
+      }
+
+      buffer = await writePlaceholdersToXlsx(buffer, mappings);
+      placeholders = [...new Set(allFoundKeys)];
+    } else {
+      const textContent = buffer.toString('utf-8');
+      const foundPlaceholders = new Set<string>();
+      let match: RegExpExecArray | null;
+      placeholderRegex.lastIndex = 0;
+      while ((match = placeholderRegex.exec(textContent)) !== null) {
+        const placeholder = `{{${match[1]}}}`;
+        if ((allPlaceholders as readonly string[]).includes(placeholder)) {
+          foundPlaceholders.add(placeholder);
+        }
+      }
+      placeholders = Array.from(foundPlaceholders);
     }
 
     const template = await deps.prisma.template.create({
@@ -137,7 +165,7 @@ export async function templateRoutes(
         description,
         format,
         fileData: new Uint8Array(buffer),
-        placeholders: Array.from(foundPlaceholders),
+        placeholders,
       },
       select: {
         id: true,
@@ -167,6 +195,23 @@ export async function templateRoutes(
 
     await deps.prisma.template.delete({ where: { id } });
     reply.code(204).send();
+  });
+
+  fastify.post('/templates/preview', async (request, reply) => {
+    if (!request.jwtPayload) throw new Error('Unauthorized');
+
+    const data = await request.file();
+    if (!data) throw new Error('No file uploaded');
+
+    const buffer = await data.toBuffer();
+
+    try {
+      const preview = await previewTemplate(buffer, data.filename);
+      return reply.send(preview);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to parse file';
+      return reply.code(422).send({ error: message });
+    }
   });
 
   const generateSchema = z.object({

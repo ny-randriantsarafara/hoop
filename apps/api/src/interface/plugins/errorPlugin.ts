@@ -37,6 +37,11 @@ async function errorPluginCallback(fastify: FastifyInstance): Promise<void> {
       return;
     }
 
+    if (error.message.includes('Unsupported file type')) {
+      reply.code(400).send({ error: error.message });
+      return;
+    }
+
     if (error.message.includes('Cannot') || error.message.includes('can only')) {
       reply.code(400).send({ error: error.message });
       return;

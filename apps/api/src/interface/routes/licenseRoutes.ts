@@ -1,12 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { createLicenseSchema, createLicensesBatchSchema } from '@hoop/shared';
-import { listLicenses } from '../../application/license/listLicenses.js';
-import { createLicense } from '../../application/license/createLicense.js';
-import { createLicensesBatch } from '../../application/license/createLicensesBatch.js';
-import type { LicenseRepository } from '../../domain/license/licenseRepository.js';
-import type { SeasonRepository } from '../../domain/season/seasonRepository.js';
-import type { PlayerRepository } from '../../domain/player/playerRepository.js';
+import { listLicenses } from '../../application/license/listLicenses';
+import { createLicense } from '../../application/license/createLicense';
+import { createLicensesBatch } from '../../application/license/createLicensesBatch';
+import type { LicenseRepository } from '../../domain/license/licenseRepository';
+import type { SeasonRepository } from '../../domain/season/seasonRepository';
+import type { PlayerRepository } from '../../domain/player/playerRepository';
 
 const licenseStatusValues = ['active', 'expired'] as const;
 
@@ -14,6 +14,11 @@ const querySchema = z.object({
   seasonId: z.string().uuid().optional(),
   status: z.enum(licenseStatusValues).optional(),
   category: z.string().optional(),
+  number: z.string().optional(),
+  startDateFrom: z.coerce.date().optional(),
+  startDateTo: z.coerce.date().optional(),
+  endDateFrom: z.coerce.date().optional(),
+  endDateTo: z.coerce.date().optional(),
 });
 
 interface LicenseRoutesDeps {

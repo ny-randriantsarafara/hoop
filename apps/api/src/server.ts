@@ -19,6 +19,8 @@ import { dashboardRoutes } from './interface/routes/dashboardRoutes';
 import { templateRoutes } from './interface/routes/templateRoutes';
 import { documentRoutes } from './interface/routes/documentRoutes';
 import { categoryRoutes } from './interface/routes/categoryRoutes';
+import { ocrRoutes } from './interface/routes/ocrRoutes';
+import { createOllamaOcrService } from './infrastructure/ocr/ollamaOcrService';
 
 const config = loadConfig();
 
@@ -28,9 +30,15 @@ const playerRepository = createPrismaPlayerRepository(prisma);
 const licenseRepository = createPrismaLicenseRepository(prisma);
 const seasonRepository = createPrismaSeasonRepository(prisma);
 const userRepository = createPrismaUserRepository(prisma);
+const ocrService = createOllamaOcrService(config.ollamaBaseUrl, config.ollamaModel);
 
 async function start(): Promise<void> {
-  await fastify.register(cors, { origin: config.corsOrigin });
+  await fastify.register(cors, {
+    origin: config.corsOrigin,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
   await fastify.register(jwt, { secret: config.jwtSecret });
   await fastify.register(authPlugin);
   await fastify.register(errorPlugin);
@@ -60,6 +68,7 @@ async function start(): Promise<void> {
       });
       await templateRoutes(app, { prisma });
       await documentRoutes(app, { prisma, playerRepository, seasonRepository });
+      await ocrRoutes(app, { ocrService, prisma });
     },
     { prefix: '/api' },
   );

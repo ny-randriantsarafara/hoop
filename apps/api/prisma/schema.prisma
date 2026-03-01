@@ -18,10 +18,11 @@ model Club {
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
 
-  players    Player[]
-  users      User[]
-  templates  Template[]
-  categories CategoryConfig[]
+  players        Player[]
+  users          User[]
+  templates      Template[]
+  categories     CategoryConfig[]
+  ocrExtractions OcrExtraction[]
 
   @@map("clubs")
 }
@@ -139,4 +140,18 @@ model Template {
 enum TemplateFormat {
   xlsx
   docx
+}
+
+model OcrExtraction {
+  id            String   @id @default(uuid())
+  clubId        String   @map("club_id")
+  originalFile  Bytes    @map("original_file")
+  mimeType      String   @map("mime_type")
+  extractedData Json     @map("extracted_data")
+  validatedData Json?    @map("validated_data")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  club Club @relation(fields: [clubId], references: [id])
+
+  @@map("ocr_extractions")
 }

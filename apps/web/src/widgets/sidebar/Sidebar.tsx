@@ -9,6 +9,7 @@ import {
   Award,
   FileSpreadsheet,
   FileText,
+  ScanLine,
   Settings,
   LogOut,
 } from 'lucide-react';
@@ -23,6 +24,7 @@ const iconMap = {
   Award,
   FileSpreadsheet,
   FileText,
+  ScanLine,
   Settings,
 } as const;
 

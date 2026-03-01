@@ -1,4 +1,4 @@
-import type { LicenseEntity } from './licenseEntity.js';
+import type { LicenseEntity } from './licenseEntity';
 import type { CreateLicenseInput, LicenseStatus, LicenseWithRelations } from '@hoop/shared';
 
 export interface LicenseFilters {
@@ -6,6 +6,11 @@ export interface LicenseFilters {
   readonly seasonId?: string;
   readonly status?: LicenseStatus;
   readonly category?: string;
+  readonly number?: string;
+  readonly startDateFrom?: Date;
+  readonly startDateTo?: Date;
+  readonly endDateFrom?: Date;
+  readonly endDateTo?: Date;
 }
 
 export interface LicenseRepository {

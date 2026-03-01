@@ -5,17 +5,20 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { Plus, Trash2 } from 'lucide-react';
 import type { Player } from '@hoop/shared';
-import { computeCategory, genderLabels } from '@hoop/shared';
+import { computeCategory, genderLabels, playerFilterFields } from '@hoop/shared';
 import { Button } from '@/shared/ui/button';
 import { Badge } from '@/shared/ui/badge';
 import { TableSkeleton } from '@/shared/ui/skeleton';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 import { useToast } from '@/shared/ui/toast';
-import { PlayerFilterBar } from '@/shared/ui/player-filter-bar';
+import { FilterBar } from '@/shared/ui/filter-bar';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
 import { fetchPlayers, deletePlayer } from '../api/playerApi';
 import { fetchCategories } from '@/features/settings/api/categoryApi';
+import { fetchSeasons } from '@/features/settings/api/seasonApi';
 import Link from 'next/link';
+
+const EMPTY_FILTERS: Record<string, string> = {};
 
 export function PlayerTable() {
   const { data: session } = useSession();
@@ -25,29 +28,36 @@ export function PlayerTable() {
   const [categories, setCategories] = useState<
     Array<{ name: string; minAge: number; maxAge: number | null }>
   >([]);
-  const [search, setSearch] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>(EMPTY_FILTERS);
   const [debouncedSearch, setDebouncedSearch] = useState('');
-  const [gender, setGender] = useState('');
-  const [category, setCategory] = useState('');
-  const [birthDateFrom, setBirthDateFrom] = useState('');
-  const [birthDateTo, setBirthDateTo] = useState('');
+  const [dynamicOptions, setDynamicOptions] = useState<
+    Record<string, ReadonlyArray<{ value: string; label: string }>>
+  >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    const timer = setTimeout(() => setDebouncedSearch(filterValues['search'] ?? ''), 300);
     return () => clearTimeout(timer);
-  }, [search]);
+  }, [filterValues['search']]);
 
   useEffect(() => {
     if (!session?.accessToken) return;
-    fetchCategories(session.accessToken)
-      .then((data) =>
-        setCategories(data.map((c) => ({ name: c.name, minAge: c.minAge, maxAge: c.maxAge }))),
-      )
-      .catch(() => setCategories([]));
+
+    Promise.all([fetchCategories(session.accessToken), fetchSeasons(session.accessToken)])
+      .then(([cats, seasons]) => {
+        setCategories(cats.map((c) => ({ name: c.name, minAge: c.minAge, maxAge: c.maxAge })));
+        setDynamicOptions({
+          category: cats.map((c) => ({ value: c.name, label: c.name })),
+          seasonId: seasons.map((s) => ({ value: s.id, label: s.label })),
+        });
+      })
+      .catch(() => {
+        setCategories([]);
+        setDynamicOptions({});
+      });
   }, [session?.accessToken]);
 
   const loadPlayers = useCallback(async () => {
@@ -55,30 +65,29 @@ export function PlayerTable() {
     setLoading(true);
     setError(null);
     try {
-      const data = await fetchPlayers(session.accessToken, {
+      const apiFilters: Record<string, string | undefined> = {
+        ...filterValues,
         search: debouncedSearch || undefined,
-        gender: gender || undefined,
-        category: category || undefined,
-        birthDateFrom: birthDateFrom || undefined,
-        birthDateTo: birthDateTo || undefined,
-      });
+      };
+      const data = await fetchPlayers(session.accessToken, apiFilters);
       setPlayers(data);
     } catch {
       setError('Failed to load players');
     } finally {
       setLoading(false);
     }
-  }, [session?.accessToken, debouncedSearch, gender, category, birthDateFrom, birthDateTo]);
+  }, [session?.accessToken, debouncedSearch, filterValues]);
 
   useEffect(() => {
     loadPlayers();
   }, [loadPlayers]);
 
+  function handleFilterChange(key: string, value: string) {
+    setFilterValues((prev) => ({ ...prev, [key]: value }));
+  }
+
   function clearFilters() {
-    setGender('');
-    setCategory('');
-    setBirthDateFrom('');
-    setBirthDateTo('');
+    setFilterValues(EMPTY_FILTERS);
   }
 
   async function handleDeleteConfirm() {
@@ -102,19 +111,12 @@ export function PlayerTable() {
     <div className="space-y-4">
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
         <div className="flex-1">
-          <PlayerFilterBar
-            categories={categories}
-            search={search}
-            onSearchChange={setSearch}
-            gender={gender}
-            onGenderChange={setGender}
-            category={category}
-            onCategoryChange={setCategory}
-            birthDateFrom={birthDateFrom}
-            onBirthDateFromChange={setBirthDateFrom}
-            birthDateTo={birthDateTo}
-            onBirthDateToChange={setBirthDateTo}
+          <FilterBar
+            fields={playerFilterFields}
+            values={filterValues}
+            onChange={handleFilterChange}
             onClear={clearFilters}
+            dynamicOptions={dynamicOptions}
           />
         </div>
         <Link href="/players/new" className="w-full md:w-auto md:shrink-0">

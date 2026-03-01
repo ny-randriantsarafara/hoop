@@ -4,6 +4,7 @@ export const siteConfig = {
   navItems: [
     { title: 'Dashboard', href: '/', icon: 'LayoutDashboard' },
     { title: 'Players', href: '/players', icon: 'Users' },
+    { title: 'Import', href: '/import', icon: 'ScanLine' },
     { title: 'Documents', href: '/documents', icon: 'FileText' },
     { title: 'Licenses', href: '/licenses', icon: 'Award' },
     { title: 'Templates', href: '/templates', icon: 'FileSpreadsheet' },

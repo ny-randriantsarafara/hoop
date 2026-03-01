@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import type { UserRepository } from '../../domain/user/userRepository.js';
+import type { UserRepository } from '../../domain/user/userRepository';
 import type { LoginInput } from '@hoop/shared';
 
 export interface AuthResult {

@@ -1,7 +1,7 @@
-import type { LicenseRepository } from '../../domain/license/licenseRepository.js';
-import type { PlayerRepository } from '../../domain/player/playerRepository.js';
-import type { SeasonRepository } from '../../domain/season/seasonRepository.js';
-import type { LicenseEntity } from '../../domain/license/licenseEntity.js';
+import type { LicenseRepository } from '../../domain/license/licenseRepository';
+import type { PlayerRepository } from '../../domain/player/playerRepository';
+import type { SeasonRepository } from '../../domain/season/seasonRepository';
+import type { LicenseEntity } from '../../domain/license/licenseEntity';
 import type { CreateLicenseInput } from '@hoop/shared';
 
 export interface CreateLicensesBatchDeps {

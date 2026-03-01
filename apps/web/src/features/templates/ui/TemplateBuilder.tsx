@@ -3,13 +3,8 @@
 import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { ChevronDown, ChevronUp } from 'lucide-react';
-import {
-  documentPlaceholders,
-  playerRowPlaceholders,
-  type DocumentPlaceholder,
-  type PlayerRowPlaceholder,
-} from '@hoop/shared';
+import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { placeholderRegistry, type PlaceholderDefinition } from '@hoop/shared';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
@@ -18,22 +13,12 @@ import { useToast } from '@/shared/ui/toast';
 import { getFormString } from '@/shared/lib/formUtils';
 import { generateTemplate } from '../api/templateApi';
 
-const placeholderLabels: Record<string, string> = {
-  '{{seasonLabel}}': 'Season',
-  '{{clubName}}': 'Club Name',
-  '{{clubSection}}': 'Club Section',
-  '{{exportDate}}': 'Export Date',
-  '{{order}}': 'Row Number',
-  '{{playerLastName}}': 'Last Name',
-  '{{playerFirstName}}': 'First Name',
-  '{{playerBirthDate}}': 'Birth Date',
-  '{{playerGender}}': 'Gender',
-  '{{playerAddress}}': 'Address',
-  '{{playerCategory}}': 'Category',
-};
+const documentEntries = placeholderRegistry.filter((p) => p.scope === 'document');
+const playerEntries = placeholderRegistry.filter((p) => p.scope === 'player');
 
-function getLabel(ph: string): string {
-  return placeholderLabels[ph] ?? ph;
+function getLabelForKey(key: string): string {
+  const entry = placeholderRegistry.find((p) => p.key === key);
+  return entry?.label ?? key;
 }
 
 export function TemplateBuilder() {
@@ -43,10 +28,10 @@ export function TemplateBuilder() {
   const [loading, setLoading] = useState(false);
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
 
-  function togglePlaceholder(ph: string) {
+  function togglePlaceholder(key: string) {
     setSelectedColumns((prev) => {
-      if (prev.includes(ph)) return prev.filter((c) => c !== ph);
-      return [...prev, ph];
+      if (prev.includes(key)) return prev.filter((c) => c !== key);
+      return [...prev, key];
     });
   }
 
@@ -68,23 +53,25 @@ export function TemplateBuilder() {
     });
   }
 
-  function renderCheckboxGroup(
-    title: string,
-    placeholders: readonly (DocumentPlaceholder | PlayerRowPlaceholder)[],
-  ) {
+  function renderCheckboxGroup(title: string, entries: ReadonlyArray<PlaceholderDefinition>) {
     return (
       <div className="space-y-2">
         <h3 className="text-sm font-medium">{title}</h3>
         <div className="flex flex-wrap gap-4">
-          {placeholders.map((ph) => (
-            <label key={ph} className="flex items-center gap-2 cursor-pointer">
+          {entries.map((entry) => (
+            <label
+              key={entry.key}
+              className="flex items-center gap-2 cursor-pointer group"
+              title={entry.description}
+            >
               <input
                 type="checkbox"
-                checked={selectedColumns.includes(ph)}
-                onChange={() => togglePlaceholder(ph)}
+                checked={selectedColumns.includes(entry.key)}
+                onChange={() => togglePlaceholder(entry.key)}
                 className="h-4 w-4 rounded border-input"
               />
-              <span className="text-sm">{getLabel(ph)}</span>
+              <span className="text-sm">{entry.label}</span>
+              <Info className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
             </label>
           ))}
         </div>
@@ -145,8 +132,8 @@ export function TemplateBuilder() {
           </div>
 
           <div className="space-y-4">
-            {renderCheckboxGroup('Document-level', documentPlaceholders)}
-            {renderCheckboxGroup('Per-player row', playerRowPlaceholders)}
+            {renderCheckboxGroup('Document-level', documentEntries)}
+            {renderCheckboxGroup('Per-player row', playerEntries)}
           </div>
 
           <div className="space-y-2">
@@ -157,12 +144,12 @@ export function TemplateBuilder() {
                   Select placeholders above to define column order
                 </p>
               ) : (
-                selectedColumns.map((ph, index) => (
+                selectedColumns.map((key, index) => (
                   <div
-                    key={ph}
+                    key={key}
                     className="flex items-center justify-between gap-2 py-1 px-2 rounded hover:bg-muted/50"
                   >
-                    <span className="text-sm">{getLabel(ph)}</span>
+                    <span className="text-sm">{getLabelForKey(key)}</span>
                     <div className="flex gap-1">
                       <Button
                         type="button"

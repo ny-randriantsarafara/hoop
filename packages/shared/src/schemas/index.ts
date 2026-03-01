@@ -20,3 +20,24 @@ export {
   type CreateSeasonInput,
   type UpdateSeasonInput,
 } from './seasonSchema';
+
+export {
+  ocrExtractionResultSchema,
+  ocrExtractionResponseSchema,
+  ocrPlayerDataSchema,
+  ocrLicenseDataSchema,
+  validateExtractionSchema,
+  type OcrConfidence,
+  type OcrPlayerData,
+  type OcrLicenseData,
+  type OcrExtractionResult,
+  type OcrExtractionResponse,
+  type ValidateExtractionInput,
+} from './ocrSchema';
+
+export {
+  spreadsheetPreviewSchema,
+  cellMappingSchema,
+  type SpreadsheetPreviewInput,
+  type CellMappingInput,
+} from './spreadsheetPreviewSchema';

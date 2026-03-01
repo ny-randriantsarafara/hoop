@@ -1,5 +1,5 @@
 import { Breadcrumbs } from '@/shared/ui/breadcrumbs';
-import { PlayerForm } from '@/features/players/ui/PlayerForm';
+import { PlayerForm } from '@/features/players/ui/player-form';
 
 export default function NewPlayerPage() {
   return (

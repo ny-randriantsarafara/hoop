@@ -1,11 +1,6 @@
 import ExcelJS from 'exceljs';
 import { allPlaceholders } from '@hoop/shared';
-import type {
-  SpreadsheetPreview,
-  PreviewCell,
-  CellStyle,
-  MergedRegion,
-} from '@hoop/shared';
+import type { SpreadsheetPreview, PreviewCell, CellStyle, MergedRegion } from '@hoop/shared';
 
 const PLACEHOLDER_REGEX = /\{\{(\w+)\}\}/g;
 
@@ -46,9 +41,7 @@ function extractCellStyle(cell: ExcelJS.Cell): CellStyle {
 
   const horizontal = alignment.horizontal;
   const normalizedAlignment =
-    horizontal === 'left' || horizontal === 'center' || horizontal === 'right'
-      ? horizontal
-      : null;
+    horizontal === 'left' || horizontal === 'center' || horizontal === 'right' ? horizontal : null;
 
   return {
     bold: font.bold === true,
@@ -122,7 +115,8 @@ export async function parseXlsxForPreview(buffer: Buffer): Promise<SpreadsheetPr
   const columnWidths: number[] = [];
   for (let i = 0; i <= maxCol; i++) {
     const column = sheet.getColumn(i + 1);
-    const width = typeof column.width === 'number' ? Math.round(column.width * 7) : DEFAULT_COLUMN_WIDTH;
+    const width =
+      typeof column.width === 'number' ? Math.round(column.width * 7) : DEFAULT_COLUMN_WIDTH;
     columnWidths.push(width);
   }
 

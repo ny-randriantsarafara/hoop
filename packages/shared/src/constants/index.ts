@@ -1,15 +1,15 @@
 export { Role, LicenseStatus, Gender } from './enums';
-export { genderLabels } from './genderLabels';
+export { genderLabels } from './gender-labels';
 export {
   placeholderRegistry,
   documentPlaceholders,
   playerRowPlaceholders,
   allPlaceholders,
-} from './templatePlaceholders';
+} from './template-placeholders';
 export type {
   PlaceholderScope,
   PlaceholderDefinition,
   DocumentPlaceholder,
   PlayerRowPlaceholder,
   TemplatePlaceholder,
-} from './templatePlaceholders';
+} from './template-placeholders';

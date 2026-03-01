@@ -1,4 +1,4 @@
-import { PlayerDetail } from '@/features/players/ui/PlayerDetail';
+import { PlayerDetail } from '@/features/players/ui/player-detail';
 
 interface PlayerPageProps {
   params: Promise<{ id: string }>;

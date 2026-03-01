@@ -109,9 +109,9 @@ describe('createOllamaOcrService', () => {
 
     const service = createOllamaOcrService('http://localhost:11434', 'gemma3');
 
-    await expect(
-      service.extract(Buffer.from('fake'), 'image/jpeg'),
-    ).rejects.toThrow(OcrConnectionError);
+    await expect(service.extract(Buffer.from('fake'), 'image/jpeg')).rejects.toThrow(
+      OcrConnectionError,
+    );
   });
 
   it('throws OcrExtractionError on non-ok response', async () => {
@@ -123,9 +123,9 @@ describe('createOllamaOcrService', () => {
 
     const service = createOllamaOcrService('http://localhost:11434', 'gemma3');
 
-    await expect(
-      service.extract(Buffer.from('fake'), 'image/jpeg'),
-    ).rejects.toThrow(OcrExtractionError);
+    await expect(service.extract(Buffer.from('fake'), 'image/jpeg')).rejects.toThrow(
+      OcrExtractionError,
+    );
   });
 
   it('throws OcrExtractionError on unexpected response shape', async () => {
@@ -136,8 +136,8 @@ describe('createOllamaOcrService', () => {
 
     const service = createOllamaOcrService('http://localhost:11434', 'gemma3');
 
-    await expect(
-      service.extract(Buffer.from('fake'), 'image/jpeg'),
-    ).rejects.toThrow(OcrExtractionError);
+    await expect(service.extract(Buffer.from('fake'), 'image/jpeg')).rejects.toThrow(
+      OcrExtractionError,
+    );
   });
 });

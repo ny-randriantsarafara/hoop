@@ -1,2 +1,2 @@
-export { computeCategory } from './computeCategory';
-export type { CategoryDefinition } from './computeCategory';
+export { computeCategory } from './compute-category';
+export type { CategoryDefinition } from './compute-category';

@@ -97,21 +97,22 @@ graph TD
 
 Defines the navigation structure used by the sidebar:
 
-| Nav item | Path | Icon |
-|---|---|---|
-| Dashboard | `/` | LayoutDashboard |
-| Players | `/players` | Users |
-| Import | `/import` | ScanLine |
-| Documents | `/documents` | FileText |
-| Licenses | `/licenses` | Award |
+| Nav item  | Path         | Icon            |
+| --------- | ------------ | --------------- |
+| Dashboard | `/`          | LayoutDashboard |
+| Players   | `/players`   | Users           |
+| Import    | `/import`    | ScanLine        |
+| Documents | `/documents` | FileText        |
+| Licenses  | `/licenses`  | Award           |
 | Templates | `/templates` | FileSpreadsheet |
-| Settings | `/settings` | Settings |
+| Settings  | `/settings`  | Settings        |
 
 ### Library (`shared/lib/`)
 
 #### `apiClient.ts`
 
 A thin `fetch` wrapper that all API calls go through:
+
 - Prepends the base URL from `NEXT_PUBLIC_API_URL`.
 - Sets `Content-Type: application/json` and `Authorization: Bearer <token>`.
 - Throws on non-OK responses with the error message from the API body.
@@ -119,6 +120,7 @@ A thin `fetch` wrapper that all API calls go through:
 #### `auth.ts`
 
 NextAuth configuration with a Credentials provider:
+
 - On sign-in, calls `POST /api/auth/login` on the API server using the server-side `API_URL`.
 - Stores the JWT token, role, and clubId in the NextAuth JWT and session.
 - Redirects unauthenticated users to `/login`.
@@ -139,22 +141,22 @@ Exports `getFormString(formData, key)` — extracts a string value from FormData
 
 Reusable, headless-style components built with Tailwind CSS and `class-variance-authority`:
 
-| Component | File | Description |
-|---|---|---|
-| **Button** | `button.tsx` | Variants: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`. Sizes: `default`, `sm`, `lg`, `icon`. |
-| **Input** | `input.tsx` | Styled text input with focus ring. |
-| **Label** | `label.tsx` | Form label with consistent styling. |
-| **Select** | `select.tsx` | Native select element with styling. |
-| **SearchableSelect** | `searchable-select.tsx` | Select with search/filter functionality. Dropdown with search input, scrollable options list. |
-| **Card** | `card.tsx` | Card container with `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` sub-components. |
-| **Badge** | `badge.tsx` | Inline badge with variants: `default`, `secondary`, `destructive`, `outline`, `success`, `warning`. |
-| **Table** | `table.tsx` | Table with `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` sub-components. |
-| **Skeleton** | `skeleton.tsx` | Loading placeholder. Also exports `TableSkeleton` for table loading states. |
-| **Toast** | `toast.tsx` | Toast notification system with `ToastProvider`, `useToast` hook, and `Toaster` component. Uses `createPortal` for rendering. |
-| **ConfirmDialog** | `confirm-dialog.tsx` | Modal confirmation dialog with title, description, confirm/cancel buttons, and loading state. |
-| **Breadcrumbs** | `breadcrumbs.tsx` | Breadcrumb navigation with clickable links and current page indicator. |
-| **FilterBar** | `filter-bar.tsx` | Generic filter bar driven by `FilterFieldDefinition` from `@hoop/shared`. Renders appropriate inputs (text, select, date) based on field type. |
-| **PlayerFilterBar** | `player-filter-bar.tsx` | Player-specific filter bar with search, gender, category, and date range filters. |
+| Component            | File                    | Description                                                                                                                                    |
+| -------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Button**           | `button.tsx`            | Variants: `default`, `destructive`, `outline`, `secondary`, `ghost`, `link`. Sizes: `default`, `sm`, `lg`, `icon`.                             |
+| **Input**            | `input.tsx`             | Styled text input with focus ring.                                                                                                             |
+| **Label**            | `label.tsx`             | Form label with consistent styling.                                                                                                            |
+| **Select**           | `select.tsx`            | Native select element with styling.                                                                                                            |
+| **SearchableSelect** | `searchable-select.tsx` | Select with search/filter functionality. Dropdown with search input, scrollable options list.                                                  |
+| **Card**             | `card.tsx`              | Card container with `CardHeader`, `CardTitle`, `CardDescription`, `CardContent` sub-components.                                                |
+| **Badge**            | `badge.tsx`             | Inline badge with variants: `default`, `secondary`, `destructive`, `outline`, `success`, `warning`.                                            |
+| **Table**            | `table.tsx`             | Table with `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` sub-components.                                                    |
+| **Skeleton**         | `skeleton.tsx`          | Loading placeholder. Also exports `TableSkeleton` for table loading states.                                                                    |
+| **Toast**            | `toast.tsx`             | Toast notification system with `ToastProvider`, `useToast` hook, and `Toaster` component. Uses `createPortal` for rendering.                   |
+| **ConfirmDialog**    | `confirm-dialog.tsx`    | Modal confirmation dialog with title, description, confirm/cancel buttons, and loading state.                                                  |
+| **Breadcrumbs**      | `breadcrumbs.tsx`       | Breadcrumb navigation with clickable links and current page indicator.                                                                         |
+| **FilterBar**        | `filter-bar.tsx`        | Generic filter bar driven by `FilterFieldDefinition` from `@hoop/shared`. Renders appropriate inputs (text, select, date) based on field type. |
+| **PlayerFilterBar**  | `player-filter-bar.tsx` | Player-specific filter bar with search, gender, category, and date range filters.                                                              |
 
 ---
 
@@ -163,6 +165,7 @@ Reusable, headless-style components built with Tailwind CSS and `class-variance-
 ### DashboardShell (`widgets/shell/DashboardShell.tsx`)
 
 The main layout wrapper for all dashboard pages:
+
 - Renders the **Sidebar** on desktop (fixed, left side).
 - Renders the **Header** with a mobile menu button.
 - On mobile, the sidebar appears as a full-screen overlay triggered by the header menu button.
@@ -171,6 +174,7 @@ The main layout wrapper for all dashboard pages:
 ### Sidebar (`widgets/sidebar/Sidebar.tsx`)
 
 Navigation sidebar:
+
 - Renders the app logo/title at the top.
 - Lists all nav items from `siteConfig`.
 - Highlights the active route.
@@ -179,6 +183,7 @@ Navigation sidebar:
 ### Header (`widgets/header/Header.tsx`)
 
 Top header bar:
+
 - Mobile menu toggle button (hamburger icon).
 - Displays the current user's name, role, and an avatar letter.
 
@@ -194,8 +199,8 @@ Each feature follows the same structure: `api/` for API client functions and `ui
 
 #### UI
 
-| Component | Description |
-|---|---|
+| Component     | Description                                                                                                                   |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **LoginForm** | Email and password form. Calls `signIn("credentials", ...)` from NextAuth. Shows toast on error, redirects to `/` on success. |
 
 ---
@@ -204,14 +209,14 @@ Each feature follows the same structure: `api/` for API client functions and `ui
 
 #### API (`dashboard/api/dashboardApi.ts`)
 
-| Function | Description |
-|---|---|
+| Function                     | Description                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------- |
 | `fetchDashboardStats(token)` | Returns `{ totalPlayers, activeLicenses, expiringLicenses, playersByCategory }` |
 
 #### UI
 
-| Component | Description |
-|---|---|
+| Component      | Description                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
 | **StatsCards** | Displays four stat cards: total players, active licenses, expiring licenses, and a breakdown by category. Links to relevant pages. |
 
 ---
@@ -220,23 +225,23 @@ Each feature follows the same structure: `api/` for API client functions and `ui
 
 #### API (`players/api/playerApi.ts`)
 
-| Function | Description |
-|---|---|
-| `fetchPlayers(token, filters?)` | Lists players with optional filters (search, gender, category, dates, seasonId) |
-| `fetchPlayer(token, id)` | Gets a single player by ID |
-| `fetchPlayerLicenses(token, id)` | Gets all licenses for a player |
-| `createPlayer(token, data)` | Creates a new player |
-| `updatePlayer(token, id, data)` | Updates a player |
-| `deletePlayer(token, id)` | Deletes a player |
+| Function                         | Description                                                                     |
+| -------------------------------- | ------------------------------------------------------------------------------- |
+| `fetchPlayers(token, filters?)`  | Lists players with optional filters (search, gender, category, dates, seasonId) |
+| `fetchPlayer(token, id)`         | Gets a single player by ID                                                      |
+| `fetchPlayerLicenses(token, id)` | Gets all licenses for a player                                                  |
+| `createPlayer(token, data)`      | Creates a new player                                                            |
+| `updatePlayer(token, id, data)`  | Updates a player                                                                |
+| `deletePlayer(token, id)`        | Deletes a player                                                                |
 
 #### UI
 
-| Component | Description |
-|---|---|
-| **PlayerTable** | Main players list. Includes `PlayerFilterBar` for filtering. Displays players in a table (desktop) or cards (mobile). Each row has view/edit/delete actions. Delete shows a confirmation dialog. |
-| **PlayerForm** | Form for creating a new player. Includes a "Import from document" button that triggers OCR extraction — extracted data is used to pre-fill the form fields. Fields: firstName, lastName, birthDate, gender, address, phone, email. |
-| **PlayerDetail** | Displays a player's full information in a card, plus a table of their licenses. Includes edit and delete buttons. |
-| **PlayerEditForm** | Form for editing an existing player. Pre-filled with current values. Includes breadcrumbs for navigation. |
+| Component          | Description                                                                                                                                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **PlayerTable**    | Main players list. Includes `PlayerFilterBar` for filtering. Displays players in a table (desktop) or cards (mobile). Each row has view/edit/delete actions. Delete shows a confirmation dialog.                                   |
+| **PlayerForm**     | Form for creating a new player. Includes a "Import from document" button that triggers OCR extraction — extracted data is used to pre-fill the form fields. Fields: firstName, lastName, birthDate, gender, address, phone, email. |
+| **PlayerDetail**   | Displays a player's full information in a card, plus a table of their licenses. Includes edit and delete buttons.                                                                                                                  |
+| **PlayerEditForm** | Form for editing an existing player. Pre-filled with current values. Includes breadcrumbs for navigation.                                                                                                                          |
 
 ```mermaid
 graph LR
@@ -253,20 +258,20 @@ graph LR
 
 #### API (`licenses/api/licenseApi.ts`)
 
-| Function | Description |
-|---|---|
-| `fetchLicenses(token, filters?)` | Lists licenses with optional filters |
+| Function                               | Description                          |
+| -------------------------------------- | ------------------------------------ |
+| `fetchLicenses(token, filters?)`       | Lists licenses with optional filters |
 | `fetchPlayerLicenses(token, playerId)` | Lists licenses for a specific player |
-| `createLicense(token, data)` | Creates a single license |
-| `createLicensesBatch(token, data)` | Creates multiple licenses at once |
+| `createLicense(token, data)`           | Creates a single license             |
+| `createLicensesBatch(token, data)`     | Creates multiple licenses at once    |
 
 #### UI
 
-| Component | Description |
-|---|---|
-| **LicenseTable** | Main licenses list with filter bar (season, status, category, number, date ranges). Displays licenses with player name and season label. |
-| **LicenseForm** | Form for creating a single license. Fields: playerId (searchable select), seasonId (select), number, status, category, startDate, endDate. |
-| **LicenseBatchForm** | Form for creating multiple licenses at once. Shared season and date fields, with multiple player/category/number rows. |
+| Component            | Description                                                                                                                                |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| **LicenseTable**     | Main licenses list with filter bar (season, status, category, number, date ranges). Displays licenses with player name and season label.   |
+| **LicenseForm**      | Form for creating a single license. Fields: playerId (searchable select), seasonId (select), number, status, category, startDate, endDate. |
+| **LicenseBatchForm** | Form for creating multiple licenses at once. Shared season and date fields, with multiple player/category/number rows.                     |
 
 The license creation page lets the user toggle between single and batch mode.
 
@@ -276,28 +281,28 @@ The license creation page lets the user toggle between single and batch mode.
 
 #### API (`templates/api/templateApi.ts`)
 
-| Function | Description |
-|---|---|
-| `fetchTemplates(token)` | Lists all templates for the club |
-| `deleteTemplate(token, id)` | Deletes a template |
-| `previewTemplate(token, file)` | Uploads an XLSX file and returns a spreadsheet preview |
-| `uploadTemplate(token, data)` | Uploads a template with file, name, description, and cell mappings |
-| `generateTemplate(token, data)` | Generates a template from selected placeholder columns |
-| `downloadTemplate(token, id)` | Downloads a template file |
+| Function                        | Description                                                        |
+| ------------------------------- | ------------------------------------------------------------------ |
+| `fetchTemplates(token)`         | Lists all templates for the club                                   |
+| `deleteTemplate(token, id)`     | Deletes a template                                                 |
+| `previewTemplate(token, file)`  | Uploads an XLSX file and returns a spreadsheet preview             |
+| `uploadTemplate(token, data)`   | Uploads a template with file, name, description, and cell mappings |
+| `generateTemplate(token, data)` | Generates a template from selected placeholder columns             |
+| `downloadTemplate(token, id)`   | Downloads a template file                                          |
 
 #### UI
 
-| Component | Description |
-|---|---|
-| **TemplateList** | Table of templates with name, format, placeholder count, dates. Actions: download, delete. |
-| **TemplateUploadFlow** | Multi-step upload wizard: (1) upload XLSX file → (2) preview spreadsheet → (3) visually map cells to placeholders → (4) enter name/description → (5) save. |
-| **TemplateUploadForm** | Simple file upload form for XLSX/DOCX files. |
-| **TemplateBuilder** | Alternative to upload: select placeholder columns from a checkbox list, reorder them, give the template a name, and generate an XLSX from scratch. |
-| **TemplateMetadataForm** | Name and description inputs used in the upload flow. |
-| **SpreadsheetGrid** | Renders the XLSX preview as a visual grid. Handles merged cells, cell selection, and placeholder badges. |
-| **SpreadsheetCell** | Individual cell in the spreadsheet grid. Renders value, applies styling (bold, italic, font size, colors, borders, alignment), shows placeholder badge. |
-| **PlaceholderDropdown** | Floating dropdown that appears when you click a cell. Lists all available placeholders, lets you pick one to assign to that cell. |
-| **PlaceholderSidebar** | Sidebar showing all current cell-to-placeholder mappings. Lets you remove mappings. |
+| Component                | Description                                                                                                                                                |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **TemplateList**         | Table of templates with name, format, placeholder count, dates. Actions: download, delete.                                                                 |
+| **TemplateUploadFlow**   | Multi-step upload wizard: (1) upload XLSX file → (2) preview spreadsheet → (3) visually map cells to placeholders → (4) enter name/description → (5) save. |
+| **TemplateUploadForm**   | Simple file upload form for XLSX/DOCX files.                                                                                                               |
+| **TemplateBuilder**      | Alternative to upload: select placeholder columns from a checkbox list, reorder them, give the template a name, and generate an XLSX from scratch.         |
+| **TemplateMetadataForm** | Name and description inputs used in the upload flow.                                                                                                       |
+| **SpreadsheetGrid**      | Renders the XLSX preview as a visual grid. Handles merged cells, cell selection, and placeholder badges.                                                   |
+| **SpreadsheetCell**      | Individual cell in the spreadsheet grid. Renders value, applies styling (bold, italic, font size, colors, borders, alignment), shows placeholder badge.    |
+| **PlaceholderDropdown**  | Floating dropdown that appears when you click a cell. Lists all available placeholders, lets you pick one to assign to that cell.                          |
+| **PlaceholderSidebar**   | Sidebar showing all current cell-to-placeholder mappings. Lets you remove mappings.                                                                        |
 
 ```mermaid
 graph TD
@@ -318,14 +323,14 @@ graph TD
 
 #### API (`documents/api/documentApi.ts`)
 
-| Function | Description |
-|---|---|
+| Function                        | Description                                                                                       |
+| ------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `generateDocument(token, data)` | Generates a document from a template, player list, and season. Downloads the resulting XLSX file. |
 
 #### UI
 
-| Component | Description |
-|---|---|
+| Component             | Description                                                                                                                                                                                                                              |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **DocumentGenerator** | Three-step wizard: (1) select a template → (2) select players (with search and filter) → (3) select a season and generate. Downloads the resulting file. Uses `SearchableSelect` for season picking and checkboxes for player selection. |
 
 ```mermaid
@@ -341,17 +346,17 @@ graph LR
 
 #### API (`ocr/api/ocrApi.ts`)
 
-| Function | Description |
-|---|---|
-| `extractDocument(token, file)` | Uploads a document image to the API for OCR extraction. Returns structured player and license data. |
-| `saveValidatedData(token, extractionId, input)` | Saves human-validated extraction data. |
+| Function                                        | Description                                                                                         |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `extractDocument(token, file)`                  | Uploads a document image to the API for OCR extraction. Returns structured player and license data. |
+| `saveValidatedData(token, extractionId, input)` | Saves human-validated extraction data.                                                              |
 
 #### UI
 
-| Component | Description |
-|---|---|
-| **ImportFlow** | Orchestrates the OCR import process. States: idle → extracting → review → saved/error. On save, can either create just a player or a player with a license. |
-| **DocumentDropzone** | Drag-and-drop zone for uploading documents. Accepts JPEG, PNG, WebP, PDF (5 MB max). Shows upload instructions and file type icons. |
+| Component            | Description                                                                                                                                                                                                                           |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **ImportFlow**       | Orchestrates the OCR import process. States: idle → extracting → review → saved/error. On save, can either create just a player or a player with a license.                                                                           |
+| **DocumentDropzone** | Drag-and-drop zone for uploading documents. Accepts JPEG, PNG, WebP, PDF (5 MB max). Shows upload instructions and file type icons.                                                                                                   |
 | **ExtractionReview** | Displays extracted data in editable fields. Shows confidence level. Two save options: "Save Player" (creates player only) or "Save Player + License" (creates both). Fields are pre-filled from OCR results and editable by the user. |
 
 ```mermaid
@@ -372,19 +377,19 @@ stateDiagram-v2
 
 #### API
 
-| File | Function | Description |
-|---|---|---|
-| `settingsApi.ts` | `fetchMyClub(token)` | Returns the current user's club info |
-| `seasonApi.ts` | `fetchSeasons(token)` | Lists all seasons |
-| `seasonApi.ts` | `createSeason(token, data)` | Creates a new season |
-| `seasonApi.ts` | `updateSeason(token, id, data)` | Updates a season |
-| `seasonApi.ts` | `deleteSeason(token, id)` | Deletes a season |
-| `categoryApi.ts` | `fetchCategories(token)` | Lists category configs for the club |
+| File             | Function                        | Description                          |
+| ---------------- | ------------------------------- | ------------------------------------ |
+| `settingsApi.ts` | `fetchMyClub(token)`            | Returns the current user's club info |
+| `seasonApi.ts`   | `fetchSeasons(token)`           | Lists all seasons                    |
+| `seasonApi.ts`   | `createSeason(token, data)`     | Creates a new season                 |
+| `seasonApi.ts`   | `updateSeason(token, id, data)` | Updates a season                     |
+| `seasonApi.ts`   | `deleteSeason(token, id)`       | Deletes a season                     |
+| `categoryApi.ts` | `fetchCategories(token)`        | Lists category configs for the club  |
 
 #### UI
 
-| Component | Description |
-|---|---|
+| Component         | Description                                                                                                                      |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | **SeasonManager** | Full CRUD interface for seasons. Inline add/edit forms. Toggle active status (only one can be active). Delete with confirmation. |
 
 The settings page also displays the club's information (name, section, address, phone, email) in a read-only card.
@@ -395,21 +400,21 @@ The settings page also displays the club's information (name, section, address, 
 
 Each page in `app/(dashboard)/` is a thin wrapper that imports feature components and passes them any needed parameters (like route params).
 
-| Route | Page component | Feature components used |
-|---|---|---|
-| `/` | Dashboard | `StatsCards` |
-| `/players` | Players list | `PlayerTable` |
-| `/players/new` | New player | `PlayerForm`, `Breadcrumbs` |
-| `/players/[id]` | Player detail | `PlayerDetail` |
-| `/players/[id]/edit` | Edit player | `PlayerEditForm` |
-| `/licenses` | Licenses list | `LicenseTable` |
-| `/licenses/new` | New license | `LicenseForm`, `LicenseBatchForm` |
-| `/templates` | Templates list | `TemplateList` |
-| `/templates/upload` | Template upload | `TemplateUploadFlow` |
-| `/templates/builder` | Template builder | `TemplateBuilder` |
-| `/documents` | Document generation | `DocumentGenerator` |
-| `/import` | OCR import | `ImportFlow` |
-| `/settings` | Settings | `SeasonManager`, club info card |
+| Route                | Page component      | Feature components used           |
+| -------------------- | ------------------- | --------------------------------- |
+| `/`                  | Dashboard           | `StatsCards`                      |
+| `/players`           | Players list        | `PlayerTable`                     |
+| `/players/new`       | New player          | `PlayerForm`, `Breadcrumbs`       |
+| `/players/[id]`      | Player detail       | `PlayerDetail`                    |
+| `/players/[id]/edit` | Edit player         | `PlayerEditForm`                  |
+| `/licenses`          | Licenses list       | `LicenseTable`                    |
+| `/licenses/new`      | New license         | `LicenseForm`, `LicenseBatchForm` |
+| `/templates`         | Templates list      | `TemplateList`                    |
+| `/templates/upload`  | Template upload     | `TemplateUploadFlow`              |
+| `/templates/builder` | Template builder    | `TemplateBuilder`                 |
+| `/documents`         | Document generation | `DocumentGenerator`               |
+| `/import`            | OCR import          | `ImportFlow`                      |
+| `/settings`          | Settings            | `SeasonManager`, club info card   |
 
 ## Authentication and route protection
 

@@ -5,8 +5,8 @@ import { useSession } from 'next-auth/react';
 import type { Club } from '@hoop/shared';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Skeleton } from '@/shared/ui/skeleton';
-import { fetchMyClub } from '@/features/settings/api/settingsApi';
-import { SeasonManager } from '@/features/settings/ui/SeasonManager';
+import { fetchMyClub } from '@/features/settings/api/settings-api';
+import { SeasonManager } from '@/features/settings/ui/season-manager';
 
 export default function SettingsPage() {
   const { data: session } = useSession();

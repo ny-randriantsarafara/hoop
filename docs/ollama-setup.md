@@ -47,12 +47,12 @@ This downloads ~5 GB. The model supports image understanding and structured JSON
 
 Any Ollama-compatible vision model works. Set `OLLAMA_MODEL` in your `.env` to switch:
 
-| Model | Size | Notes |
-|-------|------|-------|
-| `gemma3` | ~5 GB | Default. Good balance of speed and accuracy. |
-| `llama3.2-vision` | ~8 GB | Larger, potentially more accurate. Needs 8+ GB RAM. |
-| `llava` | ~5 GB | Older but well-tested vision model. |
-| `moondream` | ~2 GB | Lightweight, faster, less accurate. Good for low-RAM setups. |
+| Model             | Size  | Notes                                                        |
+| ----------------- | ----- | ------------------------------------------------------------ |
+| `gemma3`          | ~5 GB | Default. Good balance of speed and accuracy.                 |
+| `llama3.2-vision` | ~8 GB | Larger, potentially more accurate. Needs 8+ GB RAM.          |
+| `llava`           | ~5 GB | Older but well-tested vision model.                          |
+| `moondream`       | ~2 GB | Lightweight, faster, less accurate. Good for low-RAM setups. |
 
 ## 3. Start Ollama
 
@@ -85,10 +85,10 @@ OLLAMA_BASE_URL=http://localhost:11434
 OLLAMA_MODEL=gemma3
 ```
 
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | URL where Ollama is running |
-| `OLLAMA_MODEL` | `gemma3` | Vision model to use for OCR extraction |
+| Variable          | Default                  | Description                            |
+| ----------------- | ------------------------ | -------------------------------------- |
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | URL where Ollama is running            |
+| `OLLAMA_MODEL`    | `gemma3`                 | Vision model to use for OCR extraction |
 
 Both variables have defaults, so the OCR feature works without setting them as long as Ollama is running on localhost.
 

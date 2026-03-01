@@ -1,4 +1,4 @@
-import { DocumentGenerator } from '@/features/documents/ui/DocumentGenerator';
+import { DocumentGenerator } from '@/features/documents/ui/document-generator';
 
 export default function DocumentsPage() {
   return (

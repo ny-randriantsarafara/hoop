@@ -1,11 +1,13 @@
 import ExcelJS from 'exceljs';
 import { createReport } from 'docx-templates';
-import { computeCategory } from '@hoop/shared';
+import { computeCategory, playerRowPlaceholders } from '@hoop/shared';
 import type { CategoryDefinition } from '@hoop/shared';
-import type { PlayerEntity } from '../../domain/player/playerEntity.js';
+import type { PlayerEntity } from '../../domain/player/playerEntity';
+import type { LicenseEntity } from '../../domain/license/licenseEntity';
 
 export interface DocumentPlayerData {
   readonly player: PlayerEntity;
+  readonly license?: LicenseEntity;
 }
 
 export interface DocumentContext {
@@ -17,8 +19,13 @@ export interface DocumentContext {
   readonly categories: ReadonlyArray<CategoryDefinition>;
 }
 
-const PLAYER_PLACEHOLDER_REGEX =
-  /\{\{(order|playerLastName|playerFirstName|playerBirthDate|playerGender|playerAddress|playerCategory)\}\}/;
+const PLAYER_PLACEHOLDER_REGEX = new RegExp(
+  playerRowPlaceholders.map((k) => k.replace(/[{}]/g, '\\$&')).join('|'),
+);
+
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('fr-FR');
+}
 
 function getPlayerReplacements(
   entry: DocumentPlayerData,
@@ -30,10 +37,17 @@ function getPlayerReplacements(
     '{{order}}': String(index + 1),
     '{{playerLastName}}': entry.player.lastName,
     '{{playerFirstName}}': entry.player.firstName,
-    '{{playerBirthDate}}': entry.player.birthDate.toLocaleDateString('fr-FR'),
+    '{{playerBirthDate}}': formatDate(entry.player.birthDate),
     '{{playerGender}}': entry.player.gender,
     '{{playerAddress}}': entry.player.address,
+    '{{playerPhone}}': entry.player.phone ?? '',
+    '{{playerEmail}}': entry.player.email ?? '',
     '{{playerCategory}}': computeCategory(entry.player.birthDate, seasonYear, categories),
+    '{{licenseNumber}}': entry.license?.number ?? '',
+    '{{licenseStatus}}': entry.license?.status ?? '',
+    '{{licenseStartDate}}': entry.license ? formatDate(entry.license.startDate) : '',
+    '{{licenseEndDate}}': entry.license ? formatDate(entry.license.endDate) : '',
+    '{{licenseCategory}}': entry.license?.category ?? '',
   };
 }
 
@@ -166,10 +180,17 @@ export async function processDocxTemplate(
     order: index + 1,
     playerLastName: entry.player.lastName,
     playerFirstName: entry.player.firstName,
-    playerBirthDate: entry.player.birthDate.toLocaleDateString('fr-FR'),
+    playerBirthDate: formatDate(entry.player.birthDate),
     playerGender: entry.player.gender,
     playerAddress: entry.player.address,
+    playerPhone: entry.player.phone ?? '',
+    playerEmail: entry.player.email ?? '',
     playerCategory: computeCategory(entry.player.birthDate, seasonYear, categories),
+    licenseNumber: entry.license?.number ?? '',
+    licenseStatus: entry.license?.status ?? '',
+    licenseStartDate: entry.license ? formatDate(entry.license.startDate) : '',
+    licenseEndDate: entry.license ? formatDate(entry.license.endDate) : '',
+    licenseCategory: entry.license?.category ?? '',
   }));
 
   const result = await createReport({

@@ -2,14 +2,22 @@ import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import { createPlayerSchema, updatePlayerSchema, computeCategory } from '@hoop/shared';
-import { createPlayer } from '../../application/player/createPlayer.js';
-import { updatePlayer } from '../../application/player/updatePlayer.js';
-import { listPlayers } from '../../application/player/listPlayers.js';
-import { deletePlayer } from '../../application/player/deletePlayer.js';
-import type { PlayerRepository } from '../../domain/player/playerRepository.js';
-import type { LicenseRepository } from '../../domain/license/licenseRepository.js';
+import { createPlayer } from '../../application/player/createPlayer';
+import { updatePlayer } from '../../application/player/updatePlayer';
+import { listPlayers } from '../../application/player/listPlayers';
+import { deletePlayer } from '../../application/player/deletePlayer';
+import type { PlayerRepository } from '../../domain/player/playerRepository';
+import type { LicenseRepository } from '../../domain/license/licenseRepository';
 
 const playerIdParamSchema = z.object({ id: z.string().uuid() });
+
+async function resolveSeasonYear(prisma: PrismaClient, seasonId: string): Promise<number> {
+  const season = await prisma.season.findUnique({ where: { id: seasonId } });
+  if (!season) {
+    throw new Error('Season not found');
+  }
+  return season.startDate.getFullYear();
+}
 const genderValues = ['G', 'F', 'H', 'D'] as const;
 
 const querySchema = z.object({
@@ -19,6 +27,7 @@ const querySchema = z.object({
   birthDateFrom: z.coerce.date().optional(),
   birthDateTo: z.coerce.date().optional(),
   category: z.string().optional(),
+  seasonId: z.string().uuid().optional(),
 });
 
 interface PlayerRoutesDeps {
@@ -61,12 +70,15 @@ export async function playerRoutes(
       orderBy: { displayOrder: 'asc' },
     });
 
-    const currentYear = new Date().getFullYear();
+    const seasonYear = query.seasonId
+      ? await resolveSeasonYear(deps.prisma, query.seasonId)
+      : new Date().getFullYear();
+
     return players.filter(
       (player) =>
         computeCategory(
           new Date(player.birthDate),
-          currentYear,
+          seasonYear,
           categoryConfigs.map((c) => ({ name: c.name, minAge: c.minAge, maxAge: c.maxAge })),
         ) === query.category,
     );

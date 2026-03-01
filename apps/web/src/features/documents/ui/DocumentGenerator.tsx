@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import type { Player, Season, Template } from '@hoop/shared';
-import { computeCategory, genderLabels } from '@hoop/shared';
+import { computeCategory, genderLabels, playerFilterFields } from '@hoop/shared';
 import { Button } from '@/shared/ui/button';
 import { Label } from '@/shared/ui/label';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
@@ -12,7 +12,7 @@ import { Badge } from '@/shared/ui/badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
 import { SearchableSelect } from '@/shared/ui/searchable-select';
 import { TableSkeleton } from '@/shared/ui/skeleton';
-import { PlayerFilterBar } from '@/shared/ui/player-filter-bar';
+import { FilterBar } from '@/shared/ui/filter-bar';
 import { useToast } from '@/shared/ui/toast';
 import { fetchTemplates } from '@/features/templates/api/templateApi';
 import { fetchPlayers } from '@/features/players/api/playerApi';
@@ -37,11 +37,10 @@ export function DocumentGenerator() {
   const [categories, setCategories] = useState<
     ReadonlyArray<{ name: string; minAge: number; maxAge: number | null }>
   >([]);
-  const [playerSearch, setPlayerSearch] = useState('');
-  const [playerGender, setPlayerGender] = useState('');
-  const [playerCategory, setPlayerCategory] = useState('');
-  const [playerBirthFrom, setPlayerBirthFrom] = useState('');
-  const [playerBirthTo, setPlayerBirthTo] = useState('');
+  const [playerFilterValues, setPlayerFilterValues] = useState<Record<string, string>>({});
+  const [playerDynamicOptions, setPlayerDynamicOptions] = useState<
+    Record<string, ReadonlyArray<{ value: string; label: string }>>
+  >({});
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
 
@@ -58,9 +57,16 @@ export function DocumentGenerator() {
       setTemplates(templateList);
       setPlayers(playerList);
       setSeasons(seasonList);
-      setCategories(
-        categoryList.map((c) => ({ name: c.name, minAge: c.minAge, maxAge: c.maxAge })),
-      );
+      const mappedCategories = categoryList.map((c) => ({
+        name: c.name,
+        minAge: c.minAge,
+        maxAge: c.maxAge,
+      }));
+      setCategories(mappedCategories);
+      setPlayerDynamicOptions({
+        category: mappedCategories.map((c) => ({ value: c.name, label: c.name })),
+        seasonId: seasonList.map((s) => ({ value: s.id, label: s.label })),
+      });
       const activeSeason = seasonList.find((s) => s.active);
       if (activeSeason && !selectedSeasonId) {
         setSelectedSeasonId(activeSeason.id);
@@ -98,23 +104,24 @@ export function DocumentGenerator() {
     : new Date().getFullYear();
 
   const filteredPlayers = players.filter((player) => {
-    if (playerGender && player.gender !== playerGender) return false;
+    const gender = playerFilterValues['gender'];
+    if (gender && player.gender !== gender) return false;
 
-    if (playerCategory) {
+    const category = playerFilterValues['category'];
+    if (category) {
       const cat = computeCategory(new Date(player.birthDate), seasonYear, categories);
-      if (cat !== playerCategory) return false;
+      if (cat !== category) return false;
     }
 
-    if (playerBirthFrom) {
-      if (new Date(player.birthDate) < new Date(playerBirthFrom)) return false;
-    }
+    const birthFrom = playerFilterValues['birthDateFrom'];
+    if (birthFrom && new Date(player.birthDate) < new Date(birthFrom)) return false;
 
-    if (playerBirthTo) {
-      if (new Date(player.birthDate) > new Date(playerBirthTo)) return false;
-    }
+    const birthTo = playerFilterValues['birthDateTo'];
+    if (birthTo && new Date(player.birthDate) > new Date(birthTo)) return false;
 
-    if (playerSearch) {
-      const words = playerSearch.toLowerCase().trim().split(/\s+/);
+    const search = playerFilterValues['search'];
+    if (search) {
+      const words = search.toLowerCase().trim().split(/\s+/);
       const fullName = `${player.firstName} ${player.lastName}`.toLowerCase();
       if (!words.every((word) => fullName.includes(word))) return false;
     }
@@ -122,11 +129,12 @@ export function DocumentGenerator() {
     return true;
   });
 
+  function handlePlayerFilterChange(key: string, value: string) {
+    setPlayerFilterValues((prev) => ({ ...prev, [key]: value }));
+  }
+
   function clearPlayerFilters() {
-    setPlayerGender('');
-    setPlayerCategory('');
-    setPlayerBirthFrom('');
-    setPlayerBirthTo('');
+    setPlayerFilterValues({});
   }
 
   function toggleAllPlayers() {
@@ -288,19 +296,12 @@ export function DocumentGenerator() {
                   {selectedPlayerIds.size} selected
                 </span>
               </div>
-              <PlayerFilterBar
-                categories={categories}
-                search={playerSearch}
-                onSearchChange={setPlayerSearch}
-                gender={playerGender}
-                onGenderChange={setPlayerGender}
-                category={playerCategory}
-                onCategoryChange={setPlayerCategory}
-                birthDateFrom={playerBirthFrom}
-                onBirthDateFromChange={setPlayerBirthFrom}
-                birthDateTo={playerBirthTo}
-                onBirthDateToChange={setPlayerBirthTo}
+              <FilterBar
+                fields={playerFilterFields}
+                values={playerFilterValues}
+                onChange={handlePlayerFilterChange}
                 onClear={clearPlayerFilters}
+                dynamicOptions={playerDynamicOptions}
               />
               <div className="hidden md:block rounded-lg border">
                 <Table>

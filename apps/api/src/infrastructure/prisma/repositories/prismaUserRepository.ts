@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
-import type { UserEntity } from '../../../domain/user/userEntity.js';
-import type { UserRepository } from '../../../domain/user/userRepository.js';
+import type { UserEntity } from '../../../domain/user/userEntity';
+import type { UserRepository } from '../../../domain/user/userRepository';
 
 export function createPrismaUserRepository(prisma: PrismaClient): UserRepository {
   return {

@@ -1,4 +1,4 @@
-import type { PlayerRepository } from '../../domain/player/playerRepository.js';
+import type { PlayerRepository } from '../../domain/player/playerRepository';
 
 export interface DeletePlayerDeps {
   readonly playerRepository: PlayerRepository;

@@ -1,13 +1,13 @@
 import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import type { PlayerRepository } from '../../domain/player/playerRepository.js';
-import type { SeasonRepository } from '../../domain/season/seasonRepository.js';
+import type { PlayerRepository } from '../../domain/player/playerRepository';
+import type { SeasonRepository } from '../../domain/season/seasonRepository';
 import {
   processXlsxTemplate,
   processDocxTemplate,
-} from '../../infrastructure/template/templateProcessor.js';
-import type { DocumentContext } from '../../infrastructure/template/templateProcessor.js';
+} from '../../infrastructure/template/templateProcessor';
+import type { DocumentContext } from '../../infrastructure/template/templateProcessor';
 
 interface DocumentRoutesDeps {
   readonly prisma: PrismaClient;

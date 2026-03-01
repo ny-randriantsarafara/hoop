@@ -1,6 +1,6 @@
 import type { PrismaClient } from '@prisma/client';
-import type { SeasonEntity } from '../../../domain/season/seasonEntity.js';
-import type { SeasonRepository } from '../../../domain/season/seasonRepository.js';
+import type { SeasonEntity } from '../../../domain/season/seasonEntity';
+import type { SeasonRepository } from '../../../domain/season/seasonRepository';
 
 export function createPrismaSeasonRepository(prisma: PrismaClient): SeasonRepository {
   return {

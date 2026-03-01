@@ -1,10 +1,35 @@
-import type { PrismaClient } from '@prisma/client';
-import type { LicenseEntity } from '../../../domain/license/licenseEntity.js';
-import type {
-  LicenseRepository,
-  LicenseFilters,
-} from '../../../domain/license/licenseRepository.js';
+import type { PrismaClient, Prisma } from '@prisma/client';
+import type { LicenseEntity } from '../../../domain/license/licenseEntity';
+import type { LicenseRepository, LicenseFilters } from '../../../domain/license/licenseRepository';
 import type { CreateLicenseInput, LicenseWithRelations } from '@hoop/shared';
+
+function buildLicenseWhere(filters: LicenseFilters): Prisma.LicenseWhereInput {
+  return {
+    ...(filters.playerId ? { playerId: filters.playerId } : {}),
+    ...(filters.seasonId ? { seasonId: filters.seasonId } : {}),
+    ...(filters.status ? { status: filters.status } : {}),
+    ...(filters.category ? { category: filters.category } : {}),
+    ...(filters.number
+      ? { number: { contains: filters.number, mode: 'insensitive' as const } }
+      : {}),
+    ...(filters.startDateFrom || filters.startDateTo
+      ? {
+          startDate: {
+            ...(filters.startDateFrom ? { gte: filters.startDateFrom } : {}),
+            ...(filters.startDateTo ? { lte: filters.startDateTo } : {}),
+          },
+        }
+      : {}),
+    ...(filters.endDateFrom || filters.endDateTo
+      ? {
+          endDate: {
+            ...(filters.endDateFrom ? { gte: filters.endDateFrom } : {}),
+            ...(filters.endDateTo ? { lte: filters.endDateTo } : {}),
+          },
+        }
+      : {}),
+  };
+}
 
 export function createPrismaLicenseRepository(prisma: PrismaClient): LicenseRepository {
   return {
@@ -14,24 +39,14 @@ export function createPrismaLicenseRepository(prisma: PrismaClient): LicenseRepo
 
     async findMany(filters: LicenseFilters): Promise<LicenseEntity[]> {
       return prisma.license.findMany({
-        where: {
-          ...(filters.playerId ? { playerId: filters.playerId } : {}),
-          ...(filters.seasonId ? { seasonId: filters.seasonId } : {}),
-          ...(filters.status ? { status: filters.status } : {}),
-          ...(filters.category ? { category: filters.category } : {}),
-        },
+        where: buildLicenseWhere(filters),
         orderBy: { createdAt: 'desc' },
       });
     },
 
     async findManyWithRelations(filters: LicenseFilters): Promise<LicenseWithRelations[]> {
       return prisma.license.findMany({
-        where: {
-          ...(filters.playerId ? { playerId: filters.playerId } : {}),
-          ...(filters.seasonId ? { seasonId: filters.seasonId } : {}),
-          ...(filters.status ? { status: filters.status } : {}),
-          ...(filters.category ? { category: filters.category } : {}),
-        },
+        where: buildLicenseWhere(filters),
         include: {
           player: { select: { firstName: true, lastName: true } },
           season: { select: { label: true } },

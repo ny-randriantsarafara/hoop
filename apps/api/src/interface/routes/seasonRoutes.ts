@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
 import { createSeasonSchema, updateSeasonSchema } from '@hoop/shared';
-import type { SeasonRepository } from '../../domain/season/seasonRepository.js';
+import type { SeasonRepository } from '../../domain/season/seasonRepository';
 
 interface SeasonRoutesDeps {
   readonly seasonRepository: SeasonRepository;

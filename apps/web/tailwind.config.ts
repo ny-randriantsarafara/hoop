@@ -41,6 +41,20 @@ const config: Config = {
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
       },
+      keyframes: {
+        'popover-in-below': {
+          from: { opacity: '0', transform: 'translateY(-4px) scale(0.98)' },
+          to: { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        'popover-in-above': {
+          from: { opacity: '0', transform: 'translateY(4px) scale(0.98)' },
+          to: { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+      },
+      animation: {
+        'popover-in-below': 'popover-in-below 150ms ease-out',
+        'popover-in-above': 'popover-in-above 150ms ease-out',
+      },
     },
   },
   plugins: [],

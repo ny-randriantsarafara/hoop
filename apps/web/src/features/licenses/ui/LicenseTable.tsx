@@ -1,75 +1,84 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import type { LicenseWithRelations } from '@hoop/shared';
+import { licenseFilterFields } from '@hoop/shared';
 import { Badge } from '@/shared/ui/badge';
-import { Select } from '@/shared/ui/select';
-import { Label } from '@/shared/ui/label';
 import { TableSkeleton } from '@/shared/ui/skeleton';
+import { FilterBar } from '@/shared/ui/filter-bar';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/shared/ui/table';
 import { fetchLicenses } from '../api/licenseApi';
 import { fetchCategories } from '@/features/settings/api/categoryApi';
+import { fetchSeasons } from '@/features/settings/api/seasonApi';
 
 const statusVariant: Record<string, 'success' | 'secondary'> = {
   active: 'success',
   expired: 'secondary',
 };
 
+const EMPTY_FILTERS: Record<string, string> = {};
+
 export function LicenseTable() {
   const { data: session } = useSession();
   const router = useRouter();
   const [licenses, setLicenses] = useState<LicenseWithRelations[]>([]);
-  const [categories, setCategories] = useState<ReadonlyArray<{ name: string }>>([]);
-  const [statusFilter, setStatusFilter] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState('');
+  const [filterValues, setFilterValues] = useState<Record<string, string>>(EMPTY_FILTERS);
+  const [dynamicOptions, setDynamicOptions] = useState<
+    Record<string, ReadonlyArray<{ value: string; label: string }>>
+  >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!session?.accessToken) return;
-    fetchCategories(session.accessToken)
-      .then((data) => setCategories(data))
-      .catch(() => setCategories([]));
+
+    Promise.all([fetchCategories(session.accessToken), fetchSeasons(session.accessToken)])
+      .then(([cats, seasons]) => {
+        setDynamicOptions({
+          category: cats.map((c) => ({ value: c.name, label: c.name })),
+          seasonId: seasons.map((s) => ({ value: s.id, label: s.label })),
+        });
+      })
+      .catch(() => setDynamicOptions({}));
   }, [session?.accessToken]);
 
-  useEffect(() => {
+  const loadLicenses = useCallback(async () => {
     if (!session?.accessToken) return;
     setLoading(true);
     setError(null);
-    fetchLicenses(session.accessToken, {
-      status: statusFilter || undefined,
-      category: categoryFilter || undefined,
-    })
-      .then(setLicenses)
-      .catch(() => setError('Failed to load licenses'))
-      .finally(() => setLoading(false));
-  }, [session?.accessToken, statusFilter, categoryFilter]);
+    try {
+      const data = await fetchLicenses(session.accessToken, filterValues);
+      setLicenses(data);
+    } catch {
+      setError('Failed to load licenses');
+    } finally {
+      setLoading(false);
+    }
+  }, [session?.accessToken, filterValues]);
+
+  useEffect(() => {
+    loadLicenses();
+  }, [loadLicenses]);
+
+  function handleFilterChange(key: string, value: string) {
+    setFilterValues((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function clearFilters() {
+    setFilterValues(EMPTY_FILTERS);
+  }
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4 md:flex-row">
-        <div className="space-y-1">
-          <Label className="text-xs">Status</Label>
-          <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option value="">All</option>
-            <option value="active">Active</option>
-            <option value="expired">Expired</option>
-          </Select>
-        </div>
-        <div className="space-y-1">
-          <Label className="text-xs">Category</Label>
-          <Select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}>
-            <option value="">All</option>
-            {categories.map((cat) => (
-              <option key={cat.name} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </Select>
-        </div>
-      </div>
+      <FilterBar
+        fields={licenseFilterFields}
+        values={filterValues}
+        onChange={handleFilterChange}
+        onClear={clearFilters}
+        dynamicOptions={dynamicOptions}
+      />
 
       {error && (
         <div className="rounded-md bg-destructive/10 p-4 text-destructive text-sm">{error}</div>

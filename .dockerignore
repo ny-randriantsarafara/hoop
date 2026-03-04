@@ -1,0 +1,15 @@
+.git
+.github
+node_modules
+**/node_modules
+**/.next
+**/dist
+**/coverage
+**/*.log
+.vscode
+.worktrees
+.env
+.env.*
+Dockerfile*
+README.md
+docs

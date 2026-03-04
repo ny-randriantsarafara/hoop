@@ -1,25 +1,14 @@
 name: CI
 
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [main]
+  push:
     branches: [main]
 
 jobs:
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm format:check
-
-  test-api:
+  verify:
+    name: Format, lint, test, build
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -28,68 +17,57 @@ jobs:
           POSTGRES_DB: hoopadmin_test
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
-        ports: ['5432:5432']
+        ports:
+          - '5432:5432'
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: pnpm/action-setup@v4
+        with:
+          version: 10.29.3
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-      - run: pnpm install --frozen-lockfile
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
       - name: Generate Prisma client
-        working-directory: apps/api
-        run: npx prisma generate
-      - name: Run migrations
-        working-directory: apps/api
-        run: npx prisma migrate deploy
+        run: pnpm --filter @hoop/api prisma:generate
+
+      - name: Run migrations (test DB)
+        run: pnpm --filter @hoop/api prisma:migrate:deploy
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/hoopadmin_test
-      - name: Run tests
-        working-directory: apps/api
+
+      - name: Format check
+        run: pnpm format:check
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
         run: pnpm test
         env:
           DATABASE_URL: postgresql://test:test@localhost:5432/hoopadmin_test
           JWT_SECRET: ci-test-secret
+          API_URL: http://localhost:3001/api
+          NEXT_PUBLIC_API_URL: http://localhost:3001/api
+          NEXTAUTH_SECRET: ci-nextauth-secret
+          NEXTAUTH_URL: http://localhost:3000
 
-  test-web:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Run tests
-        working-directory: apps/web
-        run: pnpm test
-
-  build:
-    runs-on: ubuntu-latest
-    needs: [lint, test-api, test-web]
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - name: Generate Prisma client
-        working-directory: apps/api
-        run: npx prisma generate
-      - name: Build API
-        working-directory: apps/api
-        run: pnpm build
-      - name: Build Web
-        working-directory: apps/web
+      - name: Build
         run: pnpm build
         env:
-          NEXT_PUBLIC_API_URL: https://hoopadmin.example.com/api
+          API_URL: https://api.example.invalid/api
+          NEXT_PUBLIC_API_URL: https://api.example.invalid/api
+          NEXTAUTH_SECRET: ci-nextauth-secret
+          NEXTAUTH_URL: https://app.example.invalid

@@ -12,6 +12,7 @@ import { createPrismaSeasonRepository } from './infrastructure/prisma/repositori
 import { createPrismaUserRepository } from './infrastructure/prisma/repositories/user.repository';
 import { createPrismaCategoryRepository } from './infrastructure/prisma/repositories/category.repository';
 import { authRoutes } from './interface/routes/auth-routes';
+import { healthRoutes } from './interface/routes/health-routes';
 import { clubRoutes } from './interface/routes/club-routes';
 import { playerRoutes } from './interface/routes/player-routes';
 import { licenseRoutes } from './interface/routes/license-routes';
@@ -48,6 +49,7 @@ async function start(): Promise<void> {
 
   await fastify.register(
     async (app) => {
+      await healthRoutes(app);
       await authRoutes(app, { userRepository });
     },
     { prefix: '/api' },

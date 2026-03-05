@@ -127,7 +127,11 @@ jobs:
           VPS_USER: ${{ vars.VPS_USER }}
           VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
           IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          DB_USER: ${{ vars.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
@@ -141,9 +145,24 @@ jobs:
         run: |
           tmp_env=$(mktemp)
 
+          DB_HOST="${DB_HOST:-postgres}"
+          DB_PORT="${DB_PORT:-5432}"
+
+          if [[ -z "$DB_NAME" || -z "$DB_USER" || -z "$DB_PASSWORD" ]]; then
+            echo "DB_NAME, DB_USER, and DB_PASSWORD are required"
+            exit 1
+          fi
+
+          DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
           cat > "$tmp_env" <<EOF
           API_IMAGE=${API_IMAGE_NAME}:${IMAGE_TAG}
           WEB_IMAGE=${WEB_IMAGE_NAME}:${IMAGE_TAG}
+          DB_HOST=$DB_HOST
+          DB_PORT=$DB_PORT
+          DB_NAME=$DB_NAME
+          DB_USER=$DB_USER
+          DB_PASSWORD=$DB_PASSWORD
           DATABASE_URL=$DATABASE_URL
           JWT_SECRET=$JWT_SECRET
           CORS_ORIGIN=$CORS_ORIGIN
@@ -182,34 +201,14 @@ jobs:
           . ./.env
           set +a
 
-          if [[ -z "${DATABASE_URL:-}" ]]; then
-            echo "DATABASE_URL is required in $VPS_APP_DIR/.env"
+          if [[ -z "${DB_USER:-}" || -z "${DB_PASSWORD:-}" || -z "${DB_NAME:-}" ]]; then
+            echo "DB_USER, DB_PASSWORD, and DB_NAME are required in $VPS_APP_DIR/.env"
             exit 1
           fi
 
-          if command -v python3 >/dev/null 2>&1; then
-            readarray -t db_parts < <(python3 -c "import os, sys, urllib.parse as u; p = u.urlparse(os.environ.get('DATABASE_URL', '')); db = p.path.lstrip('/'); ok = p.scheme in ('postgres', 'postgresql') and p.username and p.password is not None and db; sys.exit(0 if ok else 1); print(p.username); print(p.password); print(db)") || {
-              echo "Failed to parse DATABASE_URL"
-              exit 1
-            }
-            db_user="${db_parts[0]}"
-            db_password="${db_parts[1]}"
-            db_name="${db_parts[2]}"
-          else
-            db_url="${DATABASE_URL#postgresql://}"
-            db_url="${db_url#postgres://}"
-            db_auth_host="${db_url%%/*}"
-            db_path="${db_url#*/}"
-            db_name="${db_path%%\?*}"
-            db_auth="${db_auth_host%@*}"
-            db_user="${db_auth%%:*}"
-            db_password="${db_auth#*:}"
-
-            if [[ -z "$db_user" || -z "$db_password" || -z "$db_name" || "$db_user" == "$db_auth" ]]; then
-              echo "Failed to parse DATABASE_URL without python3"
-              exit 1
-            fi
-          fi
+          db_user="$DB_USER"
+          db_password="$DB_PASSWORD"
+          db_name="$DB_NAME"
 
           if [[ "$db_name" == "postgres" || "$db_name" == "pomodoro" ]]; then
             echo "Refusing shared database name: $db_name"
@@ -309,7 +308,11 @@ jobs:
           VPS_USER: ${{ vars.VPS_USER }}
           VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
           IMAGE_TAG: ${{ inputs.image_tag }}
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          DB_USER: ${{ vars.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
@@ -323,9 +326,24 @@ jobs:
         run: |
           tmp_env=$(mktemp)
 
+          DB_HOST="${DB_HOST:-postgres}"
+          DB_PORT="${DB_PORT:-5432}"
+
+          if [[ -z "$DB_NAME" || -z "$DB_USER" || -z "$DB_PASSWORD" ]]; then
+            echo "DB_NAME, DB_USER, and DB_PASSWORD are required"
+            exit 1
+          fi
+
+          DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+
           cat > "$tmp_env" <<EOF
           API_IMAGE=${API_IMAGE_NAME}:${IMAGE_TAG}
           WEB_IMAGE=${WEB_IMAGE_NAME}:${IMAGE_TAG}
+          DB_HOST=$DB_HOST
+          DB_PORT=$DB_PORT
+          DB_NAME=$DB_NAME
+          DB_USER=$DB_USER
+          DB_PASSWORD=$DB_PASSWORD
           DATABASE_URL=$DATABASE_URL
           JWT_SECRET=$JWT_SECRET
           CORS_ORIGIN=$CORS_ORIGIN
@@ -364,34 +382,14 @@ jobs:
           . ./.env
           set +a
 
-          if [[ -z "${DATABASE_URL:-}" ]]; then
-            echo "DATABASE_URL is required in $VPS_APP_DIR/.env"
+          if [[ -z "${DB_USER:-}" || -z "${DB_PASSWORD:-}" || -z "${DB_NAME:-}" ]]; then
+            echo "DB_USER, DB_PASSWORD, and DB_NAME are required in $VPS_APP_DIR/.env"
             exit 1
           fi
 
-          if command -v python3 >/dev/null 2>&1; then
-            readarray -t db_parts < <(python3 -c "import os, sys, urllib.parse as u; p = u.urlparse(os.environ.get('DATABASE_URL', '')); db = p.path.lstrip('/'); ok = p.scheme in ('postgres', 'postgresql') and p.username and p.password is not None and db; sys.exit(0 if ok else 1); print(p.username); print(p.password); print(db)") || {
-              echo "Failed to parse DATABASE_URL"
-              exit 1
-            }
-            db_user="${db_parts[0]}"
-            db_password="${db_parts[1]}"
-            db_name="${db_parts[2]}"
-          else
-            db_url="${DATABASE_URL#postgresql://}"
-            db_url="${db_url#postgres://}"
-            db_auth_host="${db_url%%/*}"
-            db_path="${db_url#*/}"
-            db_name="${db_path%%\?*}"
-            db_auth="${db_auth_host%@*}"
-            db_user="${db_auth%%:*}"
-            db_password="${db_auth#*:}"
-
-            if [[ -z "$db_user" || -z "$db_password" || -z "$db_name" || "$db_user" == "$db_auth" ]]; then
-              echo "Failed to parse DATABASE_URL without python3"
-              exit 1
-            fi
-          fi
+          db_user="$DB_USER"
+          db_password="$DB_PASSWORD"
+          db_name="$DB_NAME"
 
           if [[ "$db_name" == "postgres" || "$db_name" == "pomodoro" ]]; then
             echo "Refusing shared database name: $db_name"

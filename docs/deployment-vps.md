@@ -71,22 +71,54 @@ The deploy workflow now enforces this isolation automatically at deploy time:
 - grants privileges to that role
 - fails fast if the DB name resolves to `postgres` or `pomodoro`
 
-## 4. Configure GHCR read access on VPS
+## 4. GHCR package visibility
 
-Create a GitHub token with `read:packages`.
-Use that token in GitHub Actions secret `GHCR_READ_TOKEN` and set `GHCR_USER` to your GitHub username/org bot.
+Deploy now assumes public GHCR package pulls from the VPS host.
 
-Deploy workflow logs into GHCR on VPS before `docker compose pull`.
+- `hoop-api` and `hoop-web` images should be public in GHCR.
+- No GHCR deploy credentials (`GHCR_READ_TOKEN`, `GHCR_USER`) are needed in repository secrets/variables.
 
-## 5. GitHub secrets required in this repository
+## 5. GitHub secrets and variables required in this repository
 
-- `VPS_HOST`
-- `VPS_USER` (e.g. `deploy`)
+### Secrets
+
+- `DATABASE_URL`
+- `JWT_SECRET`
+- `NEXTAUTH_SECRET`
 - `VPS_SSH_KEY` (private key for deploy user)
 - `VPS_HOST_KEY` (`ssh-keyscan -H <host>` output)
+
+### Variables
+
+- `CORS_ORIGIN`
+- `API_URL`
+- `NEXT_PUBLIC_API_URL`
+- `NEXTAUTH_URL`
+- `VPS_HOST`
+- `VPS_USER` (e.g. `deploy`)
 - `VPS_APP_DIR` (e.g. `/home/deploy/apps/hoop`)
-- `GHCR_USER`
-- `GHCR_READ_TOKEN`
+- `OLLAMA_BASE_URL` (optional)
+- `OLLAMA_MODEL` (optional)
+
+### One-shot bootstrap via GitHub CLI
+
+You can set all required values in one shot:
+
+```bash
+DATABASE_URL='postgresql://hoop_app:***@postgres:5432/hoop' \
+JWT_SECRET='***' \
+NEXTAUTH_SECRET='***' \
+VPS_SSH_KEY="$(cat ~/.ssh/id_ed25519)" \
+VPS_HOST_KEY="$(ssh-keyscan -H your.vps.host 2>/dev/null)" \
+CORS_ORIGIN='https://app.example.com' \
+API_URL='https://api.example.com/api' \
+NEXT_PUBLIC_API_URL='https://api.example.com/api' \
+NEXTAUTH_URL='https://app.example.com' \
+VPS_HOST='your.vps.host' \
+VPS_USER='deploy' \
+VPS_APP_DIR='/home/deploy/apps/hoop' \
+bash scripts/github/bootstrap-deploy-vars.sh
+```
 
 ## 6. Caddy routes (in vps-services repo)
 

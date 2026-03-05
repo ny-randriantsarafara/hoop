@@ -65,7 +65,7 @@ jobs:
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
-          registry: ghcr.io
+          registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -98,6 +98,8 @@ jobs:
       group: deploy-production
       cancel-in-progress: false
     steps:
+      - uses: actions/checkout@v4
+
       - name: Set up SSH agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
@@ -112,34 +114,64 @@ jobs:
 
       - name: Sync VPS compose file
         env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_USER: ${{ vars.VPS_USER }}
+          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
         run: |
           ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_APP_DIR'"
           scp -o StrictHostKeyChecking=yes deploy/compose.vps.yml "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/docker-compose.yml"
 
-      - name: Deploy selected images
+      - name: Write runtime .env on VPS
         env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
-          GHCR_USER: ${{ secrets.GHCR_USER }}
-          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_USER: ${{ vars.VPS_USER }}
+          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
           IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+          API_URL: ${{ vars.API_URL }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
+          OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
+          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
           API_IMAGE_NAME: ${{ env.API_IMAGE_NAME }}
           WEB_IMAGE_NAME: ${{ env.WEB_IMAGE_NAME }}
         run: |
-          API_IMAGE="${API_IMAGE_NAME}:${IMAGE_TAG}"
-          WEB_IMAGE="${WEB_IMAGE_NAME}:${IMAGE_TAG}"
+          tmp_env=$(mktemp)
+
+          cat > "$tmp_env" <<EOF
+          API_IMAGE=${API_IMAGE_NAME}:${IMAGE_TAG}
+          WEB_IMAGE=${WEB_IMAGE_NAME}:${IMAGE_TAG}
+          DATABASE_URL=$DATABASE_URL
+          JWT_SECRET=$JWT_SECRET
+          CORS_ORIGIN=$CORS_ORIGIN
+          OLLAMA_BASE_URL=$OLLAMA_BASE_URL
+          OLLAMA_MODEL=$OLLAMA_MODEL
+          API_URL=$API_URL
+          NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+          NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+          NEXTAUTH_URL=$NEXTAUTH_URL
+          EOF
 
           ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
-            "VPS_APP_DIR='$VPS_APP_DIR' GHCR_USER='$GHCR_USER' GHCR_READ_TOKEN='$GHCR_READ_TOKEN' API_IMAGE='$API_IMAGE' WEB_IMAGE='$WEB_IMAGE' bash -s" <<'EOF_REMOTE'
+            "cat > '$VPS_APP_DIR/.env.tmp' && mv '$VPS_APP_DIR/.env.tmp' '$VPS_APP_DIR/.env'" \
+            < "$tmp_env"
+
+          rm -f "$tmp_env"
+
+      - name: Deploy selected images
+        env:
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_USER: ${{ vars.VPS_USER }}
+          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+        run: |
+          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
+            "VPS_APP_DIR='$VPS_APP_DIR' bash -s" <<'EOF_REMOTE'
           set -euo pipefail
 
           cd "$VPS_APP_DIR"
-
-          echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 
           if [[ ! -f .env ]]; then
             echo "Missing $VPS_APP_DIR/.env"
@@ -200,8 +232,8 @@ jobs:
 
           docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE \"$db_name_ident\" TO \"$db_user_ident\""
 
-          API_IMAGE="$API_IMAGE" WEB_IMAGE="$WEB_IMAGE" docker compose pull api web
-          API_IMAGE="$API_IMAGE" WEB_IMAGE="$WEB_IMAGE" docker compose up -d api web
+          docker compose pull api web
+          docker compose up -d api web
 
           for i in $(seq 1 20); do
             api_cid=$(docker compose ps -q api)
@@ -221,6 +253,7 @@ jobs:
           done
 
           echo "Services failed health check"
+          docker compose logs --tail=100 api web
           exit 1
           EOF_REMOTE
 
@@ -233,6 +266,8 @@ jobs:
       group: deploy-production
       cancel-in-progress: false
     steps:
+      - uses: actions/checkout@v4
+
       - name: Validate manual image tag
         env:
           IMAGE_TAG: ${{ inputs.image_tag }}
@@ -261,34 +296,64 @@ jobs:
 
       - name: Sync VPS compose file
         env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_USER: ${{ vars.VPS_USER }}
+          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
         run: |
           ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_APP_DIR'"
           scp -o StrictHostKeyChecking=yes deploy/compose.vps.yml "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/docker-compose.yml"
 
-      - name: Deploy selected images
+      - name: Write runtime .env on VPS
         env:
-          VPS_HOST: ${{ secrets.VPS_HOST }}
-          VPS_USER: ${{ secrets.VPS_USER }}
-          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
-          GHCR_USER: ${{ secrets.GHCR_USER }}
-          GHCR_READ_TOKEN: ${{ secrets.GHCR_READ_TOKEN }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_USER: ${{ vars.VPS_USER }}
+          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
           IMAGE_TAG: ${{ inputs.image_tag }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+          API_URL: ${{ vars.API_URL }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
+          OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
+          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
           API_IMAGE_NAME: ${{ env.API_IMAGE_NAME }}
           WEB_IMAGE_NAME: ${{ env.WEB_IMAGE_NAME }}
         run: |
-          API_IMAGE="${API_IMAGE_NAME}:${IMAGE_TAG}"
-          WEB_IMAGE="${WEB_IMAGE_NAME}:${IMAGE_TAG}"
+          tmp_env=$(mktemp)
+
+          cat > "$tmp_env" <<EOF
+          API_IMAGE=${API_IMAGE_NAME}:${IMAGE_TAG}
+          WEB_IMAGE=${WEB_IMAGE_NAME}:${IMAGE_TAG}
+          DATABASE_URL=$DATABASE_URL
+          JWT_SECRET=$JWT_SECRET
+          CORS_ORIGIN=$CORS_ORIGIN
+          OLLAMA_BASE_URL=$OLLAMA_BASE_URL
+          OLLAMA_MODEL=$OLLAMA_MODEL
+          API_URL=$API_URL
+          NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+          NEXTAUTH_SECRET=$NEXTAUTH_SECRET
+          NEXTAUTH_URL=$NEXTAUTH_URL
+          EOF
 
           ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
-            "VPS_APP_DIR='$VPS_APP_DIR' GHCR_USER='$GHCR_USER' GHCR_READ_TOKEN='$GHCR_READ_TOKEN' API_IMAGE='$API_IMAGE' WEB_IMAGE='$WEB_IMAGE' bash -s" <<'EOF_REMOTE'
+            "cat > '$VPS_APP_DIR/.env.tmp' && mv '$VPS_APP_DIR/.env.tmp' '$VPS_APP_DIR/.env'" \
+            < "$tmp_env"
+
+          rm -f "$tmp_env"
+
+      - name: Deploy selected images
+        env:
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_USER: ${{ vars.VPS_USER }}
+          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+        run: |
+          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
+            "VPS_APP_DIR='$VPS_APP_DIR' bash -s" <<'EOF_REMOTE'
           set -euo pipefail
 
           cd "$VPS_APP_DIR"
-
-          echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
 
           if [[ ! -f .env ]]; then
             echo "Missing $VPS_APP_DIR/.env"
@@ -349,8 +414,8 @@ jobs:
 
           docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE \"$db_name_ident\" TO \"$db_user_ident\""
 
-          API_IMAGE="$API_IMAGE" WEB_IMAGE="$WEB_IMAGE" docker compose pull api web
-          API_IMAGE="$API_IMAGE" WEB_IMAGE="$WEB_IMAGE" docker compose up -d api web
+          docker compose pull api web
+          docker compose up -d api web
 
           for i in $(seq 1 20); do
             api_cid=$(docker compose ps -q api)
@@ -370,5 +435,6 @@ jobs:
           done
 
           echo "Services failed health check"
+          docker compose logs --tail=100 api web
           exit 1
           EOF_REMOTE

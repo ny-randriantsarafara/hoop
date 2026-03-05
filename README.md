@@ -11,7 +11,7 @@ HoopAdmin is a basketball club license management system built for local clubs. 
 - **Authentication**: NextAuth (Auth.js) + JWT
 - **OCR**: Ollama (self-hosted vision model for document data extraction)
 - **CI/CD**: GitHub Actions
-- **Deployment**: Docker Compose (API + DB + Ollama), VPS deploy via SSH (API container + static frontend)
+- **Deployment**: Docker images to GHCR + VPS app compose behind Caddy (SSR web + API)
 
 ## Prerequisites
 
@@ -207,8 +207,20 @@ Production `docker-compose.yml` runs the API and PostgreSQL. The web app is buil
 
 ## CI/CD
 
-- **CI** (`ci.yml`): Runs on every push/PR to `main` — installs deps, format check, lints, runs API tests (with PostgreSQL service), runs web tests, builds both apps
-- **Deploy** (`deploy.yml`): Runs on push to `main` — builds web, deploys API via SSH (Docker), uploads frontend static files to VPS. Requires `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `API_URL` secrets.
+- **CI** (`ci.yml`): Runs on every push/PR to `main` — runs format check, lint, tests, and build with PostgreSQL service for API test runtime.
+- **Deploy** (`deploy.yml`): Push to `main` builds and publishes `api` and `web` images to GHCR, syncs `deploy/compose.vps.yml` to the VPS app directory, ensures the app DB role/database from `DATABASE_URL` exist on shared Postgres, then deploys by pulling artifacts on VPS (`docker compose pull && up -d`). Manual `workflow_dispatch` can redeploy a specific image tag for rollback/release control.
+
+Required deploy secrets:
+
+- `VPS_HOST`
+- `VPS_USER`
+- `VPS_SSH_KEY`
+- `VPS_HOST_KEY`
+- `VPS_APP_DIR`
+- `GHCR_USER`
+- `GHCR_READ_TOKEN`
+
+See [docs/deployment-vps.md](docs/deployment-vps.md) for production hardening and one-time setup steps.
 
 ## License
 

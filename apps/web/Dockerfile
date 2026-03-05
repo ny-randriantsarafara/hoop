@@ -5,32 +5,30 @@ WORKDIR /app
 FROM base AS deps
 COPY pnpm-lock.yaml pnpm-workspace.yaml package.json ./
 COPY apps/api/package.json apps/api/package.json
+COPY apps/web/package.json apps/web/package.json
 COPY packages/shared/package.json packages/shared/package.json
 RUN pnpm install --frozen-lockfile --prod=false
 
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=deps /app/apps/web/node_modules ./apps/web/node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 COPY . .
-WORKDIR /app/apps/api
-RUN npx prisma generate
+WORKDIR /app/apps/web
 RUN pnpm build
 
-FROM base AS runner
+FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
-ENV PORT=3001
+ENV PORT=3000
 
-RUN addgroup -S api && adduser -S api -G api
+RUN addgroup -S nextjs && adduser -S nextjs -G nextjs
 
-COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/prisma ./prisma
-COPY --from=builder /app/apps/api/package.json .
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/web/.next/standalone ./
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
 
-RUN chown -R api:api /app
-USER api
+RUN chown -R nextjs:nextjs /app
+USER nextjs
 
-EXPOSE 3001
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/server.js"]
+EXPOSE 3000
+CMD ["node", "apps/web/server.js"]

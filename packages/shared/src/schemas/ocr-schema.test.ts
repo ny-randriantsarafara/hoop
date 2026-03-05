@@ -28,8 +28,8 @@ describe('ocrExtractionResultSchema', () => {
 
     const result = ocrExtractionResultSchema.parse(input);
     expect(result.confidence).toBe('high');
-    expect(result.player.firstName).toBe('Jean');
-    expect(result.license.number).toBe('LIC-001');
+    expect(result.player?.firstName).toBe('Jean');
+    expect(result.license?.number).toBe('LIC-001');
   });
 
   it('parses a result with all null fields', () => {
@@ -54,7 +54,7 @@ describe('ocrExtractionResultSchema', () => {
 
     const result = ocrExtractionResultSchema.parse(input);
     expect(result.confidence).toBe('low');
-    expect(result.player.firstName).toBeNull();
+    expect(result.player?.firstName).toBeNull();
   });
 
   it('rejects invalid confidence value', () => {
@@ -104,7 +104,7 @@ describe('ocrExtractionResponseSchema', () => {
 
     const result = ocrExtractionResponseSchema.parse(input);
     expect(result.extractionId).toBe('550e8400-e29b-41d4-a716-446655440000');
-    expect(result.player.firstName).toBe('Marie');
+    expect(result.player?.firstName).toBe('Marie');
   });
 
   it('rejects non-UUID extractionId', () => {
@@ -150,7 +150,7 @@ describe('validateExtractionSchema', () => {
     };
 
     const result = validateExtractionSchema.parse(input);
-    expect(result.validatedData.player.firstName).toBe('Jean');
+    expect(result.validatedData.player?.firstName).toBe('Jean');
   });
 
   it('rejects missing validatedData', () => {

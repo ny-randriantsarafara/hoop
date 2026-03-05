@@ -207,6 +207,8 @@ jobs:
           fi
 
           db_name="$DB_NAME"
+          db_user="$DB_USER"
+          db_password="$DB_PASSWORD"
 
           if [[ "$db_name" == "postgres" || "$db_name" == "pomodoro" ]]; then
             echo "Refusing shared database name: $db_name"
@@ -215,10 +217,37 @@ jobs:
 
           db_name_sql=${db_name//\'/\'\'}
           db_name_ident=${db_name//\"/\"\"}
+          db_user_sql=${db_user//\'/\'\'}
+          db_user_ident=${db_user//\"/\"\"}
+          db_password_sql=${db_password//\'/\'\'}
+
+          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 <<SQL
+          DO \$\$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '$db_user_sql') THEN
+              CREATE ROLE "$db_user_ident" LOGIN PASSWORD '$db_password_sql';
+            ELSE
+              ALTER ROLE "$db_user_ident" WITH LOGIN PASSWORD '$db_password_sql';
+            END IF;
+          END
+          \$\$;
+          SQL
 
           if ! docker exec supabase-db psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$db_name_sql'" | grep -q 1; then
-            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$db_name_ident\""
+            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$db_name_ident\" OWNER \"$db_user_ident\""
           fi
+
+          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE \"$db_name_ident\" TO \"$db_user_ident\""
+
+          docker exec supabase-db psql -U postgres -d "$db_name" -v ON_ERROR_STOP=1 <<SQL
+          GRANT USAGE, CREATE ON SCHEMA public TO "$db_user_ident";
+          GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "$db_user_ident";
+          GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "$db_user_ident";
+          GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "$db_user_ident";
+          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON TABLES TO "$db_user_ident";
+          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON SEQUENCES TO "$db_user_ident";
+          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON FUNCTIONS TO "$db_user_ident";
+          SQL
 
           docker compose pull api web
           docker compose up -d api web
@@ -377,6 +406,8 @@ jobs:
           fi
 
           db_name="$DB_NAME"
+          db_user="$DB_USER"
+          db_password="$DB_PASSWORD"
 
           if [[ "$db_name" == "postgres" || "$db_name" == "pomodoro" ]]; then
             echo "Refusing shared database name: $db_name"
@@ -385,10 +416,37 @@ jobs:
 
           db_name_sql=${db_name//\'/\'\'}
           db_name_ident=${db_name//\"/\"\"}
+          db_user_sql=${db_user//\'/\'\'}
+          db_user_ident=${db_user//\"/\"\"}
+          db_password_sql=${db_password//\'/\'\'}
+
+          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 <<SQL
+          DO \$\$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '$db_user_sql') THEN
+              CREATE ROLE "$db_user_ident" LOGIN PASSWORD '$db_password_sql';
+            ELSE
+              ALTER ROLE "$db_user_ident" WITH LOGIN PASSWORD '$db_password_sql';
+            END IF;
+          END
+          \$\$;
+          SQL
 
           if ! docker exec supabase-db psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$db_name_sql'" | grep -q 1; then
-            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$db_name_ident\""
+            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$db_name_ident\" OWNER \"$db_user_ident\""
           fi
+
+          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE \"$db_name_ident\" TO \"$db_user_ident\""
+
+          docker exec supabase-db psql -U postgres -d "$db_name" -v ON_ERROR_STOP=1 <<SQL
+          GRANT USAGE, CREATE ON SCHEMA public TO "$db_user_ident";
+          GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "$db_user_ident";
+          GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "$db_user_ident";
+          GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "$db_user_ident";
+          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON TABLES TO "$db_user_ident";
+          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON SEQUENCES TO "$db_user_ident";
+          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON FUNCTIONS TO "$db_user_ident";
+          SQL
 
           docker compose pull api web
           docker compose up -d api web

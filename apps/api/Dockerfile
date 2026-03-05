@@ -14,8 +14,10 @@ COPY --from=deps /app/apps/api/node_modules ./apps/api/node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 COPY . .
 WORKDIR /app/apps/api
-RUN npx prisma generate
+RUN pnpm exec prisma generate
 RUN pnpm build
+WORKDIR /app
+RUN pnpm --filter @hoop/api deploy --legacy --prod /prod/api
 
 FROM base AS runner
 WORKDIR /app
@@ -24,13 +26,10 @@ ENV PORT=3001
 
 RUN addgroup -S api && adduser -S api -G api
 
-COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/apps/api/prisma ./prisma
-COPY --from=builder /app/apps/api/package.json .
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /prod/api ./
 
 RUN chown -R api:api /app
 USER api
 
 EXPOSE 3001
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/server.js"]
+CMD ["sh", "-c", "pnpm exec prisma migrate deploy && pnpm exec tsx dist/server.js"]

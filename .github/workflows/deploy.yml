@@ -110,6 +110,15 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "$VPS_HOST_KEY" >> ~/.ssh/known_hosts
 
+      - name: Sync VPS compose file
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+        run: |
+          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_APP_DIR'"
+          scp -o StrictHostKeyChecking=yes deploy/compose.vps.yml "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/docker-compose.yml"
+
       - name: Deploy selected images
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -131,6 +140,65 @@ jobs:
           cd "$VPS_APP_DIR"
 
           echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+
+          if [[ ! -f .env ]]; then
+            echo "Missing $VPS_APP_DIR/.env"
+            exit 1
+          fi
+
+          set -a
+          . ./.env
+          set +a
+
+          if [[ -z "${DATABASE_URL:-}" ]]; then
+            echo "DATABASE_URL is required in $VPS_APP_DIR/.env"
+            exit 1
+          fi
+
+          if command -v python3 >/dev/null 2>&1; then
+            readarray -t db_parts < <(python3 -c "import os, sys, urllib.parse as u; p = u.urlparse(os.environ.get('DATABASE_URL', '')); db = p.path.lstrip('/'); ok = p.scheme in ('postgres', 'postgresql') and p.username and p.password is not None and db; sys.exit(0 if ok else 1); print(p.username); print(p.password); print(db)") || {
+              echo "Failed to parse DATABASE_URL"
+              exit 1
+            }
+            db_user="${db_parts[0]}"
+            db_password="${db_parts[1]}"
+            db_name="${db_parts[2]}"
+          else
+            db_url="${DATABASE_URL#postgresql://}"
+            db_url="${db_url#postgres://}"
+            db_auth_host="${db_url%%/*}"
+            db_path="${db_url#*/}"
+            db_name="${db_path%%\?*}"
+            db_auth="${db_auth_host%@*}"
+            db_user="${db_auth%%:*}"
+            db_password="${db_auth#*:}"
+
+            if [[ -z "$db_user" || -z "$db_password" || -z "$db_name" || "$db_user" == "$db_auth" ]]; then
+              echo "Failed to parse DATABASE_URL without python3"
+              exit 1
+            fi
+          fi
+
+          if [[ "$db_name" == "postgres" || "$db_name" == "pomodoro" ]]; then
+            echo "Refusing shared database name: $db_name"
+            exit 1
+          fi
+
+          db_user_sql=${db_user//\'/\'\'}
+          db_password_sql=${db_password//\'/\'\'}
+          db_name_sql=${db_name//\'/\'\'}
+          db_user_ident=${db_user//\"/\"\"}
+          db_name_ident=${db_name//\"/\"\"}
+
+          if ! docker exec supabase-db psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname = '$db_user_sql'" | grep -q 1; then
+            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE ROLE \"$db_user_ident\" LOGIN PASSWORD '$db_password_sql'"
+          fi
+
+          if ! docker exec supabase-db psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$db_name_sql'" | grep -q 1; then
+            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$db_name_ident\" OWNER \"$db_user_ident\""
+          fi
+
+          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE \"$db_name_ident\" TO \"$db_user_ident\""
 
           API_IMAGE="$API_IMAGE" WEB_IMAGE="$WEB_IMAGE" docker compose pull api web
           API_IMAGE="$API_IMAGE" WEB_IMAGE="$WEB_IMAGE" docker compose up -d api web
@@ -191,6 +259,15 @@ jobs:
           mkdir -p ~/.ssh
           printf '%s\n' "$VPS_HOST_KEY" >> ~/.ssh/known_hosts
 
+      - name: Sync VPS compose file
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_APP_DIR: ${{ secrets.VPS_APP_DIR }}
+        run: |
+          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_APP_DIR'"
+          scp -o StrictHostKeyChecking=yes deploy/compose.vps.yml "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/docker-compose.yml"
+
       - name: Deploy selected images
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
@@ -212,6 +289,65 @@ jobs:
           cd "$VPS_APP_DIR"
 
           echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+
+          if [[ ! -f .env ]]; then
+            echo "Missing $VPS_APP_DIR/.env"
+            exit 1
+          fi
+
+          set -a
+          . ./.env
+          set +a
+
+          if [[ -z "${DATABASE_URL:-}" ]]; then
+            echo "DATABASE_URL is required in $VPS_APP_DIR/.env"
+            exit 1
+          fi
+
+          if command -v python3 >/dev/null 2>&1; then
+            readarray -t db_parts < <(python3 -c "import os, sys, urllib.parse as u; p = u.urlparse(os.environ.get('DATABASE_URL', '')); db = p.path.lstrip('/'); ok = p.scheme in ('postgres', 'postgresql') and p.username and p.password is not None and db; sys.exit(0 if ok else 1); print(p.username); print(p.password); print(db)") || {
+              echo "Failed to parse DATABASE_URL"
+              exit 1
+            }
+            db_user="${db_parts[0]}"
+            db_password="${db_parts[1]}"
+            db_name="${db_parts[2]}"
+          else
+            db_url="${DATABASE_URL#postgresql://}"
+            db_url="${db_url#postgres://}"
+            db_auth_host="${db_url%%/*}"
+            db_path="${db_url#*/}"
+            db_name="${db_path%%\?*}"
+            db_auth="${db_auth_host%@*}"
+            db_user="${db_auth%%:*}"
+            db_password="${db_auth#*:}"
+
+            if [[ -z "$db_user" || -z "$db_password" || -z "$db_name" || "$db_user" == "$db_auth" ]]; then
+              echo "Failed to parse DATABASE_URL without python3"
+              exit 1
+            fi
+          fi
+
+          if [[ "$db_name" == "postgres" || "$db_name" == "pomodoro" ]]; then
+            echo "Refusing shared database name: $db_name"
+            exit 1
+          fi
+
+          db_user_sql=${db_user//\'/\'\'}
+          db_password_sql=${db_password//\'/\'\'}
+          db_name_sql=${db_name//\'/\'\'}
+          db_user_ident=${db_user//\"/\"\"}
+          db_name_ident=${db_name//\"/\"\"}
+
+          if ! docker exec supabase-db psql -U postgres -tAc "SELECT 1 FROM pg_roles WHERE rolname = '$db_user_sql'" | grep -q 1; then
+            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE ROLE \"$db_user_ident\" LOGIN PASSWORD '$db_password_sql'"
+          fi
+
+          if ! docker exec supabase-db psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$db_name_sql'" | grep -q 1; then
+            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$db_name_ident\" OWNER \"$db_user_ident\""
+          fi
+
+          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE \"$db_name_ident\" TO \"$db_user_ident\""
 
           API_IMAGE="$API_IMAGE" WEB_IMAGE="$WEB_IMAGE" docker compose pull api web
           API_IMAGE="$API_IMAGE" WEB_IMAGE="$WEB_IMAGE" docker compose up -d api web

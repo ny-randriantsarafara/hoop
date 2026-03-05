@@ -41,10 +41,11 @@ mkdir -p /home/deploy/apps/hoop
 cd /home/deploy/apps/hoop
 ```
 
-Copy the template files from this repo:
+Copy the env template from this repo:
 
-- `deploy/compose.vps.yml` -> `/home/deploy/apps/hoop/docker-compose.yml`
 - `deploy/.env.vps.example` -> `/home/deploy/apps/hoop/.env` (then replace values)
+
+`deploy/compose.vps.yml` is synced automatically by the deploy workflow on each run.
 
 ## 3. Create dedicated database user/database (direct Postgres)
 
@@ -61,6 +62,14 @@ Set in `/home/deploy/apps/hoop/.env`:
 ```env
 DATABASE_URL=postgresql://hoop_app:<strong-password>@postgres:5432/hoop
 ```
+
+The deploy workflow now enforces this isolation automatically at deploy time:
+
+- parses `DATABASE_URL` from `/home/deploy/apps/hoop/.env`
+- creates the role if missing
+- creates the database if missing
+- grants privileges to that role
+- fails fast if the DB name resolves to `postgres` or `pomodoro`
 
 ## 4. Configure GHCR read access on VPS
 

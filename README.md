@@ -208,7 +208,7 @@ Production `docker-compose.yml` runs the API and PostgreSQL. The web app is buil
 ## CI/CD
 
 - **CI** (`ci.yml`): Runs on every push/PR to `main` — runs format check, lint, tests, and build with PostgreSQL service for API test runtime.
-- **Deploy** (`deploy.yml`): Push to `main` builds and publishes `api` and `web` images to GHCR, then deploys by pulling artifacts on VPS (`docker compose pull && up -d`). Manual `workflow_dispatch` can redeploy a specific image tag for rollback/release control.
+- **Deploy** (`deploy.yml`): Push to `main` builds and publishes `api` and `web` images to GHCR, syncs `deploy/compose.vps.yml` to the VPS app directory, ensures the app DB role/database from `DATABASE_URL` exist on shared Postgres, then deploys by pulling artifacts on VPS (`docker compose pull && up -d`). Manual `workflow_dispatch` can redeploy a specific image tag for rollback/release control.
 
 Required deploy secrets:
 

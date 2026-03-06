@@ -143,17 +143,13 @@ jobs:
           DB_PORT: ${{ vars.DB_PORT || '5432' }}
           DB_NAME: ${{ vars.DB_NAME }}
           DB_USER: ${{ vars.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
           CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
           OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
           API_URL: ${{ vars.API_URL }}
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
         run: |
-          DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
           {
             echo "runtime_env<<EOF"
             printf '%s\n' \
@@ -163,15 +159,11 @@ jobs:
               "DB_PORT=$DB_PORT" \
               "DB_NAME=$DB_NAME" \
               "DB_USER=$DB_USER" \
-              "DB_PASSWORD=$DB_PASSWORD" \
-              "DATABASE_URL=$DATABASE_URL" \
-              "JWT_SECRET=$JWT_SECRET" \
               "CORS_ORIGIN=$CORS_ORIGIN" \
               "OLLAMA_BASE_URL=$OLLAMA_BASE_URL" \
               "OLLAMA_MODEL=$OLLAMA_MODEL" \
               "API_URL=$API_URL" \
               "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" \
-              "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" \
               "NEXTAUTH_URL=$NEXTAUTH_URL"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
@@ -194,17 +186,13 @@ jobs:
           DB_PORT: ${{ vars.DB_PORT || '5432' }}
           DB_NAME: ${{ vars.DB_NAME }}
           DB_USER: ${{ vars.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
           CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
           OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
           API_URL: ${{ vars.API_URL }}
           NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
           NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
         run: |
-          DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
           {
             echo "runtime_env<<EOF"
             printf '%s\n' \
@@ -214,15 +202,11 @@ jobs:
               "DB_PORT=$DB_PORT" \
               "DB_NAME=$DB_NAME" \
               "DB_USER=$DB_USER" \
-              "DB_PASSWORD=$DB_PASSWORD" \
-              "DATABASE_URL=$DATABASE_URL" \
-              "JWT_SECRET=$JWT_SECRET" \
               "CORS_ORIGIN=$CORS_ORIGIN" \
               "OLLAMA_BASE_URL=$OLLAMA_BASE_URL" \
               "OLLAMA_MODEL=$OLLAMA_MODEL" \
               "API_URL=$API_URL" \
               "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" \
-              "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" \
               "NEXTAUTH_URL=$NEXTAUTH_URL"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
@@ -247,6 +231,11 @@ jobs:
       health_interval: 5
       log_tail: 100
     secrets:
+      runtime_env_secret: |
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DATABASE_URL=postgresql://${{ vars.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST || 'postgres' }}:${{ vars.DB_PORT || '5432' }}/${{ vars.DB_NAME }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
       vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
       vps_host_key: ${{ secrets.VPS_HOST_KEY }}
 
@@ -270,5 +259,10 @@ jobs:
       health_interval: 5
       log_tail: 100
     secrets:
+      runtime_env_secret: |
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DATABASE_URL=postgresql://${{ vars.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST || 'postgres' }}:${{ vars.DB_PORT || '5432' }}/${{ vars.DB_NAME }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
       vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
       vps_host_key: ${{ secrets.VPS_HOST_KEY }}

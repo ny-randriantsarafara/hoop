@@ -80,7 +80,7 @@ jobs:
     name: Build API image
     needs: [check-skip, validate-runtime-config]
     if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
-    uses: ny-randriantsarafara/vps-services/.github/workflows/build-image.yml@codex/reusable-build-deploy-split
+    uses: ny-randriantsarafara/vps-services/.github/workflows/build-image.yml@main
     with:
       image: ghcr.io/${{ github.repository_owner }}/hoop-api
       context: .
@@ -92,7 +92,7 @@ jobs:
     name: Build web image
     needs: [check-skip, validate-runtime-config]
     if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
-    uses: ny-randriantsarafara/vps-services/.github/workflows/build-image.yml@codex/reusable-build-deploy-split
+    uses: ny-randriantsarafara/vps-services/.github/workflows/build-image.yml@main
     with:
       image: ghcr.io/${{ github.repository_owner }}/hoop-web
       context: .
@@ -100,80 +100,175 @@ jobs:
       stable_tag: main
     secrets: inherit
 
+  prepare-deploy-targets:
+    name: Prepare deploy targets
+    runs-on: ubuntu-latest
+    needs: [check-skip, validate-runtime-config]
+    if: needs.check-skip.outputs.should_skip != 'true'
+    outputs:
+      vps_user: ${{ steps.values.outputs.vps_user }}
+      vps_host: ${{ steps.values.outputs.vps_host }}
+      deploy_dir: ${{ steps.values.outputs.deploy_dir }}
+      db_name: ${{ steps.values.outputs.db_name }}
+    steps:
+      - name: Collect target values
+        id: values
+        env:
+          VPS_USER: ${{ vars.VPS_USER }}
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
+          DB_NAME: ${{ vars.DB_NAME }}
+        run: |
+          {
+            echo "vps_user=$VPS_USER"
+            echo "vps_host=$VPS_HOST"
+            echo "deploy_dir=$VPS_APP_DIR"
+            echo "db_name=$DB_NAME"
+          } >> "$GITHUB_OUTPUT"
+
+  prepare-auto-deploy:
+    name: Prepare auto deploy env
+    runs-on: ubuntu-latest
+    needs: [check-skip, prepare-deploy-targets, build-api, build-web]
+    if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
+    outputs:
+      runtime_env: ${{ steps.values.outputs.runtime_env }}
+    steps:
+      - name: Build runtime env
+        id: values
+        env:
+          API_IMAGE: ghcr.io/${{ github.repository_owner }}/hoop-api:${{ needs.build-api.outputs.image_tag }}
+          WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/hoop-web:${{ needs.build-web.outputs.image_tag }}
+          DB_HOST: ${{ vars.DB_HOST || 'postgres' }}
+          DB_PORT: ${{ vars.DB_PORT || '5432' }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          DB_USER: ${{ vars.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+          OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
+          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
+          API_URL: ${{ vars.API_URL }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
+        run: |
+          DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+          {
+            echo "runtime_env<<EOF"
+            printf '%s\n' \
+              "API_IMAGE=$API_IMAGE" \
+              "WEB_IMAGE=$WEB_IMAGE" \
+              "DB_HOST=$DB_HOST" \
+              "DB_PORT=$DB_PORT" \
+              "DB_NAME=$DB_NAME" \
+              "DB_USER=$DB_USER" \
+              "DB_PASSWORD=$DB_PASSWORD" \
+              "DATABASE_URL=$DATABASE_URL" \
+              "JWT_SECRET=$JWT_SECRET" \
+              "CORS_ORIGIN=$CORS_ORIGIN" \
+              "OLLAMA_BASE_URL=$OLLAMA_BASE_URL" \
+              "OLLAMA_MODEL=$OLLAMA_MODEL" \
+              "API_URL=$API_URL" \
+              "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" \
+              "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" \
+              "NEXTAUTH_URL=$NEXTAUTH_URL"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+  prepare-manual-deploy:
+    name: Prepare manual deploy env
+    runs-on: ubuntu-latest
+    needs: prepare-deploy-targets
+    if: github.event_name == 'workflow_dispatch'
+    outputs:
+      runtime_env: ${{ steps.values.outputs.runtime_env }}
+    steps:
+      - name: Build runtime env
+        id: values
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+          API_IMAGE: ghcr.io/${{ github.repository_owner }}/hoop-api:${{ inputs.image_tag }}
+          WEB_IMAGE: ghcr.io/${{ github.repository_owner }}/hoop-web:${{ inputs.image_tag }}
+          DB_HOST: ${{ vars.DB_HOST || 'postgres' }}
+          DB_PORT: ${{ vars.DB_PORT || '5432' }}
+          DB_NAME: ${{ vars.DB_NAME }}
+          DB_USER: ${{ vars.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
+          OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
+          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
+          API_URL: ${{ vars.API_URL }}
+          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
+          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+          NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
+        run: |
+          DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
+          {
+            echo "runtime_env<<EOF"
+            printf '%s\n' \
+              "API_IMAGE=$API_IMAGE" \
+              "WEB_IMAGE=$WEB_IMAGE" \
+              "DB_HOST=$DB_HOST" \
+              "DB_PORT=$DB_PORT" \
+              "DB_NAME=$DB_NAME" \
+              "DB_USER=$DB_USER" \
+              "DB_PASSWORD=$DB_PASSWORD" \
+              "DATABASE_URL=$DATABASE_URL" \
+              "JWT_SECRET=$JWT_SECRET" \
+              "CORS_ORIGIN=$CORS_ORIGIN" \
+              "OLLAMA_BASE_URL=$OLLAMA_BASE_URL" \
+              "OLLAMA_MODEL=$OLLAMA_MODEL" \
+              "API_URL=$API_URL" \
+              "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" \
+              "NEXTAUTH_SECRET=$NEXTAUTH_SECRET" \
+              "NEXTAUTH_URL=$NEXTAUTH_URL"
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
   deploy-auto:
     name: Deploy to VPS (auto)
-    needs: [check-skip, validate-runtime-config, build-api, build-web]
+    needs: [check-skip, validate-runtime-config, prepare-deploy-targets, build-api, build-web, prepare-auto-deploy]
     if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
     concurrency:
       group: deploy-production
       cancel-in-progress: false
-    uses: ny-randriantsarafara/vps-services/.github/workflows/deploy-compose.yml@codex/reusable-build-deploy-split
+    uses: ny-randriantsarafara/vps-services/.github/workflows/deploy-compose.yml@main
     with:
-      vps_user: ${{ vars.VPS_USER }}
-      vps_host: ${{ vars.VPS_HOST }}
-      deploy_dir: ${{ vars.VPS_APP_DIR }}
+      vps_user: ${{ needs.prepare-deploy-targets.outputs.vps_user }}
+      vps_host: ${{ needs.prepare-deploy-targets.outputs.vps_host }}
+      deploy_dir: ${{ needs.prepare-deploy-targets.outputs.deploy_dir }}
       compose_file: deploy/compose.vps.yml
       services: api web
-      bootstrap_databases: ${{ vars.DB_NAME }}
+      runtime_env: ${{ needs.prepare-auto-deploy.outputs.runtime_env }}
+      bootstrap_databases: ${{ needs.prepare-deploy-targets.outputs.db_name }}
       health_retries: 20
       health_interval: 5
       log_tail: 100
     secrets:
-      runtime_env: |
-        API_IMAGE=ghcr.io/${{ github.repository_owner }}/hoop-api:${{ needs.build-api.outputs.image_tag }}
-        WEB_IMAGE=ghcr.io/${{ github.repository_owner }}/hoop-web:${{ needs.build-web.outputs.image_tag }}
-        DB_HOST=${{ vars.DB_HOST || 'postgres' }}
-        DB_PORT=${{ vars.DB_PORT || '5432' }}
-        DB_NAME=${{ vars.DB_NAME }}
-        DB_USER=${{ vars.DB_USER }}
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-        DATABASE_URL=postgresql://${{ vars.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST || 'postgres' }}:${{ vars.DB_PORT || '5432' }}/${{ vars.DB_NAME }}
-        JWT_SECRET=${{ secrets.JWT_SECRET }}
-        CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
-        OLLAMA_BASE_URL=${{ vars.OLLAMA_BASE_URL }}
-        OLLAMA_MODEL=${{ vars.OLLAMA_MODEL }}
-        API_URL=${{ vars.API_URL }}
-        NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-        NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-        NEXTAUTH_URL=${{ vars.NEXTAUTH_URL }}
       vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
       vps_host_key: ${{ secrets.VPS_HOST_KEY }}
 
   deploy-manual:
     name: Deploy to VPS (manual)
-    needs: [check-skip, validate-runtime-config]
+    needs: [check-skip, validate-runtime-config, prepare-deploy-targets, prepare-manual-deploy]
     if: github.event_name == 'workflow_dispatch'
     concurrency:
       group: deploy-production
       cancel-in-progress: false
-    uses: ny-randriantsarafara/vps-services/.github/workflows/deploy-compose.yml@codex/reusable-build-deploy-split
+    uses: ny-randriantsarafara/vps-services/.github/workflows/deploy-compose.yml@main
     with:
-      vps_user: ${{ vars.VPS_USER }}
-      vps_host: ${{ vars.VPS_HOST }}
-      deploy_dir: ${{ vars.VPS_APP_DIR }}
+      vps_user: ${{ needs.prepare-deploy-targets.outputs.vps_user }}
+      vps_host: ${{ needs.prepare-deploy-targets.outputs.vps_host }}
+      deploy_dir: ${{ needs.prepare-deploy-targets.outputs.deploy_dir }}
       compose_file: deploy/compose.vps.yml
       services: api web
-      bootstrap_databases: ${{ vars.DB_NAME }}
+      runtime_env: ${{ needs.prepare-manual-deploy.outputs.runtime_env }}
+      bootstrap_databases: ${{ needs.prepare-deploy-targets.outputs.db_name }}
       health_retries: 20
       health_interval: 5
       log_tail: 100
     secrets:
-      runtime_env: |
-        API_IMAGE=ghcr.io/${{ github.repository_owner }}/hoop-api:${{ inputs.image_tag }}
-        WEB_IMAGE=ghcr.io/${{ github.repository_owner }}/hoop-web:${{ inputs.image_tag }}
-        DB_HOST=${{ vars.DB_HOST || 'postgres' }}
-        DB_PORT=${{ vars.DB_PORT || '5432' }}
-        DB_NAME=${{ vars.DB_NAME }}
-        DB_USER=${{ vars.DB_USER }}
-        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-        DATABASE_URL=postgresql://${{ vars.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST || 'postgres' }}:${{ vars.DB_PORT || '5432' }}/${{ vars.DB_NAME }}
-        JWT_SECRET=${{ secrets.JWT_SECRET }}
-        CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
-        OLLAMA_BASE_URL=${{ vars.OLLAMA_BASE_URL }}
-        OLLAMA_MODEL=${{ vars.OLLAMA_MODEL }}
-        API_URL=${{ vars.API_URL }}
-        NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
-        NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
-        NEXTAUTH_URL=${{ vars.NEXTAUTH_URL }}
       vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
       vps_host_key: ${{ secrets.VPS_HOST_KEY }}

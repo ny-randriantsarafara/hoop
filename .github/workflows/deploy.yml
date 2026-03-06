@@ -11,9 +11,12 @@ on:
         default: main
 
 env:
-  REGISTRY: ghcr.io
   API_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/hoop-api
   WEB_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/hoop-web
+
+permissions:
+  contents: read
+  packages: write
 
 jobs:
   check-skip:
@@ -40,435 +43,143 @@ jobs:
 
           echo "should_skip=false" >> "$GITHUB_OUTPUT"
 
-  build-images:
-    name: Build and publish images
+  validate-runtime-config:
+    name: Validate deploy inputs
     runs-on: ubuntu-latest
     needs: check-skip
-    if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
-    permissions:
-      contents: read
-      packages: write
-    outputs:
-      image_tag: ${{ steps.meta.outputs.image_tag }}
+    if: needs.check-skip.outputs.should_skip != 'true'
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set image metadata
-        id: meta
-        run: |
-          SHORT_SHA="${GITHUB_SHA::12}"
-          echo "image_tag=sha-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build and push API image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: apps/api/Dockerfile
-          push: true
-          tags: |
-            ${{ env.API_IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}
-            ${{ env.API_IMAGE_NAME }}:main
-
-      - name: Build and push web image
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: apps/web/Dockerfile
-          push: true
-          tags: |
-            ${{ env.WEB_IMAGE_NAME }}:${{ steps.meta.outputs.image_tag }}
-            ${{ env.WEB_IMAGE_NAME }}:main
-
-  deploy-auto:
-    name: Deploy to VPS (auto)
-    runs-on: ubuntu-latest
-    needs: [check-skip, build-images]
-    if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
-    concurrency:
-      group: deploy-production
-      cancel-in-progress: false
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
-
-      - name: Add VPS host key
+      - name: Validate runtime configuration
         env:
-          VPS_HOST_KEY: ${{ secrets.VPS_HOST_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$VPS_HOST_KEY" >> ~/.ssh/known_hosts
-
-      - name: Sync VPS compose file
-        env:
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_USER: ${{ vars.VPS_USER }}
-          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
-        run: |
-          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_APP_DIR'"
-          scp -o StrictHostKeyChecking=yes deploy/compose.vps.yml "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/docker-compose.yml"
-
-      - name: Write runtime .env on VPS
-        env:
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_USER: ${{ vars.VPS_USER }}
-          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
-          IMAGE_TAG: ${{ needs.build-images.outputs.image_tag }}
-          DB_HOST: ${{ vars.DB_HOST }}
-          DB_PORT: ${{ vars.DB_PORT }}
           DB_NAME: ${{ vars.DB_NAME }}
           DB_USER: ${{ vars.DB_USER }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
-          API_URL: ${{ vars.API_URL }}
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
-          NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
-          OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
-          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
-          API_IMAGE_NAME: ${{ env.API_IMAGE_NAME }}
-          WEB_IMAGE_NAME: ${{ env.WEB_IMAGE_NAME }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
         run: |
-          tmp_env=$(mktemp)
-
-          DB_HOST="${DB_HOST:-postgres}"
-          DB_PORT="${DB_PORT:-5432}"
+          set -euo pipefail
 
           if [[ -z "$DB_NAME" || -z "$DB_USER" || -z "$DB_PASSWORD" ]]; then
             echo "DB_NAME, DB_USER, and DB_PASSWORD are required"
             exit 1
           fi
 
-          DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-
-          cat > "$tmp_env" <<EOF
-          API_IMAGE=${API_IMAGE_NAME}:${IMAGE_TAG}
-          WEB_IMAGE=${WEB_IMAGE_NAME}:${IMAGE_TAG}
-          DB_HOST=$DB_HOST
-          DB_PORT=$DB_PORT
-          DB_NAME=$DB_NAME
-          DB_USER=$DB_USER
-          DB_PASSWORD=$DB_PASSWORD
-          DATABASE_URL=$DATABASE_URL
-          JWT_SECRET=$JWT_SECRET
-          CORS_ORIGIN=$CORS_ORIGIN
-          OLLAMA_BASE_URL=$OLLAMA_BASE_URL
-          OLLAMA_MODEL=$OLLAMA_MODEL
-          API_URL=$API_URL
-          NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-          NEXTAUTH_SECRET=$NEXTAUTH_SECRET
-          NEXTAUTH_URL=$NEXTAUTH_URL
-          EOF
-
-          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
-            "cat > '$VPS_APP_DIR/.env.tmp' && mv '$VPS_APP_DIR/.env.tmp' '$VPS_APP_DIR/.env'" \
-            < "$tmp_env"
-
-          rm -f "$tmp_env"
-
-      - name: Deploy selected images
-        env:
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_USER: ${{ vars.VPS_USER }}
-          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
-        run: |
-          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
-            "VPS_APP_DIR='$VPS_APP_DIR' bash -s" <<'EOF_REMOTE'
-          set -euo pipefail
-
-          cd "$VPS_APP_DIR"
-
-          if [[ ! -f .env ]]; then
-            echo "Missing $VPS_APP_DIR/.env"
+          if [[ "$DB_NAME" == "postgres" || "$DB_NAME" == "pomodoro" ]]; then
+            echo "Refusing shared database name: $DB_NAME"
             exit 1
           fi
 
-          set -a
-          . ./.env
-          set +a
-
-          if [[ -z "${DB_USER:-}" || -z "${DB_PASSWORD:-}" || -z "${DB_NAME:-}" ]]; then
-            echo "DB_USER, DB_PASSWORD, and DB_NAME are required in $VPS_APP_DIR/.env"
-            exit 1
-          fi
-
-          db_name="$DB_NAME"
-          db_user="$DB_USER"
-          db_password="$DB_PASSWORD"
-
-          if [[ "$db_name" == "postgres" || "$db_name" == "pomodoro" ]]; then
-            echo "Refusing shared database name: $db_name"
-            exit 1
-          fi
-
-          db_name_sql=${db_name//\'/\'\'}
-          db_name_ident=${db_name//\"/\"\"}
-          db_user_sql=${db_user//\'/\'\'}
-          db_user_ident=${db_user//\"/\"\"}
-          db_password_sql=${db_password//\'/\'\'}
-
-          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 <<SQL
-          DO \$\$
-          BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '$db_user_sql') THEN
-              CREATE ROLE "$db_user_ident" LOGIN PASSWORD '$db_password_sql';
-            ELSE
-              ALTER ROLE "$db_user_ident" WITH LOGIN PASSWORD '$db_password_sql';
-            END IF;
-          END
-          \$\$;
-          SQL
-
-          if ! docker exec supabase-db psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$db_name_sql'" | grep -q 1; then
-            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$db_name_ident\" OWNER \"$db_user_ident\""
-          fi
-
-          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE \"$db_name_ident\" TO \"$db_user_ident\""
-
-          docker exec supabase-db psql -U postgres -d "$db_name" -v ON_ERROR_STOP=1 <<SQL
-          GRANT USAGE, CREATE ON SCHEMA public TO "$db_user_ident";
-          GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "$db_user_ident";
-          GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "$db_user_ident";
-          GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "$db_user_ident";
-          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON TABLES TO "$db_user_ident";
-          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON SEQUENCES TO "$db_user_ident";
-          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON FUNCTIONS TO "$db_user_ident";
-          SQL
-
-          docker compose pull api web
-          docker compose up -d api web
-
-          for i in $(seq 1 20); do
-            api_cid=$(docker compose ps -q api)
-            web_cid=$(docker compose ps -q web)
-
-            api_state=$(docker inspect --format '{{.State.Status}}' "$api_cid")
-            web_state=$(docker inspect --format '{{.State.Status}}' "$web_cid")
-            api_health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$api_cid")
-            web_health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$web_cid")
-
-            if [[ "$api_state" == "running" && "$web_state" == "running" ]] &&
-               [[ ("$api_health" == "healthy" || "$api_health" == "none") && ("$web_health" == "healthy" || "$web_health" == "none") ]]; then
-              exit 0
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            if [[ -z "$IMAGE_TAG" ]]; then
+              echo "IMAGE_TAG is required"
+              exit 1
             fi
 
-            sleep 5
-          done
+            if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9._-]+$ ]]; then
+              echo "Invalid image tag: $IMAGE_TAG"
+              exit 1
+            fi
+          fi
 
-          echo "Services failed health check"
-          docker compose logs --tail=100 api web
-          exit 1
-          EOF_REMOTE
+  build-api:
+    name: Build API image
+    needs: [check-skip, validate-runtime-config]
+    if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
+    uses: ny-randriantsarafara/vps-services/.github/workflows/build-image.yml@codex/reusable-build-deploy-split
+    with:
+      image: ${{ env.API_IMAGE_NAME }}
+      context: .
+      dockerfile: apps/api/Dockerfile
+      stable_tag: main
+    secrets: inherit
+
+  build-web:
+    name: Build web image
+    needs: [check-skip, validate-runtime-config]
+    if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
+    uses: ny-randriantsarafara/vps-services/.github/workflows/build-image.yml@codex/reusable-build-deploy-split
+    with:
+      image: ${{ env.WEB_IMAGE_NAME }}
+      context: .
+      dockerfile: apps/web/Dockerfile
+      stable_tag: main
+    secrets: inherit
+
+  deploy-auto:
+    name: Deploy to VPS (auto)
+    needs: [check-skip, validate-runtime-config, build-api, build-web]
+    if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    uses: ny-randriantsarafara/vps-services/.github/workflows/deploy-compose.yml@codex/reusable-build-deploy-split
+    with:
+      vps_user: ${{ vars.VPS_USER }}
+      vps_host: ${{ vars.VPS_HOST }}
+      deploy_dir: ${{ vars.VPS_APP_DIR }}
+      compose_file: deploy/compose.vps.yml
+      services: api web
+      bootstrap_databases: ${{ vars.DB_NAME }}
+      required_database_role: ${{ vars.DB_USER }}
+      health_retries: 20
+      health_interval: 5
+      log_tail: 100
+      env_content: |
+        API_IMAGE=${{ env.API_IMAGE_NAME }}:${{ needs.build-api.outputs.image_tag }}
+        WEB_IMAGE=${{ env.WEB_IMAGE_NAME }}:${{ needs.build-web.outputs.image_tag }}
+        DB_HOST=${{ vars.DB_HOST || 'postgres' }}
+        DB_PORT=${{ vars.DB_PORT || '5432' }}
+        DB_NAME=${{ vars.DB_NAME }}
+        DB_USER=${{ vars.DB_USER }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DATABASE_URL=postgresql://${{ vars.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST || 'postgres' }}:${{ vars.DB_PORT || '5432' }}/${{ vars.DB_NAME }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
+        OLLAMA_BASE_URL=${{ vars.OLLAMA_BASE_URL }}
+        OLLAMA_MODEL=${{ vars.OLLAMA_MODEL }}
+        API_URL=${{ vars.API_URL }}
+        NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+        NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+        NEXTAUTH_URL=${{ vars.NEXTAUTH_URL }}
+    secrets:
+      vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
+      vps_host_key: ${{ secrets.VPS_HOST_KEY }}
 
   deploy-manual:
     name: Deploy to VPS (manual)
-    runs-on: ubuntu-latest
-    needs: check-skip
+    needs: [check-skip, validate-runtime-config]
     if: github.event_name == 'workflow_dispatch'
     concurrency:
       group: deploy-production
       cancel-in-progress: false
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Validate manual image tag
-        env:
-          IMAGE_TAG: ${{ inputs.image_tag }}
-        run: |
-          if [[ -z "$IMAGE_TAG" ]]; then
-            echo "IMAGE_TAG is required"
-            exit 1
-          fi
-
-          if [[ ! "$IMAGE_TAG" =~ ^[A-Za-z0-9._-]+$ ]]; then
-            echo "Invalid image tag: $IMAGE_TAG"
-            exit 1
-          fi
-
-      - name: Set up SSH agent
-        uses: webfactory/ssh-agent@v0.9.0
-        with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
-
-      - name: Add VPS host key
-        env:
-          VPS_HOST_KEY: ${{ secrets.VPS_HOST_KEY }}
-        run: |
-          mkdir -p ~/.ssh
-          printf '%s\n' "$VPS_HOST_KEY" >> ~/.ssh/known_hosts
-
-      - name: Sync VPS compose file
-        env:
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_USER: ${{ vars.VPS_USER }}
-          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
-        run: |
-          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" "mkdir -p '$VPS_APP_DIR'"
-          scp -o StrictHostKeyChecking=yes deploy/compose.vps.yml "$VPS_USER@$VPS_HOST:$VPS_APP_DIR/docker-compose.yml"
-
-      - name: Write runtime .env on VPS
-        env:
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_USER: ${{ vars.VPS_USER }}
-          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
-          IMAGE_TAG: ${{ inputs.image_tag }}
-          DB_HOST: ${{ vars.DB_HOST }}
-          DB_PORT: ${{ vars.DB_PORT }}
-          DB_NAME: ${{ vars.DB_NAME }}
-          DB_USER: ${{ vars.DB_USER }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
-          CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
-          API_URL: ${{ vars.API_URL }}
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
-          NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
-          OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
-          OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
-          API_IMAGE_NAME: ${{ env.API_IMAGE_NAME }}
-          WEB_IMAGE_NAME: ${{ env.WEB_IMAGE_NAME }}
-        run: |
-          tmp_env=$(mktemp)
-
-          DB_HOST="${DB_HOST:-postgres}"
-          DB_PORT="${DB_PORT:-5432}"
-
-          if [[ -z "$DB_NAME" || -z "$DB_USER" || -z "$DB_PASSWORD" ]]; then
-            echo "DB_NAME, DB_USER, and DB_PASSWORD are required"
-            exit 1
-          fi
-
-          DATABASE_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
-
-          cat > "$tmp_env" <<EOF
-          API_IMAGE=${API_IMAGE_NAME}:${IMAGE_TAG}
-          WEB_IMAGE=${WEB_IMAGE_NAME}:${IMAGE_TAG}
-          DB_HOST=$DB_HOST
-          DB_PORT=$DB_PORT
-          DB_NAME=$DB_NAME
-          DB_USER=$DB_USER
-          DB_PASSWORD=$DB_PASSWORD
-          DATABASE_URL=$DATABASE_URL
-          JWT_SECRET=$JWT_SECRET
-          CORS_ORIGIN=$CORS_ORIGIN
-          OLLAMA_BASE_URL=$OLLAMA_BASE_URL
-          OLLAMA_MODEL=$OLLAMA_MODEL
-          API_URL=$API_URL
-          NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
-          NEXTAUTH_SECRET=$NEXTAUTH_SECRET
-          NEXTAUTH_URL=$NEXTAUTH_URL
-          EOF
-
-          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
-            "cat > '$VPS_APP_DIR/.env.tmp' && mv '$VPS_APP_DIR/.env.tmp' '$VPS_APP_DIR/.env'" \
-            < "$tmp_env"
-
-          rm -f "$tmp_env"
-
-      - name: Deploy selected images
-        env:
-          VPS_HOST: ${{ vars.VPS_HOST }}
-          VPS_USER: ${{ vars.VPS_USER }}
-          VPS_APP_DIR: ${{ vars.VPS_APP_DIR }}
-        run: |
-          ssh -o StrictHostKeyChecking=yes "$VPS_USER@$VPS_HOST" \
-            "VPS_APP_DIR='$VPS_APP_DIR' bash -s" <<'EOF_REMOTE'
-          set -euo pipefail
-
-          cd "$VPS_APP_DIR"
-
-          if [[ ! -f .env ]]; then
-            echo "Missing $VPS_APP_DIR/.env"
-            exit 1
-          fi
-
-          set -a
-          . ./.env
-          set +a
-
-          if [[ -z "${DB_USER:-}" || -z "${DB_PASSWORD:-}" || -z "${DB_NAME:-}" ]]; then
-            echo "DB_USER, DB_PASSWORD, and DB_NAME are required in $VPS_APP_DIR/.env"
-            exit 1
-          fi
-
-          db_name="$DB_NAME"
-          db_user="$DB_USER"
-          db_password="$DB_PASSWORD"
-
-          if [[ "$db_name" == "postgres" || "$db_name" == "pomodoro" ]]; then
-            echo "Refusing shared database name: $db_name"
-            exit 1
-          fi
-
-          db_name_sql=${db_name//\'/\'\'}
-          db_name_ident=${db_name//\"/\"\"}
-          db_user_sql=${db_user//\'/\'\'}
-          db_user_ident=${db_user//\"/\"\"}
-          db_password_sql=${db_password//\'/\'\'}
-
-          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 <<SQL
-          DO \$\$
-          BEGIN
-            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '$db_user_sql') THEN
-              CREATE ROLE "$db_user_ident" LOGIN PASSWORD '$db_password_sql';
-            ELSE
-              ALTER ROLE "$db_user_ident" WITH LOGIN PASSWORD '$db_password_sql';
-            END IF;
-          END
-          \$\$;
-          SQL
-
-          if ! docker exec supabase-db psql -U postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$db_name_sql'" | grep -q 1; then
-            docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "CREATE DATABASE \"$db_name_ident\" OWNER \"$db_user_ident\""
-          fi
-
-          docker exec supabase-db psql -U postgres -v ON_ERROR_STOP=1 -c "GRANT ALL PRIVILEGES ON DATABASE \"$db_name_ident\" TO \"$db_user_ident\""
-
-          docker exec supabase-db psql -U postgres -d "$db_name" -v ON_ERROR_STOP=1 <<SQL
-          GRANT USAGE, CREATE ON SCHEMA public TO "$db_user_ident";
-          GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO "$db_user_ident";
-          GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO "$db_user_ident";
-          GRANT ALL PRIVILEGES ON ALL FUNCTIONS IN SCHEMA public TO "$db_user_ident";
-          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON TABLES TO "$db_user_ident";
-          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON SEQUENCES TO "$db_user_ident";
-          ALTER DEFAULT PRIVILEGES FOR ROLE "$db_user_ident" IN SCHEMA public GRANT ALL ON FUNCTIONS TO "$db_user_ident";
-          SQL
-
-          docker compose pull api web
-          docker compose up -d api web
-
-          for i in $(seq 1 20); do
-            api_cid=$(docker compose ps -q api)
-            web_cid=$(docker compose ps -q web)
-
-            api_state=$(docker inspect --format '{{.State.Status}}' "$api_cid")
-            web_state=$(docker inspect --format '{{.State.Status}}' "$web_cid")
-            api_health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$api_cid")
-            web_health=$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}none{{end}}' "$web_cid")
-
-            if [[ "$api_state" == "running" && "$web_state" == "running" ]] &&
-               [[ ("$api_health" == "healthy" || "$api_health" == "none") && ("$web_health" == "healthy" || "$web_health" == "none") ]]; then
-              exit 0
-            fi
-
-            sleep 5
-          done
-
-          echo "Services failed health check"
-          docker compose logs --tail=100 api web
-          exit 1
-          EOF_REMOTE
+    uses: ny-randriantsarafara/vps-services/.github/workflows/deploy-compose.yml@codex/reusable-build-deploy-split
+    with:
+      vps_user: ${{ vars.VPS_USER }}
+      vps_host: ${{ vars.VPS_HOST }}
+      deploy_dir: ${{ vars.VPS_APP_DIR }}
+      compose_file: deploy/compose.vps.yml
+      services: api web
+      bootstrap_databases: ${{ vars.DB_NAME }}
+      required_database_role: ${{ vars.DB_USER }}
+      health_retries: 20
+      health_interval: 5
+      log_tail: 100
+      env_content: |
+        API_IMAGE=${{ env.API_IMAGE_NAME }}:${{ inputs.image_tag }}
+        WEB_IMAGE=${{ env.WEB_IMAGE_NAME }}:${{ inputs.image_tag }}
+        DB_HOST=${{ vars.DB_HOST || 'postgres' }}
+        DB_PORT=${{ vars.DB_PORT || '5432' }}
+        DB_NAME=${{ vars.DB_NAME }}
+        DB_USER=${{ vars.DB_USER }}
+        DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+        DATABASE_URL=postgresql://${{ vars.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST || 'postgres' }}:${{ vars.DB_PORT || '5432' }}/${{ vars.DB_NAME }}
+        JWT_SECRET=${{ secrets.JWT_SECRET }}
+        CORS_ORIGIN=${{ vars.CORS_ORIGIN }}
+        OLLAMA_BASE_URL=${{ vars.OLLAMA_BASE_URL }}
+        OLLAMA_MODEL=${{ vars.OLLAMA_MODEL }}
+        API_URL=${{ vars.API_URL }}
+        NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
+        NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+        NEXTAUTH_URL=${{ vars.NEXTAUTH_URL }}
+    secrets:
+      vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
+      vps_host_key: ${{ secrets.VPS_HOST_KEY }}

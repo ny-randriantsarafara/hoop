@@ -10,10 +10,6 @@ on:
         required: false
         default: main
 
-env:
-  API_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/hoop-api
-  WEB_IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/hoop-web
-
 permissions:
   contents: read
   packages: write
@@ -86,7 +82,7 @@ jobs:
     if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
     uses: ny-randriantsarafara/vps-services/.github/workflows/build-image.yml@codex/reusable-build-deploy-split
     with:
-      image: ${{ env.API_IMAGE_NAME }}
+      image: ghcr.io/${{ github.repository_owner }}/hoop-api
       context: .
       dockerfile: apps/api/Dockerfile
       stable_tag: main
@@ -98,7 +94,7 @@ jobs:
     if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
     uses: ny-randriantsarafara/vps-services/.github/workflows/build-image.yml@codex/reusable-build-deploy-split
     with:
-      image: ${{ env.WEB_IMAGE_NAME }}
+      image: ghcr.io/${{ github.repository_owner }}/hoop-web
       context: .
       dockerfile: apps/web/Dockerfile
       stable_tag: main
@@ -119,13 +115,13 @@ jobs:
       compose_file: deploy/compose.vps.yml
       services: api web
       bootstrap_databases: ${{ vars.DB_NAME }}
-      required_database_role: ${{ vars.DB_USER }}
       health_retries: 20
       health_interval: 5
       log_tail: 100
-      env_content: |
-        API_IMAGE=${{ env.API_IMAGE_NAME }}:${{ needs.build-api.outputs.image_tag }}
-        WEB_IMAGE=${{ env.WEB_IMAGE_NAME }}:${{ needs.build-web.outputs.image_tag }}
+    secrets:
+      runtime_env: |
+        API_IMAGE=ghcr.io/${{ github.repository_owner }}/hoop-api:${{ needs.build-api.outputs.image_tag }}
+        WEB_IMAGE=ghcr.io/${{ github.repository_owner }}/hoop-web:${{ needs.build-web.outputs.image_tag }}
         DB_HOST=${{ vars.DB_HOST || 'postgres' }}
         DB_PORT=${{ vars.DB_PORT || '5432' }}
         DB_NAME=${{ vars.DB_NAME }}
@@ -140,7 +136,6 @@ jobs:
         NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
         NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
         NEXTAUTH_URL=${{ vars.NEXTAUTH_URL }}
-    secrets:
       vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
       vps_host_key: ${{ secrets.VPS_HOST_KEY }}
 
@@ -159,13 +154,13 @@ jobs:
       compose_file: deploy/compose.vps.yml
       services: api web
       bootstrap_databases: ${{ vars.DB_NAME }}
-      required_database_role: ${{ vars.DB_USER }}
       health_retries: 20
       health_interval: 5
       log_tail: 100
-      env_content: |
-        API_IMAGE=${{ env.API_IMAGE_NAME }}:${{ inputs.image_tag }}
-        WEB_IMAGE=${{ env.WEB_IMAGE_NAME }}:${{ inputs.image_tag }}
+    secrets:
+      runtime_env: |
+        API_IMAGE=ghcr.io/${{ github.repository_owner }}/hoop-api:${{ inputs.image_tag }}
+        WEB_IMAGE=ghcr.io/${{ github.repository_owner }}/hoop-web:${{ inputs.image_tag }}
         DB_HOST=${{ vars.DB_HOST || 'postgres' }}
         DB_PORT=${{ vars.DB_PORT || '5432' }}
         DB_NAME=${{ vars.DB_NAME }}
@@ -180,6 +175,5 @@ jobs:
         NEXT_PUBLIC_API_URL=${{ vars.NEXT_PUBLIC_API_URL }}
         NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
         NEXTAUTH_URL=${{ vars.NEXTAUTH_URL }}
-    secrets:
       vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
       vps_host_key: ${{ secrets.VPS_HOST_KEY }}

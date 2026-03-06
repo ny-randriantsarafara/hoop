@@ -1,7 +1,7 @@
 import type { OcrExtractionResponse, ValidateExtractionInput } from '@hoop/shared';
 import { apiClient } from '@/shared/lib/api-client';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+const API_URL = '/api';
 
 export async function extractDocument(token: string, file: File): Promise<OcrExtractionResponse> {
   const formData = new FormData();

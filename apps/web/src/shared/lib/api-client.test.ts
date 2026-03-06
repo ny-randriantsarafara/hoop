@@ -19,7 +19,7 @@ describe('apiClient', () => {
     const result = await apiClient('/players');
 
     expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/players',
+      '/api/players',
       expect.objectContaining({
         headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
       }),

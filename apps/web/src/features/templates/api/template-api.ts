@@ -1,7 +1,7 @@
 import { apiClient } from '@/shared/lib/api-client';
 import type { Template, SpreadsheetPreview, CellMapping } from '@hoop/shared';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api';
+const API_URL = '/api';
 
 export function fetchTemplates(token: string): Promise<Template[]> {
   return apiClient<Template[]>('/templates', { token });

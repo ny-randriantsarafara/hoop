@@ -18,6 +18,8 @@ RUN pnpm exec prisma generate
 RUN pnpm build
 WORKDIR /app
 RUN pnpm --filter @hoop/api deploy --legacy --prod /prod/api
+WORKDIR /prod/api
+RUN pnpm exec prisma generate
 
 FROM base AS runner
 WORKDIR /app

@@ -2,7 +2,7 @@ export async function generateDocument(
   token: string,
   data: { templateId: string; playerIds: string[]; seasonId: string },
 ): Promise<void> {
-  const apiUrl = '/api';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? '/api';
   const response = await fetch(`${apiUrl}/documents/generate`, {
     method: 'POST',
     headers: {

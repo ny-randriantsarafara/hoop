@@ -6,6 +6,7 @@ vi.stubGlobal('fetch', mockFetch);
 
 beforeEach(() => {
   mockFetch.mockReset();
+  delete process.env.NEXT_PUBLIC_API_URL;
 });
 
 describe('apiClient', () => {
@@ -25,6 +26,25 @@ describe('apiClient', () => {
       }),
     );
     expect(result).toEqual({ data: 'test' });
+  });
+
+  it('uses NEXT_PUBLIC_API_URL when provided', async () => {
+    process.env.NEXT_PUBLIC_API_URL = 'http://localhost:3001/api';
+
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: () => Promise.resolve({ data: 'test' }),
+    });
+
+    await apiClient('/players');
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      'http://localhost:3001/api/players',
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
+      }),
+    );
   });
 
   it('includes authorization header when token is provided', async () => {

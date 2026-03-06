@@ -1,7 +1,9 @@
 import { apiClient } from '@/shared/lib/api-client';
 import type { Template, SpreadsheetPreview, CellMapping } from '@hoop/shared';
 
-const API_URL = '/api';
+function getApiUrl(): string {
+  return process.env.NEXT_PUBLIC_API_URL ?? '/api';
+}
 
 export function fetchTemplates(token: string): Promise<Template[]> {
   return apiClient<Template[]>('/templates', { token });
@@ -15,7 +17,7 @@ export async function previewTemplate(token: string, file: File): Promise<Spread
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API_URL}/templates/preview`, {
+  const response = await fetch(`${getApiUrl()}/templates/preview`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
@@ -43,7 +45,7 @@ export async function uploadTemplate(
     formData.append('cellMappings', JSON.stringify(cellMappings));
   }
 
-  const response = await fetch(`${API_URL}/templates`, {
+  const response = await fetch(`${getApiUrl()}/templates`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: formData,
@@ -65,7 +67,7 @@ export function generateTemplate(
 }
 
 export async function downloadTemplate(token: string, id: string, filename: string): Promise<void> {
-  const response = await fetch(`${API_URL}/templates/${id}/download`, {
+  const response = await fetch(`${getApiUrl()}/templates/${id}/download`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!response.ok) throw new Error('Download failed');

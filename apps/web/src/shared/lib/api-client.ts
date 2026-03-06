@@ -1,4 +1,6 @@
-const API_URL = '/api';
+function getApiUrl(): string {
+  return process.env.NEXT_PUBLIC_API_URL ?? '/api';
+}
 
 interface FetchOptions extends RequestInit {
   token?: string;
@@ -16,7 +18,7 @@ export async function apiClient<T>(endpoint: string, options: FetchOptions = {})
     headers['Authorization'] = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${API_URL}${endpoint}`, {
+  const response = await fetch(`${getApiUrl()}${endpoint}`, {
     ...restOptions,
     headers,
   });

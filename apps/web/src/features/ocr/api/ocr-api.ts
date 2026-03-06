@@ -1,13 +1,15 @@
 import type { OcrExtractionResponse, ValidateExtractionInput } from '@hoop/shared';
 import { apiClient } from '@/shared/lib/api-client';
 
-const API_URL = '/api';
+function getApiUrl(): string {
+  return process.env.NEXT_PUBLIC_API_URL ?? '/api';
+}
 
 export async function extractDocument(token: string, file: File): Promise<OcrExtractionResponse> {
   const formData = new FormData();
   formData.append('file', file);
 
-  const response = await fetch(`${API_URL}/ocr/extract`, {
+  const response = await fetch(`${getApiUrl()}/ocr/extract`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}` },
     body: formData,

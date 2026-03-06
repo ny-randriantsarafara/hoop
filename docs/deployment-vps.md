@@ -91,8 +91,6 @@ Deploy now assumes public GHCR package pulls from the VPS host.
 ### Variables
 
 - `CORS_ORIGIN`
-- `API_URL`
-- `NEXT_PUBLIC_API_URL`
 - `NEXTAUTH_URL`
 - `VPS_HOST`
 - `VPS_USER` (e.g. `deploy`)
@@ -111,8 +109,6 @@ NEXTAUTH_SECRET='***' \
 VPS_SSH_KEY="$(cat ~/.ssh/id_ed25519)" \
 VPS_HOST_KEY="$(ssh-keyscan -H your.vps.host 2>/dev/null)" \
 CORS_ORIGIN='https://app.example.com' \
-API_URL='https://api.example.com/api' \
-NEXT_PUBLIC_API_URL='https://api.example.com/api' \
 NEXTAUTH_URL='https://app.example.com' \
 VPS_HOST='your.vps.host' \
 VPS_USER='deploy' \
@@ -122,15 +118,15 @@ bash scripts/github/bootstrap-deploy-vars.sh
 
 ## 6. Caddy routes (in vps-services repo)
 
-Add routes in `vps-services/caddy/Caddyfile` so Caddy proxies to app containers on `vps-net`:
+Add a route in `vps-services/caddy/Caddyfile` so Caddy exposes the app domain publicly and proxies `/api/*` to the API container on `vps-net`:
 
 ```caddy
 app.example.com {
-  reverse_proxy hoop-web:3000
-}
+  handle /api/* {
+    reverse_proxy hoop-api:3001
+  }
 
-api.example.com {
-  reverse_proxy hoop-api:3001
+  reverse_proxy hoop-web:3000
 }
 ```
 
@@ -144,7 +140,7 @@ Recommended first run:
 2. Trigger `Deploy` workflow manually (`workflow_dispatch`) with `image_tag=main`.
 3. Verify:
    - `https://app.example.com/login`
-   - `https://api.example.com/api/health`
+   - `https://app.example.com/api/health`
 
 ## 8. Rollback
 

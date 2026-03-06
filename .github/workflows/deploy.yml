@@ -146,10 +146,10 @@ jobs:
           CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
           OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
-          API_URL: ${{ vars.API_URL }}
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
           NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
         run: |
+          APP_URL="${NEXTAUTH_URL%/}"
+
           {
             echo "runtime_env<<EOF"
             printf '%s\n' \
@@ -162,9 +162,9 @@ jobs:
               "CORS_ORIGIN=$CORS_ORIGIN" \
               "OLLAMA_BASE_URL=$OLLAMA_BASE_URL" \
               "OLLAMA_MODEL=$OLLAMA_MODEL" \
-              "API_URL=$API_URL" \
-              "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" \
-              "NEXTAUTH_URL=$NEXTAUTH_URL"
+              "API_URL=http://hoop-api:3001/api" \
+              "NEXT_PUBLIC_API_URL=$APP_URL/api" \
+              "NEXTAUTH_URL=$APP_URL"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 
@@ -189,10 +189,10 @@ jobs:
           CORS_ORIGIN: ${{ vars.CORS_ORIGIN }}
           OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
-          API_URL: ${{ vars.API_URL }}
-          NEXT_PUBLIC_API_URL: ${{ vars.NEXT_PUBLIC_API_URL }}
           NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
         run: |
+          APP_URL="${NEXTAUTH_URL%/}"
+
           {
             echo "runtime_env<<EOF"
             printf '%s\n' \
@@ -205,9 +205,9 @@ jobs:
               "CORS_ORIGIN=$CORS_ORIGIN" \
               "OLLAMA_BASE_URL=$OLLAMA_BASE_URL" \
               "OLLAMA_MODEL=$OLLAMA_MODEL" \
-              "API_URL=$API_URL" \
-              "NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL" \
-              "NEXTAUTH_URL=$NEXTAUTH_URL"
+              "API_URL=http://hoop-api:3001/api" \
+              "NEXT_PUBLIC_API_URL=$APP_URL/api" \
+              "NEXTAUTH_URL=$APP_URL"
             echo "EOF"
           } >> "$GITHUB_OUTPUT"
 

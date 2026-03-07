@@ -51,7 +51,9 @@ describe('auth config', () => {
     expect(config.basePath).toBe('/auth');
     expect(config.pages?.signIn).toBe('/login');
 
-    const providerConfig = credentialsMock.mock.calls[0]?.[0] as MockedCredentialsConfig | undefined;
+    const providerConfig = credentialsMock.mock.calls[0]?.[0] as
+      | MockedCredentialsConfig
+      | undefined;
     expect(providerConfig).toBeDefined();
     if (!providerConfig) {
       throw new Error('Expected credentials provider config to be passed');

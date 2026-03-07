@@ -237,7 +237,15 @@ jobs:
 
   deploy-auto:
     name: Deploy to VPS (auto)
-    needs: [check-skip, validate-runtime-config, prepare-deploy-targets, build-api, build-web, prepare-auto-deploy]
+    needs:
+      [
+        check-skip,
+        validate-runtime-config,
+        prepare-deploy-targets,
+        build-api,
+        build-web,
+        prepare-auto-deploy,
+      ]
     if: github.event_name == 'push' && needs.check-skip.outputs.should_skip != 'true'
     concurrency:
       group: deploy-production

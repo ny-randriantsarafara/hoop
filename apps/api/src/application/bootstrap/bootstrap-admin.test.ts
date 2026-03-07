@@ -26,9 +26,11 @@ function createDeps(envOverrides: Record<string, string | undefined> = {}) {
   };
 
   const prisma = {
-    $transaction: vi.fn().mockImplementation(async (callback: (client: MockTransaction) => unknown) => {
-      return callback(tx);
-    }),
+    $transaction: vi
+      .fn()
+      .mockImplementation(async (callback: (client: MockTransaction) => unknown) => {
+        return callback(tx);
+      }),
   };
 
   const logger = {

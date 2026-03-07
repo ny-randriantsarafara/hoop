@@ -4,6 +4,7 @@ import Credentials from 'next-auth/providers/credentials';
 const API_URL = process.env.API_URL ?? 'http://localhost:3001/api';
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  basePath: '/auth',
   providers: [
     Credentials({
       credentials: {

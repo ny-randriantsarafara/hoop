@@ -90,6 +90,7 @@ Deploy now assumes public GHCR package pulls from the VPS host.
 
 ### Variables
 
+- `AUTH_TRUST_HOST` (set to `true` for Auth.js v5 behind the public reverse proxy)
 - `CORS_ORIGIN`
 - `NEXTAUTH_URL`
 - `VPS_HOST`
@@ -109,12 +110,15 @@ NEXTAUTH_SECRET='***' \
 VPS_SSH_KEY="$(cat ~/.ssh/id_ed25519)" \
 VPS_HOST_KEY="$(ssh-keyscan -H your.vps.host 2>/dev/null)" \
 CORS_ORIGIN='https://app.example.com' \
+AUTH_TRUST_HOST='true' \
 NEXTAUTH_URL='https://app.example.com' \
 VPS_HOST='your.vps.host' \
 VPS_USER='deploy' \
 VPS_APP_DIR='/home/deploy/apps/hoop' \
 bash scripts/github/bootstrap-deploy-vars.sh
 ```
+
+For Auth.js v5 deployments, `AUTH_URL` should resolve to the same public origin as `NEXTAUTH_URL`. In this repo, the production compose file maps `AUTH_URL` from `NEXTAUTH_URL`, so setting `NEXTAUTH_URL='https://app.example.com'` remains the primary deploy input.
 
 ## 6. Caddy routes (in vps-services repo)
 

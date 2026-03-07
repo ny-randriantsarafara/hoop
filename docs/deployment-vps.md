@@ -140,67 +140,23 @@ When `ADMIN_EMAIL` and `ADMIN_PASSWORD` are present, the API bootstraps or updat
 
 ## 6. Caddy routes (in vps-services repo)
 
-Add a route in `vps-services/caddy/Caddyfile` so Caddy exposes the app domain publicly and splits the shared `/api` namespace between NextAuth in `hoop-web` and Fastify in `hoop-api`:
+Add a route in `vps-services/caddy/Caddyfile` so Caddy exposes the app domain publicly with stable namespace ownership:
 
 ```caddy
 app.example.com {
-  handle /api/auth/login {
+  handle /api/* {
     reverse_proxy hoop-api:3001
   }
 
-  handle /api/auth/me {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/auth/* {
+  handle /auth/* {
     reverse_proxy hoop-web:3000
-  }
-
-  handle /api/health {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/categories* {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/players* {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/seasons* {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/clubs* {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/dashboard* {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/licenses* {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/templates* {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/documents* {
-    reverse_proxy hoop-api:3001
-  }
-
-  handle /api/ocr* {
-    reverse_proxy hoop-api:3001
   }
 
   reverse_proxy hoop-web:3000
 }
 ```
 
-Keep this list aligned with the route groups registered in `apps/api/src/server.ts`. New Fastify route groups need a matching Caddy handler because `/api/auth/*` is reserved by NextAuth except for Fastify's `/api/auth/login` and `/api/auth/me`.
+With this split, new Fastify routes under `/api/*` do not require Caddy updates. NextAuth stays isolated under `/auth/*`, while the web container still calls the internal Fastify login endpoint at `API_URL/auth/login`.
 
 Reload from the `vps-services` deployment flow.
 

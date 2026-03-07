@@ -107,7 +107,7 @@ sequenceDiagram
     participant NextAuth
     participant API
 
-    Browser->>NextAuth: POST /api/auth/callback/credentials
+    Browser->>NextAuth: POST /auth/callback/credentials
     NextAuth->>API: POST /api/auth/login (email, password)
     API->>API: Verify password (bcrypt)
     API-->>NextAuth: { token, user }
@@ -115,7 +115,7 @@ sequenceDiagram
     Browser->>API: Subsequent requests with Bearer JWT
 ```
 
-The frontend uses NextAuth with a Credentials provider. On login, NextAuth calls the API's `/api/auth/login` endpoint, which verifies the password with bcrypt and returns a JWT. NextAuth stores the token in the session. All subsequent API calls include `Authorization: Bearer <token>`.
+The frontend exposes NextAuth under `/auth/*` and the Fastify API under `/api/*`. On login, NextAuth calls the API's internal `/api/auth/login` endpoint, which verifies the password with bcrypt and returns a JWT. NextAuth stores the token in the session. All subsequent API calls include `Authorization: Bearer <token>`.
 
 ## Root scripts
 

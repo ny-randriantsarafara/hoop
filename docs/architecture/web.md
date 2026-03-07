@@ -121,6 +121,7 @@ A thin `fetch` wrapper that all API calls go through:
 
 NextAuth configuration with a Credentials provider:
 
+- Exposes the public auth endpoints under `/auth/*`.
 - On sign-in, calls `POST /api/auth/login` on the API server using the server-side `API_URL`.
 - Stores the JWT token, role, and clubId in the NextAuth JWT and session.
 - Redirects unauthenticated users to `/login`.

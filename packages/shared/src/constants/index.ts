@@ -1,4 +1,4 @@
-export { Role, LicenseStatus, Gender } from './enums';
+export { Role, LicenseStatus, Gender, Permission, FeatureKey } from './enums';
 export { genderLabels } from './gender-labels';
 export {
   placeholderRegistry,

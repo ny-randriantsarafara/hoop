@@ -5,6 +5,7 @@ import multipart from '@fastify/multipart';
 import { loadConfig } from './config';
 import { prisma } from './infrastructure/prisma/prisma-client';
 import { authPlugin } from './interface/plugins/auth-plugin';
+import { authorizationPlugin } from './interface/plugins/authorization-plugin';
 import { errorPlugin } from './interface/plugins/error-plugin';
 import { createPrismaPlayerRepository } from './infrastructure/prisma/repositories/player.repository';
 import { createPrismaLicenseRepository } from './infrastructure/prisma/repositories/license.repository';
@@ -23,6 +24,7 @@ import { documentRoutes } from './interface/routes/document-routes';
 import { categoryRoutes } from './interface/routes/category-routes';
 import { ocrRoutes } from './interface/routes/ocr-routes';
 import { userRoutes } from './interface/routes/user-routes';
+import { featureFlagRoutes } from './interface/routes/feature-flag-routes';
 import { createOllamaOcrService } from './infrastructure/ocr/ollama-ocr-service';
 import { bootstrapAdmin } from './application/bootstrap/bootstrap-admin';
 
@@ -48,6 +50,7 @@ async function start(): Promise<void> {
   });
   await fastify.register(jwt, { secret: config.jwtSecret });
   await fastify.register(authPlugin);
+  await fastify.register(authorizationPlugin, { prisma });
   await fastify.register(errorPlugin);
   await fastify.register(multipart, { limits: { fileSize: 5 * 1024 * 1024 } });
 
@@ -83,6 +86,7 @@ async function start(): Promise<void> {
       await templateRoutes(app, { prisma });
       await documentRoutes(app, { prisma, playerRepository, seasonRepository });
       await ocrRoutes(app, { ocrService, prisma });
+      await featureFlagRoutes(app, { prisma });
     },
     { prefix: '/api' },
   );

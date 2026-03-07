@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { validateExtractionSchema } from '@hoop/shared';
+import { validateExtractionSchema, Permission, FeatureKey } from '@hoop/shared';
 import type { OcrService } from '../../infrastructure/ocr/ollama-ocr-service';
 import {
   OcrConnectionError,
@@ -16,7 +16,12 @@ interface OcrRoutesDeps {
 }
 
 export async function ocrRoutes(fastify: FastifyInstance, deps: OcrRoutesDeps): Promise<void> {
-  fastify.post('/ocr/extract', async (request, reply) => {
+  const authorizeOcr = fastify.authorize({
+    permission: Permission.ImportUse,
+    featureKey: FeatureKey.OcrImport,
+  });
+
+  fastify.post('/ocr/extract', { preHandler: authorizeOcr }, async (request, reply) => {
     if (!request.jwtPayload) {
       throw new Error('Unauthorized');
     }
@@ -55,7 +60,7 @@ export async function ocrRoutes(fastify: FastifyInstance, deps: OcrRoutesDeps): 
     }
   });
 
-  fastify.patch('/ocr/extractions/:id', async (request) => {
+  fastify.patch('/ocr/extractions/:id', { preHandler: authorizeOcr }, async (request) => {
     if (!request.jwtPayload) {
       throw new Error('Unauthorized');
     }

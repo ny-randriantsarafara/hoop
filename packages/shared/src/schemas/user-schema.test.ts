@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { createUserSchema, updateUserSchema, resetUserPasswordSchema } from './user-schema';
+import { Role } from '../constants/enums';
 
 describe('createUserSchema', () => {
   it('parses valid payload', () => {
@@ -7,10 +8,10 @@ describe('createUserSchema', () => {
       name: 'Coach',
       email: 'coach@test.mg',
       password: 'password123',
-      role: 'adminClub',
+      role: Role.Staff,
     });
 
-    expect(parsed.role).toBe('adminClub');
+    expect(parsed.role).toBe(Role.Staff);
   });
 
   it('rejects short passwords', () => {
@@ -19,7 +20,7 @@ describe('createUserSchema', () => {
         name: 'Coach',
         email: 'coach@test.mg',
         password: 'short',
-        role: 'adminClub',
+        role: Role.Staff,
       }),
     ).toThrow();
   });

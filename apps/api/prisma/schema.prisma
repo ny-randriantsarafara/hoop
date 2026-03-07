@@ -23,6 +23,7 @@ model Club {
   templates      Template[]
   categories     CategoryConfig[]
   ocrExtractions OcrExtraction[]
+  featureFlags   FeatureFlag[]
 
   @@map("clubs")
 }
@@ -121,7 +122,9 @@ enum LicenseStatus {
 }
 
 enum Role {
-  adminClub
+  admin
+  staff
+  viewer
 }
 
 model Template {
@@ -157,4 +160,18 @@ model OcrExtraction {
   club Club @relation(fields: [clubId], references: [id])
 
   @@map("ocr_extractions")
+}
+
+model FeatureFlag {
+  id        String   @id @default(uuid())
+  clubId    String   @map("club_id")
+  key       String
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  club Club @relation(fields: [clubId], references: [id])
+
+  @@unique([clubId, key])
+  @@map("feature_flags")
 }

@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcrypt';
+import { FeatureKey } from '@hoop/shared';
 
 const prisma = new PrismaClient();
 
@@ -68,7 +69,7 @@ async function main() {
       name: 'Admin Club',
       email: 'admin@bcanalamanga.mg',
       passwordHash,
-      role: 'adminClub',
+      role: 'admin',
       clubId: club.id,
     },
   });
@@ -122,11 +123,28 @@ async function main() {
     });
   }
 
+  // Seed feature flags - OCR Import disabled by default
+  await prisma.featureFlag.upsert({
+    where: {
+      clubId_key: {
+        clubId: club.id,
+        key: FeatureKey.OcrImport,
+      },
+    },
+    update: {},
+    create: {
+      clubId: club.id,
+      key: FeatureKey.OcrImport,
+      enabled: false,
+    },
+  });
+
   console.log('Seed completed:', {
     season: season.label,
     club: club.name,
     players: players.length,
     categories: defaultCategories.length,
+    featureFlags: 1,
   });
 }
 

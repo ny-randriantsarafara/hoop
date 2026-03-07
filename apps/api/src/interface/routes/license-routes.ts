@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { createLicenseSchema, createLicensesBatchSchema } from '@hoop/shared';
+import { createLicenseSchema, createLicensesBatchSchema, Permission } from '@hoop/shared';
 import { listLicenses } from '../../application/license/listLicenses';
 import { createLicense } from '../../application/license/create-license';
 import { createLicensesBatch } from '../../application/license/create-licenses-batch';
@@ -33,12 +33,15 @@ export async function licenseRoutes(
   fastify: FastifyInstance,
   deps: LicenseRoutesDeps,
 ): Promise<void> {
-  fastify.get('/licenses', async (request) => {
+  const authorizeRead = fastify.authorize({ permission: Permission.LicensesRead });
+  const authorizeWrite = fastify.authorize({ permission: Permission.LicensesWrite });
+
+  fastify.get('/licenses', { preHandler: authorizeRead }, async (request) => {
     const query = querySchema.parse(request.query ?? {});
     return listLicenses({ licenseRepository: deps.licenseRepository }, query);
   });
 
-  fastify.post('/licenses', async (request, reply) => {
+  fastify.post('/licenses', { preHandler: authorizeWrite }, async (request, reply) => {
     const body = createLicenseSchema.parse(request.body);
     const license = await createLicense(
       {
@@ -52,7 +55,7 @@ export async function licenseRoutes(
     reply.code(201).send(license);
   });
 
-  fastify.post('/licenses/batch', async (request, reply) => {
+  fastify.post('/licenses/batch', { preHandler: authorizeWrite }, async (request, reply) => {
     const body = createLicensesBatchSchema.parse(request.body);
     const licenses = await createLicensesBatch(
       {

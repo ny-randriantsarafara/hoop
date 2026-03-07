@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 import ExcelJS from 'exceljs';
-import { allPlaceholders, cellMappingSchema } from '@hoop/shared';
+import { allPlaceholders, cellMappingSchema, Permission } from '@hoop/shared';
 import { previewTemplate } from '../../application/template/preview-template';
 import { writePlaceholdersToXlsx } from '../../infrastructure/template/xlsx-placeholder-writer';
 
@@ -31,7 +31,10 @@ export async function templateRoutes(
   fastify: FastifyInstance,
   deps: TemplateRoutesDeps,
 ): Promise<void> {
-  fastify.get('/templates', async (request) => {
+  const authorizeRead = fastify.authorize({ permission: Permission.TemplatesRead });
+  const authorizeWrite = fastify.authorize({ permission: Permission.TemplatesWrite });
+
+  fastify.get('/templates', { preHandler: authorizeRead }, async (request) => {
     if (!request.jwtPayload) throw new Error('Unauthorized');
     const clubId = request.jwtPayload.clubId;
     if (!clubId) throw new Error('No club associated');
@@ -53,7 +56,7 @@ export async function templateRoutes(
     return templates;
   });
 
-  fastify.get('/templates/:id/download', async (request, reply) => {
+  fastify.get('/templates/:id/download', { preHandler: authorizeRead }, async (request, reply) => {
     if (!request.jwtPayload) throw new Error('Unauthorized');
     const clubId = request.jwtPayload.clubId;
     if (!clubId) throw new Error('No club associated');
@@ -77,7 +80,7 @@ export async function templateRoutes(
     return reply.send(Buffer.from(template.fileData));
   });
 
-  fastify.get('/templates/:id', async (request) => {
+  fastify.get('/templates/:id', { preHandler: authorizeRead }, async (request) => {
     if (!request.jwtPayload) throw new Error('Unauthorized');
     const clubId = request.jwtPayload.clubId;
     if (!clubId) throw new Error('No club associated');
@@ -99,7 +102,7 @@ export async function templateRoutes(
     };
   });
 
-  fastify.post('/templates', async (request, reply) => {
+  fastify.post('/templates', { preHandler: authorizeWrite }, async (request, reply) => {
     if (!request.jwtPayload) throw new Error('Unauthorized');
     const clubId = request.jwtPayload.clubId;
     if (!clubId) throw new Error('No club associated');
@@ -183,7 +186,7 @@ export async function templateRoutes(
     reply.code(201).send(template);
   });
 
-  fastify.delete('/templates/:id', async (request, reply) => {
+  fastify.delete('/templates/:id', { preHandler: authorizeWrite }, async (request, reply) => {
     if (!request.jwtPayload) throw new Error('Unauthorized');
     const clubId = request.jwtPayload.clubId;
     if (!clubId) throw new Error('No club associated');
@@ -199,7 +202,7 @@ export async function templateRoutes(
     reply.code(204).send();
   });
 
-  fastify.post('/templates/preview', async (request, reply) => {
+  fastify.post('/templates/preview', { preHandler: authorizeRead }, async (request, reply) => {
     if (!request.jwtPayload) throw new Error('Unauthorized');
 
     const data = await request.file();
@@ -222,7 +225,7 @@ export async function templateRoutes(
     columns: z.array(z.string()).min(1),
   });
 
-  fastify.post('/templates/generate', async (request, reply) => {
+  fastify.post('/templates/generate', { preHandler: authorizeWrite }, async (request, reply) => {
     if (!request.jwtPayload) throw new Error('Unauthorized');
     const clubId = request.jwtPayload.clubId;
     if (!clubId) throw new Error('No club associated');

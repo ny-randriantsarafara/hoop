@@ -4,12 +4,15 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { RotateCcw } from 'lucide-react';
 import type { Club } from '@hoop/shared';
+import { Permission } from '@hoop/shared';
 import { Button } from '@/shared/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Skeleton } from '@/shared/ui/skeleton';
+import { RequirePermission } from '@/shared/ui/require-permission';
 import { fetchMyClub } from '@/features/settings/api/settings-api';
 import { SeasonManager } from '@/features/settings/ui/season-manager';
 import { CategoryManager } from '@/features/settings/ui/category-manager';
+import { FeatureFlagsManager } from '@/features/settings/ui/feature-flags-manager';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -44,6 +47,28 @@ export default function SettingsPage() {
     loadClub(true);
   }, [loadClub]);
 
+  return (
+    <RequirePermission permission={Permission.SettingsManage}>
+      <SettingsContent
+        club={club}
+        loading={loading}
+        refreshing={refreshing}
+        error={error}
+        onRefresh={() => loadClub(false)}
+      />
+    </RequirePermission>
+  );
+}
+
+interface SettingsContentProps {
+  readonly club: Club | null;
+  readonly loading: boolean;
+  readonly refreshing: boolean;
+  readonly error: string | null;
+  readonly onRefresh: () => void;
+}
+
+function SettingsContent({ club, loading, refreshing, error, onRefresh }: SettingsContentProps) {
   if (loading) {
     return (
       <div className="space-y-6">
@@ -102,11 +127,7 @@ export default function SettingsPage() {
             <h1 className="text-2xl font-bold">Settings</h1>
             <p className="text-muted-foreground">Manage your club settings</p>
           </div>
-          <Button
-            variant="outline"
-            onClick={() => loadClub(false)}
-            disabled={refreshing || loading}
-          >
+          <Button variant="outline" onClick={onRefresh} disabled={refreshing || loading}>
             <RotateCcw className="mr-2 h-4 w-4" />
             {refreshing ? 'Refreshing...' : 'Refresh'}
           </Button>
@@ -143,6 +164,7 @@ export default function SettingsPage() {
       </Card>
       <SeasonManager />
       <CategoryManager />
+      <FeatureFlagsManager />
     </div>
   );
 }

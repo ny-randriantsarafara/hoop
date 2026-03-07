@@ -47,6 +47,11 @@ async function errorPluginCallback(fastify: FastifyInstance): Promise<void> {
       return;
     }
 
+    if (error.message === 'Feature disabled') {
+      reply.code(403).send({ error: 'Feature disabled for this club' });
+      return;
+    }
+
     if (error.message.includes('No club') || error.message.includes('no club')) {
       reply.code(403).send({ error: error.message });
       return;

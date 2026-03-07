@@ -1,6 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import { Permission } from '@hoop/shared';
 import type { PlayerRepository } from '../../domain/player/player.repository';
 import type { SeasonRepository } from '../../domain/season/season.repository';
 import {
@@ -25,7 +26,9 @@ export async function documentRoutes(
   fastify: FastifyInstance,
   deps: DocumentRoutesDeps,
 ): Promise<void> {
-  fastify.post('/documents/generate', async (request, reply) => {
+  const authorizeWrite = fastify.authorize({ permission: Permission.DocumentsWrite });
+
+  fastify.post('/documents/generate', { preHandler: authorizeWrite }, async (request, reply) => {
     if (!request.jwtPayload) {
       throw new Error('Unauthorized');
     }

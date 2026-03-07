@@ -47,14 +47,14 @@ type BootstrapTransaction = {
       update: {
         name: string;
         passwordHash: string;
-        role: 'adminClub';
+        role: 'admin';
         clubId: string;
       };
       create: {
         name: string;
         email: string;
         passwordHash: string;
-        role: 'adminClub';
+        role: 'admin';
         clubId: string;
       };
     }) => Promise<unknown>;
@@ -146,14 +146,14 @@ export async function bootstrapAdmin({
       update: {
         name: config.adminName,
         passwordHash,
-        role: 'adminClub',
+        role: 'admin',
         clubId: club.id,
       },
       create: {
         name: config.adminName,
         email: config.adminEmail,
         passwordHash,
-        role: 'adminClub',
+        role: 'admin',
         clubId: club.id,
       },
     });

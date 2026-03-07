@@ -1,7 +1,12 @@
 import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { createPlayerSchema, updatePlayerSchema, computeCategoryId } from '@hoop/shared';
+import {
+  createPlayerSchema,
+  updatePlayerSchema,
+  computeCategoryId,
+  Permission,
+} from '@hoop/shared';
 import { createPlayer } from '../../application/player/create-player';
 import { updatePlayer } from '../../application/player/update-player';
 import { listPlayers } from '../../application/player/list-players';
@@ -40,7 +45,10 @@ export async function playerRoutes(
   fastify: FastifyInstance,
   deps: PlayerRoutesDeps,
 ): Promise<void> {
-  fastify.get('/players', async (request) => {
+  const authorizeRead = fastify.authorize({ permission: Permission.PlayersRead });
+  const authorizeWrite = fastify.authorize({ permission: Permission.PlayersWrite });
+
+  fastify.get('/players', { preHandler: authorizeRead }, async (request) => {
     if (!request.jwtPayload) {
       throw new Error('Unauthorized');
     }
@@ -91,7 +99,7 @@ export async function playerRoutes(
     );
   });
 
-  fastify.get('/players/:id', async (request) => {
+  fastify.get('/players/:id', { preHandler: authorizeRead }, async (request) => {
     const { id } = playerIdParamSchema.parse(request.params);
     const player = await deps.playerRepository.findById(id);
     if (!player) {
@@ -100,25 +108,25 @@ export async function playerRoutes(
     return player;
   });
 
-  fastify.post('/players', async (request, reply) => {
+  fastify.post('/players', { preHandler: authorizeWrite }, async (request, reply) => {
     const input = createPlayerSchema.parse(request.body);
     const player = await createPlayer({ playerRepository: deps.playerRepository }, input);
     reply.code(201).send(player);
   });
 
-  fastify.put('/players/:id', async (request) => {
+  fastify.put('/players/:id', { preHandler: authorizeWrite }, async (request) => {
     const { id } = playerIdParamSchema.parse(request.params);
     const input = updatePlayerSchema.parse(request.body);
     return updatePlayer({ playerRepository: deps.playerRepository }, id, input);
   });
 
-  fastify.delete('/players/:id', async (request, reply) => {
+  fastify.delete('/players/:id', { preHandler: authorizeWrite }, async (request, reply) => {
     const { id } = playerIdParamSchema.parse(request.params);
     await deletePlayer({ playerRepository: deps.playerRepository }, id);
     reply.code(204).send();
   });
 
-  fastify.get('/players/:id/licenses', async (request) => {
+  fastify.get('/players/:id/licenses', { preHandler: authorizeRead }, async (request) => {
     const { id } = playerIdParamSchema.parse(request.params);
     return deps.licenseRepository.findMany({ playerId: id });
   });

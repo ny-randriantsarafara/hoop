@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { Role } from '@hoop/shared';
 import { Button } from '@/shared/ui/button';
 import { Input } from '@/shared/ui/input';
 import { Label } from '@/shared/ui/label';
@@ -16,7 +17,7 @@ interface UserFormProps {
   readonly userId?: string;
 }
 
-type FormRole = 'adminClub';
+type FormRole = (typeof Role)[keyof typeof Role];
 
 interface UserDraft {
   readonly name: string;
@@ -27,11 +28,13 @@ interface UserDraft {
 const EMPTY_DRAFT: UserDraft = {
   name: '',
   email: '',
-  role: 'adminClub',
+  role: Role.Staff,
 };
 
 function parseRole(value: string): FormRole {
-  return value === 'adminClub' ? 'adminClub' : 'adminClub';
+  if (value === Role.Admin) return Role.Admin;
+  if (value === Role.Staff) return Role.Staff;
+  return Role.Viewer;
 }
 
 export function UserForm({ userId }: UserFormProps) {
@@ -58,7 +61,7 @@ export function UserForm({ userId }: UserFormProps) {
       setDraft({
         name: user.name,
         email: user.email,
-        role: user.role === 'adminClub' ? 'adminClub' : 'adminClub',
+        role: parseRole(user.role),
       });
     } catch {
       setError('Failed to load user');
@@ -193,7 +196,9 @@ export function UserForm({ userId }: UserFormProps) {
               value={draft.role}
               onChange={(event) => updateDraft('role', parseRole(event.target.value))}
             >
-              <option value="adminClub">adminClub</option>
+              <option value={Role.Admin}>Admin</option>
+              <option value={Role.Staff}>Staff</option>
+              <option value={Role.Viewer}>Viewer</option>
             </Select>
           </div>
           {!userId && (

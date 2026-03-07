@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -17,6 +17,7 @@ import {
 import { signOut } from 'next-auth/react';
 import { cn } from '@/shared/lib/utils';
 import { siteConfig } from '@/shared/config/site-config';
+import { useAuthorization } from '@/shared/lib/use-authorization';
 import { ConfirmDialog } from '@/shared/ui/confirm-dialog';
 
 const iconMap = {
@@ -37,6 +38,19 @@ interface SidebarProps {
 export function Sidebar({ onClose }: SidebarProps) {
   const pathname = usePathname();
   const [signOutOpen, setSignOutOpen] = useState(false);
+  const { canAccess, isLoading } = useAuthorization();
+
+  const visibleNavItems = useMemo(() => {
+    if (isLoading) {
+      // While loading, show only items without permission requirements
+      return siteConfig.navItems.filter((item) => !('permission' in item));
+    }
+    return siteConfig.navItems.filter((item) => {
+      const permission = 'permission' in item ? item.permission : undefined;
+      const featureKey = 'featureKey' in item ? item.featureKey : undefined;
+      return canAccess(permission, featureKey);
+    });
+  }, [isLoading, canAccess]);
 
   return (
     <aside className="flex h-screen w-64 flex-col border-r bg-card">
@@ -48,7 +62,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       </Link>
 
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {siteConfig.navItems.map((item) => {
+        {visibleNavItems.map((item) => {
           const Icon = iconMap[item.icon as keyof typeof iconMap];
           const isActive = item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
 

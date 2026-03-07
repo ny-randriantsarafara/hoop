@@ -1,12 +1,13 @@
 import { z } from 'zod';
+import { Role } from '../constants/enums';
 
-const roleValues = ['adminClub'] as const;
+const roleValues = [Role.Admin, Role.Staff, Role.Viewer] as const;
 
 export const createUserSchema = z.object({
   name: z.string().min(1).max(255),
   email: z.string().email(),
   password: z.string().min(8).max(255),
-  role: z.enum(roleValues).default('adminClub'),
+  role: z.enum(roleValues).default(Role.Staff),
 });
 
 export const updateUserSchema = z

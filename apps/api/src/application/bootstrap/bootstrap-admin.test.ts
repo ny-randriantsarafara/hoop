@@ -114,14 +114,14 @@ describe('bootstrapAdmin', () => {
         clubId: 'club-1',
         name: 'Club Admin',
         passwordHash: '$2b$10$hashed',
-        role: 'adminClub',
+        role: 'admin',
       },
       create: {
         clubId: 'club-1',
         email: 'admin@test.mg',
         name: 'Club Admin',
         passwordHash: '$2b$10$hashed',
-        role: 'adminClub',
+        role: 'admin',
       },
     });
   });
@@ -139,14 +139,14 @@ describe('bootstrapAdmin', () => {
         clubId: 'club-42',
         name: 'Updated Admin',
         passwordHash: '$2b$10$new-hash',
-        role: 'adminClub',
+        role: 'admin',
       },
       create: {
         clubId: 'club-42',
         email: 'admin@test.mg',
         name: 'Updated Admin',
         passwordHash: '$2b$10$new-hash',
-        role: 'adminClub',
+        role: 'admin',
       },
     });
   });
@@ -188,14 +188,14 @@ describe('bootstrapAdmin', () => {
         clubId: 'club-1',
         name: 'Admin Club',
         passwordHash: '$2b$10$seed-hash',
-        role: 'adminClub',
+        role: 'admin',
       },
       create: {
         clubId: 'club-1',
         email: 'admin@test.mg',
         name: 'Admin Club',
         passwordHash: '$2b$10$seed-hash',
-        role: 'adminClub',
+        role: 'admin',
       },
     });
   });

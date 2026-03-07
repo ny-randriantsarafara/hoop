@@ -85,11 +85,19 @@ Deploy now assumes public GHCR package pulls from the VPS host.
 - `DATABASE_URL`
 - `JWT_SECRET`
 - `NEXTAUTH_SECRET`
+- `ADMIN_EMAIL` (optional; if omitted, admin bootstrap is skipped)
+- `ADMIN_PASSWORD` (optional; if omitted, admin bootstrap is skipped)
 - `VPS_SSH_KEY` (private key for deploy user)
 - `VPS_HOST_KEY` (`ssh-keyscan -H <host>` output)
 
 ### Variables
 
+- `ADMIN_NAME` (optional; defaults to `Admin Club`)
+- `ADMIN_CLUB_NAME` (optional; defaults to `BC Analamanga`)
+- `ADMIN_CLUB_SECTION` (optional; defaults to `Masculine`)
+- `ADMIN_CLUB_EMAIL` (optional; defaults to `contact@bcanalamanga.mg`)
+- `ADMIN_CLUB_PHONE` (optional; defaults to `+261 34 00 000 00`)
+- `ADMIN_CLUB_ADDRESS` (optional; defaults to `Antananarivo, Madagascar`)
 - `AUTH_TRUST_HOST` (set to `true` for Auth.js v5 behind the public reverse proxy)
 - `CORS_ORIGIN`
 - `NEXTAUTH_URL`
@@ -107,18 +115,28 @@ You can set all required values in one shot:
 DATABASE_URL='postgresql://hoop_app:***@postgres:5432/hoop' \
 JWT_SECRET='***' \
 NEXTAUTH_SECRET='***' \
+ADMIN_EMAIL='admin@example.com' \
+ADMIN_PASSWORD='***' \
 VPS_SSH_KEY="$(cat ~/.ssh/id_ed25519)" \
 VPS_HOST_KEY="$(ssh-keyscan -H your.vps.host 2>/dev/null)" \
+ADMIN_NAME='Club Admin' \
+ADMIN_CLUB_NAME='Example Club' \
+ADMIN_CLUB_SECTION='Masculine' \
+ADMIN_CLUB_EMAIL='contact@example.com' \
+ADMIN_CLUB_PHONE='+261 34 00 000 00' \
+ADMIN_CLUB_ADDRESS='Antananarivo, Madagascar' \
 CORS_ORIGIN='https://app.example.com' \
 AUTH_TRUST_HOST='true' \
 NEXTAUTH_URL='https://app.example.com' \
 VPS_HOST='your.vps.host' \
 VPS_USER='deploy' \
 VPS_APP_DIR='/home/deploy/apps/hoop' \
-bash scripts/github/bootstrap-deploy-vars.sh
+bash scripts/sync-env-to-gh.sh
 ```
 
 For Auth.js v5 deployments, `AUTH_URL` should resolve to the same public origin as `NEXTAUTH_URL`. In this repo, the production compose file maps `AUTH_URL` from `NEXTAUTH_URL`, so setting `NEXTAUTH_URL='https://app.example.com'` remains the primary deploy input.
+
+When `ADMIN_EMAIL` and `ADMIN_PASSWORD` are present, the API bootstraps or updates the admin user and its club during startup. If either secret is missing, bootstrap is skipped and deployment continues.
 
 ## 6. Caddy routes (in vps-services repo)
 

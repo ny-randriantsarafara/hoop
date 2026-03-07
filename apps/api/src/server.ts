@@ -23,6 +23,7 @@ import { documentRoutes } from './interface/routes/document-routes';
 import { categoryRoutes } from './interface/routes/category-routes';
 import { ocrRoutes } from './interface/routes/ocr-routes';
 import { createOllamaOcrService } from './infrastructure/ocr/ollama-ocr-service';
+import { bootstrapAdmin } from './application/bootstrap/bootstrap-admin';
 
 const config = loadConfig();
 
@@ -36,6 +37,8 @@ const categoryRepository = createPrismaCategoryRepository(prisma);
 const ocrService = createOllamaOcrService(config.ollamaBaseUrl, config.ollamaModel);
 
 async function start(): Promise<void> {
+  await bootstrapAdmin({ prisma, logger: fastify.log });
+
   await fastify.register(cors, {
     origin: config.corsOrigin,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],

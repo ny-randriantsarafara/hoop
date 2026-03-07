@@ -9,7 +9,7 @@ Usage: scripts/sync-env-to-gh.sh [options]
 Push KEY=VALUE entries from a local .env file to GitHub repository settings.
 
 Secrets:
-  DATABASE_URL, DB_PASSWORD, JWT_SECRET, NEXTAUTH_SECRET, VPS_SSH_KEY, VPS_HOST_KEY
+  DATABASE_URL, DB_PASSWORD, JWT_SECRET, NEXTAUTH_SECRET, ADMIN_EMAIL, ADMIN_PASSWORD, VPS_SSH_KEY, VPS_HOST_KEY
 
 Variables:
   all other keys from the .env file
@@ -37,6 +37,9 @@ trim() {
 is_secret_key() {
   case "$1" in
     DATABASE_URL|DB_PASSWORD|JWT_SECRET|NEXTAUTH_SECRET|VPS_SSH_KEY|VPS_HOST_KEY)
+      return 0
+      ;;
+    ADMIN_EMAIL|ADMIN_PASSWORD)
       return 0
       ;;
     *)

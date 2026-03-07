@@ -147,6 +147,12 @@ jobs:
           OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
           NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
+          ADMIN_NAME: ${{ vars.ADMIN_NAME }}
+          ADMIN_CLUB_NAME: ${{ vars.ADMIN_CLUB_NAME }}
+          ADMIN_CLUB_SECTION: ${{ vars.ADMIN_CLUB_SECTION }}
+          ADMIN_CLUB_EMAIL: ${{ vars.ADMIN_CLUB_EMAIL }}
+          ADMIN_CLUB_PHONE: ${{ vars.ADMIN_CLUB_PHONE }}
+          ADMIN_CLUB_ADDRESS: ${{ vars.ADMIN_CLUB_ADDRESS }}
         run: |
           APP_URL="${NEXTAUTH_URL%/}"
 
@@ -162,6 +168,12 @@ jobs:
               "CORS_ORIGIN=$CORS_ORIGIN" \
               "OLLAMA_BASE_URL=$OLLAMA_BASE_URL" \
               "OLLAMA_MODEL=$OLLAMA_MODEL" \
+              "ADMIN_NAME=$ADMIN_NAME" \
+              "ADMIN_CLUB_NAME=$ADMIN_CLUB_NAME" \
+              "ADMIN_CLUB_SECTION=$ADMIN_CLUB_SECTION" \
+              "ADMIN_CLUB_EMAIL=$ADMIN_CLUB_EMAIL" \
+              "ADMIN_CLUB_PHONE=$ADMIN_CLUB_PHONE" \
+              "ADMIN_CLUB_ADDRESS=$ADMIN_CLUB_ADDRESS" \
               "API_URL=http://hoop-api:3001/api" \
               "NEXT_PUBLIC_API_URL=$APP_URL/api" \
               "NEXTAUTH_URL=$APP_URL"
@@ -190,6 +202,12 @@ jobs:
           OLLAMA_BASE_URL: ${{ vars.OLLAMA_BASE_URL }}
           OLLAMA_MODEL: ${{ vars.OLLAMA_MODEL }}
           NEXTAUTH_URL: ${{ vars.NEXTAUTH_URL }}
+          ADMIN_NAME: ${{ vars.ADMIN_NAME }}
+          ADMIN_CLUB_NAME: ${{ vars.ADMIN_CLUB_NAME }}
+          ADMIN_CLUB_SECTION: ${{ vars.ADMIN_CLUB_SECTION }}
+          ADMIN_CLUB_EMAIL: ${{ vars.ADMIN_CLUB_EMAIL }}
+          ADMIN_CLUB_PHONE: ${{ vars.ADMIN_CLUB_PHONE }}
+          ADMIN_CLUB_ADDRESS: ${{ vars.ADMIN_CLUB_ADDRESS }}
         run: |
           APP_URL="${NEXTAUTH_URL%/}"
 
@@ -205,6 +223,12 @@ jobs:
               "CORS_ORIGIN=$CORS_ORIGIN" \
               "OLLAMA_BASE_URL=$OLLAMA_BASE_URL" \
               "OLLAMA_MODEL=$OLLAMA_MODEL" \
+              "ADMIN_NAME=$ADMIN_NAME" \
+              "ADMIN_CLUB_NAME=$ADMIN_CLUB_NAME" \
+              "ADMIN_CLUB_SECTION=$ADMIN_CLUB_SECTION" \
+              "ADMIN_CLUB_EMAIL=$ADMIN_CLUB_EMAIL" \
+              "ADMIN_CLUB_PHONE=$ADMIN_CLUB_PHONE" \
+              "ADMIN_CLUB_ADDRESS=$ADMIN_CLUB_ADDRESS" \
               "API_URL=http://hoop-api:3001/api" \
               "NEXT_PUBLIC_API_URL=$APP_URL/api" \
               "NEXTAUTH_URL=$APP_URL"
@@ -236,6 +260,8 @@ jobs:
         DATABASE_URL=postgresql://${{ vars.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST || 'postgres' }}:${{ vars.DB_PORT || '5432' }}/${{ vars.DB_NAME }}
         JWT_SECRET=${{ secrets.JWT_SECRET }}
         NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+        ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+        ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
       vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
       vps_host_key: ${{ secrets.VPS_HOST_KEY }}
 
@@ -264,5 +290,7 @@ jobs:
         DATABASE_URL=postgresql://${{ vars.DB_USER }}:${{ secrets.DB_PASSWORD }}@${{ vars.DB_HOST || 'postgres' }}:${{ vars.DB_PORT || '5432' }}/${{ vars.DB_NAME }}
         JWT_SECRET=${{ secrets.JWT_SECRET }}
         NEXTAUTH_SECRET=${{ secrets.NEXTAUTH_SECRET }}
+        ADMIN_EMAIL=${{ secrets.ADMIN_EMAIL }}
+        ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
       vps_ssh_key: ${{ secrets.VPS_SSH_KEY }}
       vps_host_key: ${{ secrets.VPS_HOST_KEY }}

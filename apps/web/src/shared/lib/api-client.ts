@@ -7,12 +7,16 @@ interface FetchOptions extends RequestInit {
 }
 
 export async function apiClient<T>(endpoint: string, options: FetchOptions = {}): Promise<T> {
-  const { token, headers: customHeaders, ...restOptions } = options;
+  const { token, headers: customHeaders, body, ...restOptions } = options;
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...Object.fromEntries(Object.entries(customHeaders ?? {})),
   };
+
+  // Only set Content-Type for requests with a body to avoid parser errors on bodyless requests
+  if (body) {
+    headers['Content-Type'] = 'application/json';
+  }
 
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -21,6 +25,7 @@ export async function apiClient<T>(endpoint: string, options: FetchOptions = {})
   const response = await fetch(`${getApiUrl()}${endpoint}`, {
     ...restOptions,
     headers,
+    body,
   });
 
   if (!response.ok) {

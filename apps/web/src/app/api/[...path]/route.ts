@@ -28,9 +28,20 @@ async function proxyRequest(
   };
 
   if (method !== 'GET' && method !== 'HEAD') {
-    const body = await request.text();
-    if (body) {
-      init.body = body;
+    const contentType = request.headers.get('content-type') ?? '';
+    const hasBody = request.headers.get('content-length') !== '0';
+
+    if (hasBody) {
+      // Use arrayBuffer() to preserve binary data integrity for multipart uploads
+      const buffer = await request.arrayBuffer();
+      if (buffer.byteLength > 0) {
+        init.body = buffer;
+      }
+    }
+
+    // Strip Content-Type header for requests with no body to avoid parser errors
+    if (!init.body && contentType) {
+      headers.delete('content-type');
     }
   }
 

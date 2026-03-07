@@ -10,7 +10,7 @@ beforeEach(() => {
 });
 
 describe('apiClient', () => {
-  it('makes a GET request with correct URL', async () => {
+  it('makes a GET request with correct URL without Content-Type header', async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       status: 200,
@@ -19,12 +19,10 @@ describe('apiClient', () => {
 
     const result = await apiClient('/players');
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      '/api/players',
-      expect.objectContaining({
-        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
-      }),
-    );
+    expect(mockFetch).toHaveBeenCalledWith('/api/players', expect.any(Object));
+    // GET requests should not have Content-Type header (no body)
+    const [, options] = mockFetch.mock.calls[0];
+    expect(options.headers['Content-Type']).toBeUndefined();
     expect(result).toEqual({ data: 'test' });
   });
 
@@ -39,12 +37,23 @@ describe('apiClient', () => {
 
     await apiClient('/players');
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      'http://localhost:3001/api/players',
-      expect.objectContaining({
-        headers: expect.objectContaining({ 'Content-Type': 'application/json' }),
-      }),
-    );
+    expect(mockFetch).toHaveBeenCalledWith('http://localhost:3001/api/players', expect.any(Object));
+  });
+
+  it('includes Content-Type header only when body is present', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      status: 201,
+      json: () => Promise.resolve({ id: '123' }),
+    });
+
+    await apiClient('/players', {
+      method: 'POST',
+      body: JSON.stringify({ firstName: 'Ada' }),
+    });
+
+    const [, options] = mockFetch.mock.calls[0];
+    expect(options.headers['Content-Type']).toBe('application/json');
   });
 
   it('includes authorization header when token is provided', async () => {

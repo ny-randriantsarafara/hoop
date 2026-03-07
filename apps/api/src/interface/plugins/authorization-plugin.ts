@@ -1,11 +1,16 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import fp from 'fastify-plugin';
-import { hasPermission, type Permission, type FeatureKey } from '@hoop/shared';
+import {
+  hasPermission,
+  FeatureKey,
+  type Permission,
+  type FeatureKey as FeatureKeyType,
+} from '@hoop/shared';
 
 export interface AuthorizeOptions {
   readonly permission?: Permission;
-  readonly featureKey?: FeatureKey;
+  readonly featureKey?: FeatureKeyType;
 }
 
 declare module 'fastify' {
@@ -56,9 +61,10 @@ async function authorizationPluginCallback(
             },
           });
 
-          // If flag exists and is disabled, block access
-          // If flag doesn't exist, default to enabled (except for OCR which we'll seed as disabled)
-          if (flag && !flag.enabled) {
+          const defaultEnabled = options.featureKey !== FeatureKey.OcrImport;
+          const isEnabled = flag?.enabled ?? defaultEnabled;
+
+          if (!isEnabled) {
             throw new Error('Feature disabled');
           }
         }

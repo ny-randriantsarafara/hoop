@@ -17,9 +17,10 @@ export async function featureFlagRoutes(
   deps: FeatureFlagRoutesDeps,
 ): Promise<void> {
   const authorizeSettings = fastify.authorize({ permission: Permission.SettingsManage });
+  const authorizeAuthenticated = fastify.authorize({});
 
   // Get all feature flags for the current club
-  fastify.get('/feature-flags', { preHandler: authorizeSettings }, async (request) => {
+  fastify.get('/feature-flags', { preHandler: authorizeAuthenticated }, async (request) => {
     if (!request.jwtPayload) {
       throw new Error('Unauthorized');
     }
@@ -38,7 +39,7 @@ export async function featureFlagRoutes(
       const flag = flags.find((f: { key: string; enabled: boolean }) => f.key === key);
       return {
         key,
-        enabled: flag?.enabled ?? true, // Default to enabled if not set
+        enabled: flag?.enabled ?? key !== FeatureKey.OcrImport,
       };
     });
   });

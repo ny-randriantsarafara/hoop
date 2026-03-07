@@ -1,12 +1,18 @@
 'use client';
 
 import { useSession } from 'next-auth/react';
-import { hasPermission, type Permission, type FeatureKey, type Role } from '@hoop/shared';
+import {
+  FeatureKey,
+  hasPermission,
+  type Permission,
+  type FeatureKey as FeatureKeyType,
+  type Role,
+} from '@hoop/shared';
 import { useEffect, useState, useCallback } from 'react';
 import { apiClient } from '@/shared/lib/api-client';
 
 interface FeatureFlag {
-  key: FeatureKey;
+  key: FeatureKeyType;
   enabled: boolean;
 }
 
@@ -56,16 +62,15 @@ export function useAuthorization() {
   );
 
   const isFeatureEnabled = useCallback(
-    (featureKey: FeatureKey): boolean => {
+    (featureKey: FeatureKeyType): boolean => {
       const flag = state.featureFlags.find((f) => f.key === featureKey);
-      // Default to enabled if flag doesn't exist (backward compatibility)
-      return flag?.enabled ?? true;
+      return flag?.enabled ?? featureKey !== FeatureKey.OcrImport;
     },
     [state.featureFlags],
   );
 
   const canAccess = useCallback(
-    (permission?: Permission, featureKey?: FeatureKey): boolean => {
+    (permission?: Permission, featureKey?: FeatureKeyType): boolean => {
       // Check permission if provided
       if (permission && !can(permission)) {
         return false;

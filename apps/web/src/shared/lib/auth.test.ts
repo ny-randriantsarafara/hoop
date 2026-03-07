@@ -45,12 +45,18 @@ describe('auth config', () => {
     expect(nextAuthMock).toHaveBeenCalledTimes(1);
     const config = nextAuthMock.mock.calls[0]?.[0] as MockedAuthConfig | undefined;
     expect(config).toBeDefined();
-    expect(config!.basePath).toBe('/auth');
-    expect(config!.pages?.signIn).toBe('/login');
+    if (!config) {
+      throw new Error('Expected NextAuth config to be passed');
+    }
+    expect(config.basePath).toBe('/auth');
+    expect(config.pages?.signIn).toBe('/login');
 
     const providerConfig = credentialsMock.mock.calls[0]?.[0] as MockedCredentialsConfig | undefined;
     expect(providerConfig).toBeDefined();
-    const authorize = providerConfig!.authorize;
+    if (!providerConfig) {
+      throw new Error('Expected credentials provider config to be passed');
+    }
+    const authorize = providerConfig.authorize;
 
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

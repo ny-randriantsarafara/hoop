@@ -15,7 +15,8 @@
     "db:dev": "docker compose -f docker-compose.dev.yml up -d",
     "db:stop": "docker compose -f docker-compose.dev.yml down",
     "db:migrate": "pnpm --filter @hoop/api prisma:migrate",
-    "db:seed": "pnpm --filter @hoop/api prisma:seed"
+    "db:seed": "pnpm --filter @hoop/api prisma:seed",
+    "db:reset": "pnpm --filter @hoop/api prisma:reset"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

@@ -11,9 +11,10 @@ const mockUser = {
   name: 'Admin',
   email: 'admin@test.mg',
   passwordHash: '$2b$10$hashed',
-  role: 'admin',
+  role: 'adminClub',
   clubId: 'club-1',
   lastLogin: null,
+  createdAt: new Date(),
 };
 
 function createDeps(
@@ -22,7 +23,12 @@ function createDeps(
   return {
     userRepository: {
       findById: vi.fn().mockResolvedValue(null),
+      findManyByClub: vi.fn().mockResolvedValue([]),
       findByEmail: vi.fn().mockResolvedValue(mockUser),
+      create: vi.fn(),
+      update: vi.fn(),
+      updatePassword: vi.fn(),
+      delete: vi.fn(),
       updateLastLogin: vi.fn().mockResolvedValue(undefined),
       ...overrides,
     },
@@ -43,7 +49,7 @@ describe('authenticateUser', () => {
       userId: 'user-1',
       name: 'Admin',
       email: 'admin@test.mg',
-      role: 'admin',
+      role: 'adminClub',
       clubId: 'club-1',
     });
     expect(deps.userRepository.updateLastLogin).toHaveBeenCalledWith('user-1');

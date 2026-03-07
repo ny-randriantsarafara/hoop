@@ -10,3 +10,13 @@ export interface User {
   readonly lastLogin: Date | null;
   readonly createdAt: Date;
 }
+
+export interface PublicUser {
+  readonly id: string;
+  readonly clubId: string | null;
+  readonly name: string;
+  readonly email: string;
+  readonly role: Role;
+  readonly lastLogin: Date | null;
+  readonly createdAt: Date;
+}

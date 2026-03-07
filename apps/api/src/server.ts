@@ -22,6 +22,7 @@ import { templateRoutes } from './interface/routes/template-routes';
 import { documentRoutes } from './interface/routes/document-routes';
 import { categoryRoutes } from './interface/routes/category-routes';
 import { ocrRoutes } from './interface/routes/ocr-routes';
+import { userRoutes } from './interface/routes/user-routes';
 import { createOllamaOcrService } from './infrastructure/ocr/ollama-ocr-service';
 import { bootstrapAdmin } from './application/bootstrap/bootstrap-admin';
 
@@ -64,6 +65,7 @@ async function start(): Promise<void> {
 
       await clubRoutes(app, { prisma });
       await categoryRoutes(app, { prisma });
+      await userRoutes(app, { userRepository });
       await playerRoutes(app, { playerRepository, licenseRepository, prisma });
       await licenseRoutes(app, {
         licenseRepository,

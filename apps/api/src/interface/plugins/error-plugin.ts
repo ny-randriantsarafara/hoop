@@ -23,6 +23,15 @@ async function errorPluginCallback(fastify: FastifyInstance): Promise<void> {
       return;
     }
 
+    if (
+      prismaError.code === 'P2002' &&
+      Array.isArray(prismaError.meta?.target) &&
+      prismaError.meta?.target.includes('email')
+    ) {
+      reply.code(409).send({ error: 'Email already exists' });
+      return;
+    }
+
     if (error.message === 'Invalid credentials') {
       reply.code(401).send({ error: error.message });
       return;

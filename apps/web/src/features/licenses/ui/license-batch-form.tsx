@@ -240,7 +240,7 @@ export function LicenseBatchForm() {
                           <option value="">Select...</option>
                           {categories.map((cat) => (
                             <option key={cat.id} value={cat.id}>
-                              {cat.name}
+                              {cat.name} ({cat.gender})
                             </option>
                           ))}
                         </Select>

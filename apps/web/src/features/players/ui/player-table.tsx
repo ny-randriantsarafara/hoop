@@ -26,7 +26,13 @@ export function PlayerTable() {
   const { toast } = useToast();
   const [players, setPlayers] = useState<Player[]>([]);
   const [categories, setCategories] = useState<
-    Array<{ name: string; minAge: number; maxAge: number | null }>
+    Array<{
+      id: string;
+      name: string;
+      gender: Player['gender'];
+      minAge: number;
+      maxAge: number | null;
+    }>
   >([]);
   const [filterValues, setFilterValues] = useState<Record<string, string>>(EMPTY_FILTERS);
   const [debouncedSearch, setDebouncedSearch] = useState('');
@@ -48,9 +54,20 @@ export function PlayerTable() {
 
     Promise.all([fetchCategories(session.accessToken), fetchSeasons(session.accessToken)])
       .then(([cats, seasons]) => {
-        setCategories(cats.map((c) => ({ name: c.name, minAge: c.minAge, maxAge: c.maxAge })));
+        setCategories(
+          cats.map((c) => ({
+            id: c.id,
+            name: c.name,
+            gender: c.gender,
+            minAge: c.minAge,
+            maxAge: c.maxAge,
+          })),
+        );
         setDynamicOptions({
-          category: cats.map((c) => ({ value: c.name, label: c.name })),
+          category: cats.map((c) => ({
+            value: c.id,
+            label: `${c.name} (${genderLabels[c.gender] ?? c.gender})`,
+          })),
           seasonId: seasons.map((s) => ({ value: s.id, label: s.label })),
         });
       })
@@ -167,7 +184,12 @@ export function PlayerTable() {
                     <TableCell>{genderLabels[player.gender] ?? player.gender}</TableCell>
                     <TableCell>
                       <Badge variant="secondary">
-                        {computeCategory(new Date(player.birthDate), currentYear, categories)}
+                        {computeCategory(
+                          new Date(player.birthDate),
+                          currentYear,
+                          player.gender,
+                          categories,
+                        )}
                       </Badge>
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate">{player.address}</TableCell>
@@ -207,7 +229,12 @@ export function PlayerTable() {
                     {player.lastName} {player.firstName}
                   </span>
                   <Badge variant="secondary">
-                    {computeCategory(new Date(player.birthDate), currentYear, categories)}
+                    {computeCategory(
+                      new Date(player.birthDate),
+                      currentYear,
+                      player.gender,
+                      categories,
+                    )}
                   </Badge>
                 </div>
                 <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground">

@@ -15,6 +15,22 @@ export {
 export { loginSchema, type LoginInput } from './auth-schema';
 
 export {
+  createCategorySchema,
+  updateCategorySchema,
+  type CreateCategoryInput,
+  type UpdateCategoryInput,
+} from './category-schema';
+
+export {
+  createUserSchema,
+  updateUserSchema,
+  resetUserPasswordSchema,
+  type CreateUserInput,
+  type UpdateUserInput,
+  type ResetUserPasswordInput,
+} from './user-schema';
+
+export {
   createSeasonSchema,
   updateSeasonSchema,
   type CreateSeasonInput,

@@ -2,33 +2,46 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
+import { RotateCcw } from 'lucide-react';
 import type { Club } from '@hoop/shared';
+import { Button } from '@/shared/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/shared/ui/card';
 import { Skeleton } from '@/shared/ui/skeleton';
 import { fetchMyClub } from '@/features/settings/api/settings-api';
 import { SeasonManager } from '@/features/settings/ui/season-manager';
+import { CategoryManager } from '@/features/settings/ui/category-manager';
 
 export default function SettingsPage() {
   const { data: session } = useSession();
   const [club, setClub] = useState<Club | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const loadClub = useCallback(async () => {
-    if (!session?.accessToken) return;
-    setError(null);
-    try {
-      const data = await fetchMyClub(session.accessToken);
-      setClub(data);
-    } catch {
-      setError('Failed to load club information');
-    } finally {
-      setLoading(false);
-    }
-  }, [session?.accessToken]);
+  const loadClub = useCallback(
+    async (showLoading: boolean) => {
+      if (!session?.accessToken) return;
+      if (showLoading) {
+        setLoading(true);
+      } else {
+        setRefreshing(true);
+      }
+      setError(null);
+      try {
+        const data = await fetchMyClub(session.accessToken);
+        setClub(data);
+      } catch {
+        setError('Failed to load club information');
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [session?.accessToken],
+  );
 
   useEffect(() => {
-    loadClub();
+    loadClub(true);
   }, [loadClub]);
 
   if (loading) {
@@ -84,8 +97,20 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your club settings</p>
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold">Settings</h1>
+            <p className="text-muted-foreground">Manage your club settings</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={() => loadClub(false)}
+            disabled={refreshing || loading}
+          >
+            <RotateCcw className="mr-2 h-4 w-4" />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </Button>
+        </div>
       </div>
       <Card>
         <CardHeader>
@@ -117,6 +142,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
       <SeasonManager />
+      <CategoryManager />
     </div>
   );
 }

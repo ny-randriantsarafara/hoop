@@ -31,6 +31,7 @@ model CategoryConfig {
   id           String @id @default(uuid())
   clubId       String @map("club_id")
   name         String
+  gender       Gender @map("gender")
   minAge       Int    @map("min_age")
   maxAge       Int?   @map("max_age")
   displayOrder Int    @default(0) @map("display_order")

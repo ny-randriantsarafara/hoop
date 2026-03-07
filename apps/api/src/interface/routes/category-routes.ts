@@ -1,19 +1,11 @@
 import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
+import { createCategorySchema, updateCategorySchema } from '@hoop/shared';
 
 interface CategoryRoutesDeps {
   readonly prisma: PrismaClient;
 }
-
-const createSchema = z.object({
-  name: z.string().min(1).max(50),
-  minAge: z.number().int().min(0),
-  maxAge: z.number().int().min(0).nullable(),
-  displayOrder: z.number().int().default(0),
-});
-
-const updateSchema = createSchema.partial();
 
 export async function categoryRoutes(
   fastify: FastifyInstance,
@@ -35,7 +27,7 @@ export async function categoryRoutes(
     const clubId = request.jwtPayload.clubId;
     if (!clubId) throw new Error('No club associated');
 
-    const input = createSchema.parse(request.body);
+    const input = createCategorySchema.parse(request.body);
     const category = await deps.prisma.categoryConfig.create({
       data: { ...input, clubId },
     });
@@ -48,7 +40,7 @@ export async function categoryRoutes(
     if (!clubId) throw new Error('No club associated');
 
     const { id } = z.object({ id: z.string().uuid() }).parse(request.params);
-    const input = updateSchema.parse(request.body);
+    const input = updateCategorySchema.parse(request.body);
 
     const existing = await deps.prisma.categoryConfig.findUnique({ where: { id } });
     if (!existing || existing.clubId !== clubId) throw new Error('Category not found');

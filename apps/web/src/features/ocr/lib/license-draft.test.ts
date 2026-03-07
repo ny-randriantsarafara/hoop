@@ -2,17 +2,18 @@ import { describe, expect, it } from 'vitest';
 import { prepareLicenseInput, resolveCategoryIdByName } from './license-draft';
 
 const categories = [
-  { id: 'cat-u13', name: 'U13' },
-  { id: 'cat-u15', name: 'U15' },
+  { id: 'cat-u13-g', name: 'U13', gender: 'G' as const },
+  { id: 'cat-u13-f', name: 'U13', gender: 'F' as const },
+  { id: 'cat-u15-g', name: 'U15', gender: 'G' as const },
 ];
 
 describe('resolveCategoryIdByName', () => {
-  it('returns matching category id case-insensitively', () => {
-    expect(resolveCategoryIdByName(' u13 ', categories)).toBe('cat-u13');
+  it('returns matching category id case-insensitively using player gender', () => {
+    expect(resolveCategoryIdByName(' u13 ', 'F', categories)).toBe('cat-u13-f');
   });
 
   it('returns null when there is no matching category name', () => {
-    expect(resolveCategoryIdByName('UNKNOWN', categories)).toBeNull();
+    expect(resolveCategoryIdByName('UNKNOWN', 'G', categories)).toBeNull();
   });
 });
 

@@ -29,14 +29,22 @@ async function main() {
   });
 
   const defaultCategories = [
-    { name: 'U10', minAge: 0, maxAge: 10, displayOrder: 1 },
-    { name: 'U12', minAge: 11, maxAge: 12, displayOrder: 2 },
-    { name: 'U14', minAge: 13, maxAge: 14, displayOrder: 3 },
-    { name: 'U16', minAge: 15, maxAge: 16, displayOrder: 4 },
-    { name: 'U18', minAge: 17, maxAge: 18, displayOrder: 5 },
-    { name: 'U20', minAge: 19, maxAge: 20, displayOrder: 6 },
-    { name: 'Senior', minAge: 21, maxAge: 35, displayOrder: 7 },
-    { name: 'Veteran', minAge: 36, maxAge: null, displayOrder: 8 },
+    { name: 'U10', gender: 'G' as const, minAge: 0, maxAge: 10 },
+    { name: 'U10', gender: 'F' as const, minAge: 0, maxAge: 10 },
+    { name: 'U12', gender: 'G' as const, minAge: 11, maxAge: 12 },
+    { name: 'U12', gender: 'F' as const, minAge: 11, maxAge: 12 },
+    { name: 'U14', gender: 'G' as const, minAge: 13, maxAge: 14 },
+    { name: 'U14', gender: 'F' as const, minAge: 13, maxAge: 14 },
+    { name: 'U16', gender: 'G' as const, minAge: 15, maxAge: 16 },
+    { name: 'U16', gender: 'F' as const, minAge: 15, maxAge: 16 },
+    { name: 'U18', gender: 'G' as const, minAge: 17, maxAge: 18 },
+    { name: 'U18', gender: 'F' as const, minAge: 17, maxAge: 18 },
+    { name: 'U20', gender: 'G' as const, minAge: 19, maxAge: 20 },
+    { name: 'U20', gender: 'F' as const, minAge: 19, maxAge: 20 },
+    { name: 'Senior', gender: 'H' as const, minAge: 21, maxAge: 35 },
+    { name: 'Senior', gender: 'D' as const, minAge: 21, maxAge: 35 },
+    { name: 'Veteran', gender: 'H' as const, minAge: 36, maxAge: null },
+    { name: 'Veteran', gender: 'D' as const, minAge: 36, maxAge: null },
   ];
 
   await prisma.categoryConfig.deleteMany({ where: { clubId: club.id } });
@@ -44,6 +52,7 @@ async function main() {
     data: defaultCategories.map((cat, index) => ({
       clubId: club.id,
       name: cat.name,
+      gender: cat.gender,
       minAge: cat.minAge,
       maxAge: cat.maxAge,
       displayOrder: index + 1,

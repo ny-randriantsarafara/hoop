@@ -1,4 +1,5 @@
 import type { OcrLicenseData } from '@hoop/shared';
+import type { Gender } from '@hoop/shared';
 
 type LicenseField = 'number' | 'category' | 'startDate' | 'endDate';
 
@@ -12,6 +13,7 @@ export interface PreparedLicenseInput {
 export interface CategoryOption {
   readonly id: string;
   readonly name: string;
+  readonly gender: Gender;
 }
 
 type LicensePreparationResult =
@@ -35,6 +37,7 @@ function parseDate(value: string | null): Date | null {
 
 export function resolveCategoryIdByName(
   value: string | null,
+  playerGender: Gender | null,
   categories: ReadonlyArray<CategoryOption>,
 ): string | null {
   const normalized = normalizeText(value);
@@ -42,7 +45,9 @@ export function resolveCategoryIdByName(
 
   const normalizedKey = normalizeCategoryName(normalized);
   const matched = categories.find(
-    (category) => normalizeCategoryName(category.name) === normalizedKey,
+    (category) =>
+      normalizeCategoryName(category.name) === normalizedKey &&
+      (playerGender ? category.gender === playerGender : true),
   );
 
   return matched?.id ?? null;

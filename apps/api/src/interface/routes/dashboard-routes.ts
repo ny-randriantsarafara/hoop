@@ -1,6 +1,6 @@
 import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
-import { computeCategory } from '@hoop/shared';
+import { computeCategoryId } from '@hoop/shared';
 import type { PlayerRepository } from '../../domain/player/player.repository';
 import type { LicenseRepository } from '../../domain/license/license.repository';
 import type { SeasonRepository } from '../../domain/season/season.repository';
@@ -52,23 +52,41 @@ export async function dashboardRoutes(
     const seasonYear = season.startDate.getFullYear();
     const categories = categoryConfigs.map((c) => ({
       name: c.name,
+      gender: c.gender,
       minAge: c.minAge,
       maxAge: c.maxAge,
     }));
 
+    const categoryById = new Map(categoryConfigs.map((entry) => [entry.id, entry]));
     const categoryCounts = new Map<string, number>();
     for (const player of players) {
-      const cat = computeCategory(player.birthDate, seasonYear, categories);
-      categoryCounts.set(cat, (categoryCounts.get(cat) ?? 0) + 1);
+      const categoryId = computeCategoryId(player.birthDate, seasonYear, player.gender, categories);
+      if (!categoryId) {
+        categoryCounts.set('Unknown', (categoryCounts.get('Unknown') ?? 0) + 1);
+        continue;
+      }
+      categoryCounts.set(categoryId, (categoryCounts.get(categoryId) ?? 0) + 1);
     }
 
     const playersByCategory = Array.from(categoryCounts.entries())
-      .map(([category, count]) => ({ category, count }))
+      .map(([categoryKey, count]) => {
+        if (categoryKey === 'Unknown') {
+          return { category: 'Unknown', count, displayOrder: Number.MAX_SAFE_INTEGER };
+        }
+        const categoryConfig = categoryById.get(categoryKey);
+        if (!categoryConfig) {
+          return { category: 'Unknown', count, displayOrder: Number.MAX_SAFE_INTEGER };
+        }
+        return {
+          category: `${categoryConfig.name} (${categoryConfig.gender})`,
+          count,
+          displayOrder: categoryConfig.displayOrder,
+        };
+      })
       .sort((a, b) => {
-        const orderA = categoryConfigs.findIndex((c) => c.name === a.category);
-        const orderB = categoryConfigs.findIndex((c) => c.name === b.category);
-        return (orderA === -1 ? Infinity : orderA) - (orderB === -1 ? Infinity : orderB);
-      });
+        return a.displayOrder - b.displayOrder;
+      })
+      .map(({ category, count }) => ({ category, count }));
 
     return { totalPlayers, activeLicenses, expiringLicenses, playersByCategory };
   });

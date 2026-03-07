@@ -12,12 +12,14 @@ import type {
   OcrPlayerData,
   OcrLicenseData,
   OcrConfidence,
+  Gender,
 } from '@hoop/shared';
 import { resolveCategoryIdByName } from '../lib/license-draft';
 
 interface CategoryOption {
   readonly id: string;
   readonly name: string;
+  readonly gender: 'G' | 'F' | 'H' | 'D';
 }
 
 const confidenceConfig: Record<
@@ -51,6 +53,14 @@ export function ExtractionReview({
   categoriesLoading,
   saving,
 }: ExtractionReviewProps) {
+  function resolvePlayerGender(value: string | null): Gender | null {
+    if (value === 'F') return 'F';
+    if (value === 'H') return 'H';
+    if (value === 'D') return 'D';
+    if (value === 'G') return 'G';
+    return null;
+  }
+
   const emptyPlayer: OcrPlayerData = {
     firstName: null,
     lastName: null,
@@ -82,9 +92,13 @@ export function ExtractionReview({
         return previous;
       }
 
-      return resolveCategoryIdByName(license.category, categories);
+      return resolveCategoryIdByName(
+        license.category,
+        resolvePlayerGender(player.gender),
+        categories,
+      );
     });
-  }, [categories, license.category]);
+  }, [categories, license.category, player.gender]);
 
   const { label, className, Icon } = confidenceConfig[extraction.confidence];
 
@@ -224,7 +238,7 @@ export function ExtractionReview({
                   </option>
                   {categories.map((category) => (
                     <option key={category.id} value={category.id}>
-                      {category.name}
+                      {category.name} ({category.gender})
                     </option>
                   ))}
                 </Select>

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
-import { createPlayerSchema, updatePlayerSchema, computeCategory } from '@hoop/shared';
+import { createPlayerSchema, updatePlayerSchema, computeCategoryId } from '@hoop/shared';
 import { createPlayer } from '../../application/player/create-player';
 import { updatePlayer } from '../../application/player/update-player';
 import { listPlayers } from '../../application/player/list-players';
@@ -26,7 +26,7 @@ const querySchema = z.object({
   clubId: z.string().uuid().optional(),
   birthDateFrom: z.coerce.date().optional(),
   birthDateTo: z.coerce.date().optional(),
-  category: z.string().optional(),
+  category: z.string().uuid().optional(),
   seasonId: z.string().uuid().optional(),
 });
 
@@ -76,10 +76,17 @@ export async function playerRoutes(
 
     return players.filter(
       (player) =>
-        computeCategory(
+        computeCategoryId(
           new Date(player.birthDate),
           seasonYear,
-          categoryConfigs.map((c) => ({ name: c.name, minAge: c.minAge, maxAge: c.maxAge })),
+          player.gender,
+          categoryConfigs.map((c) => ({
+            id: c.id,
+            name: c.name,
+            gender: c.gender,
+            minAge: c.minAge,
+            maxAge: c.maxAge,
+          })),
         ) === query.category,
     );
   });

@@ -35,7 +35,13 @@ export function DocumentGenerator() {
   const [players, setPlayers] = useState<readonly Player[]>([]);
   const [seasons, setSeasons] = useState<readonly Season[]>([]);
   const [categories, setCategories] = useState<
-    ReadonlyArray<{ name: string; minAge: number; maxAge: number | null }>
+    ReadonlyArray<{
+      id: string;
+      name: string;
+      gender: Player['gender'];
+      minAge: number;
+      maxAge: number | null;
+    }>
   >([]);
   const [playerFilterValues, setPlayerFilterValues] = useState<Record<string, string>>({});
   const [playerDynamicOptions, setPlayerDynamicOptions] = useState<
@@ -58,13 +64,18 @@ export function DocumentGenerator() {
       setPlayers(playerList);
       setSeasons(seasonList);
       const mappedCategories = categoryList.map((c) => ({
+        id: c.id,
         name: c.name,
+        gender: c.gender,
         minAge: c.minAge,
         maxAge: c.maxAge,
       }));
       setCategories(mappedCategories);
       setPlayerDynamicOptions({
-        category: mappedCategories.map((c) => ({ value: c.name, label: c.name })),
+        category: mappedCategories.map((c) => ({
+          value: c.id,
+          label: `${c.name} (${genderLabels[c.gender] ?? c.gender})`,
+        })),
         seasonId: seasonList.map((s) => ({ value: s.id, label: s.label })),
       });
       const activeSeason = seasonList.find((s) => s.active);
@@ -109,8 +120,16 @@ export function DocumentGenerator() {
 
     const category = playerFilterValues['category'];
     if (category) {
-      const cat = computeCategory(new Date(player.birthDate), seasonYear, categories);
-      if (cat !== category) return false;
+      const cat = computeCategory(
+        new Date(player.birthDate),
+        seasonYear,
+        player.gender,
+        categories,
+      );
+      const matchedCategory = categories.find(
+        (entry) => entry.name === cat && entry.gender === player.gender,
+      );
+      if (!matchedCategory || matchedCategory.id !== category) return false;
     }
 
     const birthFrom = playerFilterValues['birthDateFrom'];
@@ -352,7 +371,12 @@ export function DocumentGenerator() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="secondary">
-                              {computeCategory(new Date(player.birthDate), seasonYear, categories)}
+                              {computeCategory(
+                                new Date(player.birthDate),
+                                seasonYear,
+                                player.gender,
+                                categories,
+                              )}
                             </Badge>
                           </TableCell>
                           <TableCell>{genderLabels[player.gender] ?? player.gender}</TableCell>
@@ -386,7 +410,12 @@ export function DocumentGenerator() {
                           <span>{new Date(player.birthDate).toLocaleDateString('fr-FR')}</span>
                           <span>{genderLabels[player.gender] ?? player.gender}</span>
                           <Badge variant="secondary">
-                            {computeCategory(new Date(player.birthDate), seasonYear, categories)}
+                            {computeCategory(
+                              new Date(player.birthDate),
+                              seasonYear,
+                              player.gender,
+                              categories,
+                            )}
                           </Badge>
                         </div>
                       </div>
@@ -447,7 +476,12 @@ export function DocumentGenerator() {
                         <TableCell>{genderLabels[player.gender] ?? player.gender}</TableCell>
                         <TableCell>
                           <Badge variant="secondary">
-                            {computeCategory(new Date(player.birthDate), seasonYear, categories)}
+                            {computeCategory(
+                              new Date(player.birthDate),
+                              seasonYear,
+                              player.gender,
+                              categories,
+                            )}
                           </Badge>
                         </TableCell>
                       </TableRow>
@@ -467,7 +501,12 @@ export function DocumentGenerator() {
                           {index + 1}. {player.lastName} {player.firstName}
                         </span>
                         <Badge variant="secondary">
-                          {computeCategory(new Date(player.birthDate), seasonYear, categories)}
+                          {computeCategory(
+                            new Date(player.birthDate),
+                            seasonYear,
+                            player.gender,
+                            categories,
+                          )}
                         </Badge>
                       </div>
                       <div className="flex flex-wrap gap-x-3 gap-y-1 text-sm text-muted-foreground">

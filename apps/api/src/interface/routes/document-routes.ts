@@ -76,6 +76,7 @@ export async function documentRoutes(
       players,
       categories: categories.map((c) => ({
         name: c.name,
+        gender: c.gender,
         minAge: c.minAge,
         maxAge: c.maxAge,
       })),

@@ -151,7 +151,7 @@ export function LicenseForm({ defaultPlayerId }: LicenseFormProps) {
               <option value="">Select category...</option>
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.id}>
-                  {cat.name}
+                  {cat.name} ({cat.gender})
                 </option>
               ))}
             </Select>

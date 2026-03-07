@@ -37,7 +37,13 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
   const [player, setPlayer] = useState<Player | null>(null);
   const [licenses, setLicenses] = useState<License[]>([]);
   const [categories, setCategories] = useState<
-    ReadonlyArray<{ id: string; name: string; minAge: number; maxAge: number | null }>
+    ReadonlyArray<{
+      id: string;
+      name: string;
+      gender: Player['gender'];
+      minAge: number;
+      maxAge: number | null;
+    }>
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -59,6 +65,7 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
         categoryList.map((c) => ({
           id: c.id,
           name: c.name,
+          gender: c.gender,
           minAge: c.minAge,
           maxAge: c.maxAge,
         })),
@@ -126,7 +133,12 @@ export function PlayerDetail({ playerId }: PlayerDetailProps) {
   }
 
   const currentYear = new Date().getFullYear();
-  const category = computeCategory(new Date(player.birthDate), currentYear, categories);
+  const category = computeCategory(
+    new Date(player.birthDate),
+    currentYear,
+    player.gender,
+    categories,
+  );
   const categoryNameById = new Map(categories.map((entry) => [entry.id, entry.name]));
 
   return (
